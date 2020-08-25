@@ -1,4 +1,4 @@
-import os,shutil, subprocess,sys
+import os,shutil, subprocess, sys
 from metadatahandler import MetadataHandler
 from confconverter import ConfConverter
 
@@ -18,35 +18,36 @@ class ExoDOSConverter():
         gamelist.write("<gameList>\n")
 #        TODO catch exceptions on game by game basis
         for game in self.games :
-#            try:
-            self.convertGame(game, gamelist)
-#            except:
-#                print('Error %s while converting game %s' %(sys.exc_info()[0],game))
+            try:
+                self.convertGame(game, gamelist)
+            except:
+                print('Error %s while converting game %s' %(sys.exc_info()[0],game))
     
         gamelist.write("</gameList>\n")
         gamelist.close()
         
     def convertGame(self, game, gamelist) :
-        print("----------- Starting conversion for %s -----------" %game)
-            
-        if not os.path.exists(os.path.join(self.exoDosDir,"Games",game)):
-            print("%s needs installation" %game)
-            #automatic F and N
-            subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir,game), shell=False)
-#            subprocess.call("cmd /C Install.bat", cwd=os.path.join(gamesDosDir,game), shell=False)
-            print("installed %s" %game)
-        else :
-            print("%s is already installed" %game)
-        
+        print("----------- Starting conversion for %s -----------" %game)        
         genre = self.metadataHandler.process(game,gamelist)
         
         if not os.path.exists(os.path.join(self.outputDir,genre,game+".pc")):
+            if not os.path.exists(os.path.join(self.exoDosDir,"Games",game)):
+                print("%s needs installation" %game)
+                #automatic F and N
+                subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir,game), shell=False)
+                print("installed %s" %game)
+            else :
+                print("%s is already installed" %game)
+     
             self.copyGameFiles(game,genre)    
-            self.confConverter.process(game,genre)
-#            copyMapper(game,genre)
-                      
+            self.confConverter.process(game,genre)       
+        
+        else :
+            print("%s already in output folder" %game)
+        
         print("----------- Finished conversion for %s -----------" %game)
-        print("")
+        print("")      
+        
         
     def copyGameFiles(self,game,genre):
         dest = os.path.join(self.outputDir,genre,game+".pc",game)

@@ -1,5 +1,4 @@
-import os,shutil
-from metadatahandler import MetadataHandler
+import os
 from commandhandler import CommandHandler
 
 class ConfConverter():
@@ -16,30 +15,30 @@ class ConfConverter():
         retroDosboxCfg = open(os.path.join(dest,"dosbox.cfg"),'w')#retroarch dosbox.cfg
         retroDosboxBat = open(os.path.join(dest,"dosbox.bat"),'w')#retroarch dosbox.bat
         
-        count =0
+        count = 0
         lines = exoDosboxConf.readlines()
-        for line in lines :
-            if line.startswith("fullscreen"):
+        for cmdline in lines :
+            if cmdline.startswith("fullscreen"):
                 retroDosboxCfg.write("fullscreen=true\n")
-            elif line.startswith("fullresolution"):
+            elif cmdline.startswith("fullresolution"):
                 retroDosboxCfg.write("fullresolution=desktop\n")
-            elif line.startswith("output"):
+            elif cmdline.startswith("output"):
                 retroDosboxCfg.write("output=texture\n")
                 retroDosboxCfg.write("renderer = auto\n")
                 retroDosboxCfg.write("vsync=false\n")            
-            elif line.startswith("buttonwrap") :            
+            elif cmdline.startswith("buttonwrap") :            
                 retroDosboxCfg.write("buttonwrap=false\n")
-            elif line.startswith("mapperfile"):
+            elif cmdline.startswith("mapperfile"):
                 retroDosboxCfg.write("mapperfile=mapper.map\n")
-            elif line.startswith("ultradir"):
+            elif cmdline.startswith("ultradir"):
                 retroDosboxCfg.write(r"ultradir=C:\ULTRASND")
                 retroDosboxCfg.write("\n")
-            elif line.startswith("[autoexec]"):
-                retroDosboxCfg.write(line)          
+            elif cmdline.startswith("[autoexec]"):
+                retroDosboxCfg.write(cmdline)          
                 self.createDosboxBat(lines[count+1:],retroDosboxBat,retroDosboxCfg,game,dest)
                 break
             else :
-                retroDosboxCfg.write(line)
+                retroDosboxCfg.write(cmdline)
         
             count = count +1
         
@@ -48,34 +47,35 @@ class ConfConverter():
         retroDosboxCfg.close()
         retroDosboxBat.close()        
         
-    def createDosboxBat(self,lines,retroDosboxBat,retroDosboxCfg,game,dest) :
+    def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,dest) :
         gameDir = os.path.join(self.exoDosDir,"Games",game)
-        #nécessaire de voir où est monté mount c ?
-        cutLines = ["cd ..","cd ..","cls","mount c","mount c","#","exit"]
-        # TODO First move into game dir but better add that after included c:
-        retroDosboxBat.write("cd %s\n" %game)
-        for line in lines :
+        cutLines = ["cd ..","cls","mount c","#","exit"]
+        
+        for cmdline in cmdlines :
             # keep conf in dosbox.cfg but comment it
-            retroDosboxCfg.write("# "+line)
+            retroDosboxCfg.write("# "+cmdline)
             # always remove @
-            line = line.lstrip('@ ')
+            cmdline = cmdline.lstrip('@ ')
             
-            if self.commandHandler.isGoodLine(line,cutLines) :
-                #remove cd to gamedir            
-                if line.lower().startswith("cd "):                
-                    path = self.commandHandler.reducePath(line.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '),game)
+            if self.commandHandler.useLine(cmdline,cutLines) :
+                if cmdline.lower().startswith("c:") :
+                    retroDosboxBat.write(cmdline)
+                    # First add move into game dir
+                    retroDosboxBat.write("cd %s\n" %game)        
+                #remove cd to gamedir as it is already done, but keep others cd     
+                elif cmdline.lower().startswith("cd "):                
+                    path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '),game)
                     # TODO should be adapted coz games are in subfolder now
                     if path.lower() == game.lower() and not os.path.exists(os.path.join(gameDir,path)):
-                        print("analyzing cd path %s -> path is game name and no existing subpath, removed" %line.rstrip('\n\r '))
+                        print("analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
                     else :
-                        print("analyzing cd path %s -> kept" %line.rstrip('\n\r '))
-                        retroDosboxBat.write(line)
-                elif line.lower().startswith("imgmount d"):
-                    retroDosboxBat.write(self.commandHandler.handleCDMount(line,game,dest))
+                        print("analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
+                        retroDosboxBat.write(cmdline)
+                elif cmdline.lower().startswith("imgmount d"):
+                    retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))
                     retroDosboxBat.write("pause\n")
-                elif line.lower().startswith("mount "):
-                    retroDosboxBat.write(self.commandHandler.handleCDMount(line,game,dest))
+                elif cmdline.lower().startswith("mount "):
+                    retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))
                     retroDosboxBat.write("pause\n")
                 else :
-                    retroDosboxBat.write(line)       
-        #insérer pause
+                    retroDosboxBat.write(cmdline)

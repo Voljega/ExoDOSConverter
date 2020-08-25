@@ -11,7 +11,8 @@ class MetadataHandler():
     def process(self, game, gamelist) :
         dosGame = self.handleMetadata(game)
         genre = self.buildGenre(dosGame)
-        print("stuffed into genre %s" %genre)
+        print("computed genre %s" %genre)
+        print("")
         self.writeGamelistEntry(gamelist,dosGame,game,genre)
         return genre
         
@@ -29,6 +30,13 @@ class MetadataHandler():
     
     # TODO do not use meagre shit anymore
     def handleMetadata(self,game) :
+        # TODO Needs full rewrite for exoDOS v5
+        # Metadat in G:\Romsets\eXoDOS4\Metadata/Metadata.xml
+        # Front pics in G:\Romsets\eXoDOS4\Images\MS-DOS\Box - Front and subfolders
+        # Game title in G:\Romsets\eXoDOS4\Images\MS-DOS\Screenshot - Game Title and subfolders
+        # Game screenshot in G:\Romsets\eXoDOS4\Images\MS-DOS\Screenshot - Gameplay and subfolders
+        # Manuals in G:\Romsets\eXoDOS4\Manuals\MS-DOS
+        
         meagreDir = os.path.join(self.gamesDosDir,game,"Meagre")
         manualDir = os.path.join(meagreDir,"Manual")
         picDir = os.path.join(meagreDir,"Front")
@@ -73,11 +81,13 @@ class MetadataHandler():
         if not os.path.exists(os.path.join(self.outputDir,"downloaded_images")) :
             os.mkdir(os.path.join(self.outputDir,"downloaded_images"))
         if os.path.exists(front) and not os.path.isdir(front):
-            print("copy pic file %s to %s" %(frontPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
+            #TODO pic must be same name as game
+            #print("copy pic file %s to %s" %(frontPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
             shutil.copy2(front,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg"))
             frontPic = "./downloaded_images/"+safeEscapedName +" - front.jpg"
         elif os.path.exists(screen) and not os.path.isdir(screen):
-            print("copy pic file %s to %s" %(screenPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
+            #TODO pic must be same name as game
+            #print("copy pic file %s to %s" %(screenPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
             shutil.copy2(screen,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg"))
             frontPic = "./downloaded_images/"+safeEscapedName +" - front.jpg"
         #copy manual files
@@ -87,7 +97,7 @@ class MetadataHandler():
         if len(manualFiles) > 0 and not os.path.exists(os.path.join(self.outputDir,"manuals",safeEscapedName)):
             os.mkdir(os.path.join(self.outputDir,"manuals",safeEscapedName))
         for manual in manualFiles:
-            print("copy manual file %s to %s" %(manual,os.path.join(self.outputDir,"manuals",safeEscapedName,manual)))
+            #print("copy manual file %s to %s" %(manual,os.path.join(self.outputDir,"manuals",safeEscapedName,manual)))
             shutil.copy2(os.path.join(manualDir,manual),os.path.join(self.outputDir,"manuals",safeEscapedName,manual))
         # get content of about in About dir    
         # about = open(aboutFile,'r',encoding='utf-8').read()    
@@ -96,11 +106,10 @@ class MetadataHandler():
         iniFile.close()
                     
         dosGame = DosGame(name,genre,subgenre,publisher,developer,year,"./downloaded_images/"+safeEscapedName +" - front.jpg",'')
-        print("")
-        print("Metadata for %s : %s (%s), genre: %s , subgenre: %s" %(game,dosGame.name,dosGame.year,dosGame.genre,dosGame.subgenre))    
+        #print("")
+        print("Metadata: %s (%s), genre: %s / %s" %(dosGame.name,dosGame.year,dosGame.genre,dosGame.subgenre))    
     #    print("publisher: %s , developer: %s" %(dosGame.publisher,dosGame.developer))
-    #    print("pic : %s" %dosGame.frontPic)    
-        print("")
+    #    print("pic : %s" %dosGame.frontPic)        
         return dosGame
     
     def buildGenre(self,dosGame):
