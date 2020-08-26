@@ -1,8 +1,9 @@
 import os.path, sys
 from exodosconverter import ExoDOSConverter
+from metadatahandler import MetadataHandler
 import util
 
-exoDosDir = r"G:\Romsets\eXoDOS4\eXoDOS"
+exoDosDir = r"G:\Romsets\eXoDOS4"
 outputDir = r'G:\ExoDOSConverted'
 
 if __name__ == "__main__":
@@ -19,17 +20,20 @@ if __name__ == "__main__":
         print("%s is not a directory or doesn't exist" %outputDir)
         exit
     
-    util.buildCache(scriptDir,exoDosDir)
+    cache = util.buildCache(scriptDir,exoDosDir)
     
-    gamesDir = os.path.join(exoDosDir,"Games")
+    gamesDir = os.path.join(exoDosDir,"eXoDOS","Games")
     gamesDosDir = os.path.join(gamesDir,"!dos")
     games = [filename for filename in os.listdir(gamesDosDir)][:nbGames]
     
     if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir) :
         print("%s doesn't seem to be a valid ExoDOSCollection folder" %exoDosDir)
         exit
+        
+    metadataHandler = MetadataHandler(exoDosDir, cache)
+    metadataHandler.parseXmlMetadata()   
     
-    exoDOSConverter = ExoDOSConverter(games, exoDosDir, gamesDosDir, outputDir)
+    exoDOSConverter = ExoDOSConverter(games, os.path.join(exoDosDir,'eXoDOS'), gamesDosDir, outputDir, metadataHandler)
     exoDOSConverter.convertGames()
     
 

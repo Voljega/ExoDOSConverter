@@ -10,6 +10,7 @@ class ConfConverter():
         self.commandHandler = CommandHandler(self.outputDir)
 
     def process(self,game,genre) :
+        print("  convert dosbox.bat")
         dest = os.path.join(self.outputDir,genre,game+".pc")
         exoDosboxConf = open(os.path.join(dest,game,"dosbox.conf"),'r')#original
         retroDosboxCfg = open(os.path.join(dest,"dosbox.cfg"),'w')#retroarch dosbox.cfg
@@ -67,9 +68,9 @@ class ConfConverter():
                     path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '),game)
                     # TODO should be adapted coz games are in subfolder now
                     if path.lower() == game.lower() and not os.path.exists(os.path.join(gameDir,path)):
-                        print("analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
+                        print("    analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
                     else :
-                        print("analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
+                        print("    analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
                         retroDosboxBat.write(cmdline)
                 elif cmdline.lower().startswith("imgmount d"):
                     retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))

@@ -42,15 +42,15 @@ class CommandHandler():
         for path in paths :
             path = self.reducePath(path.replace('"',""),game)        
             if len(paths)==1 :
-                print("clean single CD")
+                print("    clean single CD")
                 path = self.cleanCDname(path,dest)
             else :
-                print("<ERROR> MULTIPATH/MULTISPACE")
+                print("    <ERROR> MULTIPATH/MULTISPACE")
                 print(paths)
             prString = prString + " "+path
         
         # treat mount a and d here
-        # TODO code to rework
+        # TODO shitty code to rework
         if line.startswith("mount a") or line.startswith("mount d") :        
             prString = dest.replace(self.outputDir+"\\","/recalbox/share/roms/dos/") + "/" + prString.strip()        
             prString = ' "' + prString.replace("\\","/") +'"'        
@@ -74,16 +74,16 @@ class CommandHandler():
                     
                 # Rename file to dos compatible name                
                 cdFilename = self.dosRename(cdsPath,cdFile,cdFilename,cdFileExt)
-                print("renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
+                print("    renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
                 
                 if cdFileExt == ".cue" :
                     self.cleanCue(cdsPath,cdFilename)                   
                         
                 cleanedPath = "\\".join(pathList[:-1])+"\\"+cdFilename+cdFileExt
-                print("modify dosbox.bat : %s -> %s" %(path,cleanedPath))
+                print("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else :
-            print("<ERROR> path %s doesn't exist" %cdFileFullPath)
+            print("    <ERROR> path %s doesn't exist" %cdFileFullPath)
             return path
         
     def dosRename(self, path, originalFile, fileName, fileExt) :
@@ -107,7 +107,7 @@ class CommandHandler():
                 fixedIsoBinName = self.dosRename(path,params[1],isobin[0],isobin[1])
                 params[1] = fixedIsoBinName + isobin[-1]
                 line = '"'.join(params)
-                print("cue FILE line -> " +line.rstrip('\n\r'))
+                print("    cue FILE line -> " +line.rstrip('\n\r'))
                 
             newFile.write(line)
         oldFile.close()

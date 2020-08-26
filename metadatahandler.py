@@ -1,155 +1,135 @@
-import os,shutil,collections
+import os,shutil,collections,sys
+import xml.etree.ElementTree as etree
+from xml.dom import minidom
+import util
 
-DosGame = collections.namedtuple('DosGame', 'name genre subgenre publisher developer year frontPic about')
+DosGame = collections.namedtuple('DosGame', 'dosname metadataname name genres publisher developer year frontPic manual desc')
 
 class MetadataHandler():
     
-    def __init__(self,gamesDosDir,outputDir) :
-        self.gamesDosDir = gamesDosDir
-        self.outputDir = outputDir
+    def __init__(self,exoDosDir, cache) :
+        self.exoDosDir = exoDosDir
+        self.cache = cache
+        self.metadatas = dict()
         
-    def process(self, game, gamelist) :
+    def get(self,i,e):
+        ll=i.find(e)        
+        return ll.text if ll != None else None
+    
+    def initXml(self, outputDir) :
+        if os.path.exists(os.path.join(outputDir,"gamelist.xml")) :
+            parser = etree.XMLParser(encoding="utf-8")
+            return etree.parse(os.path.join(outputDir,"gamelist.xml"), parser=parser)
+        else :
+            tree = etree.ElementTree()
+            tree._setroot(etree.Element('gameList'))
+            return tree
+        
+    def writeXml(self, outputDir, gamelist) :
+        xmlstr = minidom.parseString(etree.tostring(gamelist.getroot())).toprettyxml(indent="   ", newl="\r")
+        xmlstr = '\n'.join([s for s in xmlstr.splitlines() if s.strip()])
+        with open(os.path.join(outputDir,"gamelist.xml"), "wb") as f:
+            f.write(xmlstr.encode('utf-8'))
+        
+    def parseXmlMetadata(self) :
+        xmlPath = os.path.join(self.exoDosDir,'Data','Platforms','MS-DOS.xml')
+        metadatas = dict();
+        if os.path.exists(xmlPath) :
+            parser = etree.XMLParser(encoding="utf-8")
+            games = etree.parse(xmlPath, parser=parser).findall(".//Game")
+            for g in games:
+                try :
+                    path = self.get(g,'ApplicationPath').split("\\")
+                    dosname = path[-2]
+                    metadataname = os.path.splitext(path[-1])[0]
+                    name = self.get(g,'Title')
+#                    print("%s %s %s" %(dosname, name, metadataname))
+                    desc = self.get(g,'Notes')
+                    releasedate = self.get(g,'ReleaseDate')[:4] if self.get(g,'ReleaseDate') is not None else None
+                    developer = self.get(g,'Developer')
+                    publisher = self.get(g,'Publisher')
+                    genres = self.get(g,'Genre').split(';') if self.get(g,'Genre') is not None else []                    
+                    manual = self.get(g,'ManualPath')
+                    manualpath = os.path.join(self.exoDosDir,manual) if manual is not None else None                    
+                    frontPic = util.findPic(name,self.cache,'.jpg')
+                    frontPic = frontPic if frontPic is not None else util.findPic(name,self.cache,'.png')
+#                    print(frontPic if frontPic is not None else 'IMG NOT FOUND')
+                    metadata = DosGame(dosname, metadataname, name,genres,publisher,developer,releasedate,frontPic,manualpath,desc)
+                    metadatas[metadata.dosname] = metadata
+                        
+                except :
+                    print(sys.exc_info())
+        print('Loaded %i metadatas' %len(metadatas.keys()))
+        self.metadatas = metadatas
+        return metadatas
+        
+    def processGame(self, game, gamelist, genre, outputDir) :
         dosGame = self.handleMetadata(game)
-        genre = self.buildGenre(dosGame)
-        print("computed genre %s" %genre)
+        print("  computed genre %s" %genre)
+        print("  copy pics and manual")
+        if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic) :
+            shutil.copy2(dosGame.frontPic,os.path.join(outputDir,'downloaded_images'))
+        if dosGame.manual is not None and os.path.exists(dosGame.manual) :
+            shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         print("")
         self.writeGamelistEntry(gamelist,dosGame,game,genre)
         return genre
+    
+    # replace “ ” ’ …
+    def cleanString(self, s) :
+        return s.replace('&','&amp;')
         
     def writeGamelistEntry(self,gamelist,dosGame,game,genre):
-        gamelist.write("    <game>\n")
-        gamelist.write("        <path>./"+genre+"/"+game+".pc</path>\n")
-        gamelist.write("        <name>"+dosGame.name+"</name>\n")
-        gamelist.write("        <desc>"+dosGame.about+"</desc>\n")    
-        gamelist.write("        <releasedate>"+dosGame.year+"0101T000000</releasedate>\n")
-        gamelist.write("        <image>"+dosGame.frontPic+"</image>\n")
-        gamelist.write("        <developer>"+dosGame.developer+"</developer>\n")
-        gamelist.write("        <publisher>"+dosGame.publisher+"</publisher>\n")
-        gamelist.write("        <genre>"+genre+"</genre>\n")
-        gamelist.write("    </game>\n")
+        root = gamelist.getroot()
+        frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
+        manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
+        gameElt = etree.SubElement(root,'game')
+        etree.SubElement(gameElt,'path').text = "./"+genre+"/"+self.cleanString(game)+".pc"
+        etree.SubElement(gameElt,'name').text = dosGame.name
+        etree.SubElement(gameElt,'desc').text = dosGame.desc
+        etree.SubElement(gameElt,'releasedate').text = dosGame.year+"0101T000000"      
+        etree.SubElement(gameElt,'developer').text = dosGame.developer
+        etree.SubElement(gameElt,'publisher').text = dosGame.publisher
+        etree.SubElement(gameElt,'genre').text = genre
+        etree.SubElement(gameElt,'manual').text = manual
+        etree.SubElement(gameElt,'image').text = frontPic
     
     # TODO do not use meagre shit anymore
     def handleMetadata(self,game) :
-        # TODO Needs full rewrite for exoDOS v5
-        # Metadat in G:\Romsets\eXoDOS4\Metadata/Metadata.xml
-        # Front pics in G:\Romsets\eXoDOS4\Images\MS-DOS\Box - Front and subfolders
-        # Game title in G:\Romsets\eXoDOS4\Images\MS-DOS\Screenshot - Game Title and subfolders
-        # Game screenshot in G:\Romsets\eXoDOS4\Images\MS-DOS\Screenshot - Gameplay and subfolders
-        # Manuals in G:\Romsets\eXoDOS4\Manuals\MS-DOS
-        
-        meagreDir = os.path.join(self.gamesDosDir,game,"Meagre")
-        manualDir = os.path.join(meagreDir,"Manual")
-        picDir = os.path.join(meagreDir,"Front")
-        screenPicDir = os.path.join(meagreDir,"Screen")
-        aboutFile = os.path.join(meagreDir,"About","about.txt")
-        iniFileDir = os.path.join(meagreDir,"IniFile")
-        
-        iniFilename = os.path.join(iniFileDir,os.listdir(iniFileDir)[0])
-        iniFile = open(iniFilename,'r')
-        
-        # Parse iniFile in iniFile dir    
-        for line in iniFile.readlines() :
-            confLine = line.split("=")
-            key = confLine[0]        
-            if key == "Name" :
-                name = confLine[1].rstrip('\n\r ')
-                safeEscapedName = name.replace(":","")
-                safeEscapedName = safeEscapedName.replace("/","-")
-                safeEscapedName = safeEscapedName.replace("?","")
-                safeEscapedName = safeEscapedName.replace("*","-")
-            elif key == "Genre" :
-                genre = confLine[1].rstrip('\n\r ')
-            elif key == "SubGenre" :
-                subgenre = confLine[1].rstrip('\n\r ')
-            elif key == "SubGenre2" :
-                subgenre = subgenre + " " + confLine[1].rstrip('\n\r ')
-            elif key == "Publisher" :
-                publisher = confLine[1].rstrip('\n\r ')
-            elif key == "Developer" :
-                developer = confLine[1].rstrip('\n\r ')
-            elif key == "Year" :
-                year = confLine[1].rstrip('\n\r ')
-            elif key == "Front01" :
-                frontPic = confLine[1].rstrip('\n\r ')
-            elif key == "Screen01" :
-                screenPic = confLine[1].rstrip('\n\r ')
-        #RECUPERER SCREEN SI FRONT N'EXISTE PAS
-        
-        front = os.path.join(picDir,frontPic)
-        screen = os.path.join(screenPicDir,screenPic)
-        #copy front pic if exists else screenPic
-        if not os.path.exists(os.path.join(self.outputDir,"downloaded_images")) :
-            os.mkdir(os.path.join(self.outputDir,"downloaded_images"))
-        if os.path.exists(front) and not os.path.isdir(front):
-            #TODO pic must be same name as game
-            #print("copy pic file %s to %s" %(frontPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
-            shutil.copy2(front,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg"))
-            frontPic = "./downloaded_images/"+safeEscapedName +" - front.jpg"
-        elif os.path.exists(screen) and not os.path.isdir(screen):
-            #TODO pic must be same name as game
-            #print("copy pic file %s to %s" %(screenPic,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg")))
-            shutil.copy2(screen,os.path.join(self.outputDir,"downloaded_images",safeEscapedName +" - front.jpg"))
-            frontPic = "./downloaded_images/"+safeEscapedName +" - front.jpg"
-        #copy manual files
-        if not os.path.exists(os.path.join(self.outputDir,"manuals")) :
-            os.mkdir(os.path.join(self.outputDir,"manuals"))
-        manualFiles = os.listdir(manualDir)
-        if len(manualFiles) > 0 and not os.path.exists(os.path.join(self.outputDir,"manuals",safeEscapedName)):
-            os.mkdir(os.path.join(self.outputDir,"manuals",safeEscapedName))
-        for manual in manualFiles:
-            #print("copy manual file %s to %s" %(manual,os.path.join(self.outputDir,"manuals",safeEscapedName,manual)))
-            shutil.copy2(os.path.join(manualDir,manual),os.path.join(self.outputDir,"manuals",safeEscapedName,manual))
-        # get content of about in About dir    
-        # about = open(aboutFile,'r',encoding='utf-8').read()    
-        
-        #aboutFile.close() // mandatory ?
-        iniFile.close()
-                    
-        dosGame = DosGame(name,genre,subgenre,publisher,developer,year,"./downloaded_images/"+safeEscapedName +" - front.jpg",'')
-        #print("")
-        print("Metadata: %s (%s), genre: %s / %s" %(dosGame.name,dosGame.year,dosGame.genre,dosGame.subgenre))    
-    #    print("publisher: %s , developer: %s" %(dosGame.publisher,dosGame.developer))
-    #    print("pic : %s" %dosGame.frontPic)        
+        dosGame = self.metadatas.get(game)
+        print("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
         return dosGame
     
     def buildGenre(self,dosGame):
-        if dosGame.genre in ['Sports']:
+        if 'Sports' in dosGame.genres :
             return dosGame.genre
-        elif "Adventure" in dosGame.genre and "Action" in dosGame.subgenre :
-            return "Action-Adventure"
-        elif "Adventure" in dosGame.genre :
-            return "Adventure"
-        elif "Racing" in dosGame.genre :
+        elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
             return "Race"
-        elif dosGame.genre == 'Strategy' and "Board" in dosGame.subgenre:
-            return 'Puzzle'
-        elif dosGame.genre == 'Strategy' and not "Puzzle" in dosGame.subgenre:
-            return 'Strategy-Gestion'
-        elif dosGame.genre == 'Strategy' and "Puzzle" in dosGame.subgenre:
-            return "Puzzle"
-        elif dosGame.genre == 'Simulation' and 'Managerial' in dosGame.subgenre :
-            return 'Strategy-Gestion'
-        elif dosGame.genre == 'Simulation' and 'Sports' in dosGame.subgenre :
-            return 'Sports'
-        elif dosGame.genre == 'Simulation' and 'Pinball' in dosGame.subgenre :
+        elif 'Pinball' in dosGame.genres :
             return 'Pinball'
-        elif dosGame.genre == 'Simulation' :
-            return 'Simulation'
-        elif dosGame.genre == 'RPG':
+        elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres :
+            return "Puzzle"
+        elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres :
             return 'RPG'
-        elif dosGame.genre == 'Action' and 'Pinball' in dosGame.subgenre :
-            return 'Pinball'
-        elif dosGame.genre == 'Action' and "Puzzle" in dosGame.subgenre:
-            return "Puzzle"
-        elif dosGame.genre == 'Action' and 'Shooter' in dosGame.subgenre :
+        elif 'Shooter' in dosGame.genres :
             return 'ShootEmUp'
-        elif dosGame.genre == 'Action' and 'Platform' in dosGame.subgenre :
+        elif 'Platform' in dosGame.genres :
             return 'Platform'
-        elif dosGame.genre == 'Action' and 'FPS' in dosGame.subgenre :
+        elif 'FPS' in dosGame.genres :
             return 'Gun-FPS'
-        elif dosGame.genre == 'Action' and 'Fighting' in dosGame.subgenre :
+        elif 'Fighting' in dosGame.genres :
             return 'BeatEmUp'
-        elif dosGame.genre == 'Action' :
+        elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres :
+            return 'Strategy-Gestion'        
+        elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres :
+            return 'Strategy-Gestion'
+        elif 'Simulation' in dosGame.genres :
+            return 'Simulation'
+        elif "Adventure" in dosGame.genres and "Action" in dosGame.genres :
+            return "Action-Adventure"
+        elif "Adventure" in dosGame.genres :
+            return "Adventure"
+        elif 'Action' in dosGame.genres :
             return 'Action-Adventure'
         else :
             return 'Unknown'
