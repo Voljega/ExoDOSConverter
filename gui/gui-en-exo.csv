@@ -1,0 +1,12 @@
+id;label;help
+outputDir;Output directory;Path where your set will be created (exodos collection will be left untouched)
+exoDosDir;Custom set folder;Path to your eXoDOs collection
+left;Deselect game;Remove game(s) from selection
+right;Select game;Add game(s) to your selection
+leftList;ExoDOS Games;Full list of ExoDOS games
+rightList;Your Selection;Games you have selected
+verify;Verify;Check that your paths are okay
+save;Save;Save your configuration to file
+proceed;Proceed;Create your set
+confirm;Confirm;Your output dir is {outputDir}#nIts content will be erased.#nIf you don't want to proceed, close this window, or click Cancel
+

@@ -7,9 +7,10 @@ DosGame = collections.namedtuple('DosGame', 'dosname metadataname name genres pu
 
 class MetadataHandler():
     
-    def __init__(self,exoDosDir, cache) :
+    def __init__(self,exoDosDir, cache,logger) :
         self.exoDosDir = exoDosDir
         self.cache = cache
+        self.logger = logger
         self.metadatas = dict()
         
     def get(self,i,e):
@@ -58,20 +59,20 @@ class MetadataHandler():
                     metadatas[metadata.dosname] = metadata
                         
                 except :
-                    print(sys.exc_info())
-        print('Loaded %i metadatas' %len(metadatas.keys()))
+                    self.logger.log(sys.exc_info())
+        self.logger.log('Loaded %i metadatas' %len(metadatas.keys()))
         self.metadatas = metadatas
         return metadatas
         
     def processGame(self, game, gamelist, genre, outputDir) :
         dosGame = self.handleMetadata(game)
-        print("  computed genre %s" %genre)
-        print("  copy pics and manual")
+        self.logger.log("  computed genre %s" %genre)
+        self.logger.log("  copy pics and manual")
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic) :
             shutil.copy2(dosGame.frontPic,os.path.join(outputDir,'downloaded_images'))
         if dosGame.manual is not None and os.path.exists(dosGame.manual) :
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        print("")
+        self.logger.log("")
         self.writeGamelistEntry(gamelist,dosGame,game,genre)
         return genre
     
@@ -94,10 +95,9 @@ class MetadataHandler():
         etree.SubElement(gameElt,'manual').text = manual
         etree.SubElement(gameElt,'image').text = frontPic
     
-    # TODO do not use meagre shit anymore
     def handleMetadata(self,game) :
         dosGame = self.metadatas.get(game)
-        print("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
+        self.logger.log("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
         return dosGame
     
     def buildGenre(self,dosGame):

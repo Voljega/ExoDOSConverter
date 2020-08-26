@@ -2,8 +2,9 @@ import os
 
 class CommandHandler():
     
-    def __init__(self,outputDir) :
+    def __init__(self,outputDir, logger) :
         self.outputDir = outputDir
+        self.logger = logger
         
     def useLine(self,l,cLines):
         for cL in cLines :
@@ -12,14 +13,14 @@ class CommandHandler():
         return True
 
     def reducePath(self,path,game):
-        #print("PATH CONVERT: %s" %path)
+        #self.logger.log("PATH CONVERT: %s" %path)
         if path.lower().startswith(".\games") or path.lower().startswith("\games") or path.lower().startswith("games") :
             pathList = path.split('\\')        
             if pathList[0]=='.' :
                 pathList = pathList[1:]
             if len(pathList) > 1 and pathList[0].lower()=='games' and pathList[1].lower()==game.lower() :
                 path = ".\\"+ "\\".join(pathList[1:])
-        #print("TO: %s" %path)
+        #self.logger.log("TO: %s" %path)
         return path
         
     # TODO separate CD Mount and basic mount    
@@ -42,11 +43,11 @@ class CommandHandler():
         for path in paths :
             path = self.reducePath(path.replace('"',""),game)        
             if len(paths)==1 :
-                print("    clean single CD")
+                self.logger.log("    clean single CD")
                 path = self.cleanCDname(path,dest)
             else :
-                print("    <ERROR> MULTIPATH/MULTISPACE")
-                print(paths)
+                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE")
+                self.logger.log(paths)
             prString = prString + " "+path
         
         # treat mount a and d here
@@ -74,16 +75,16 @@ class CommandHandler():
                     
                 # Rename file to dos compatible name                
                 cdFilename = self.dosRename(cdsPath,cdFile,cdFilename,cdFileExt)
-                print("    renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
+                self.logger.log("    renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
                 
                 if cdFileExt == ".cue" :
                     self.cleanCue(cdsPath,cdFilename)                   
                         
                 cleanedPath = "\\".join(pathList[:-1])+"\\"+cdFilename+cdFileExt
-                print("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
+                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else :
-            print("    <ERROR> path %s doesn't exist" %cdFileFullPath)
+            self.logger.log("    <ERROR> path %s doesn't exist" %cdFileFullPath)
             return path
         
     def dosRename(self, path, originalFile, fileName, fileExt) :
@@ -107,7 +108,7 @@ class CommandHandler():
                 fixedIsoBinName = self.dosRename(path,params[1],isobin[0],isobin[1])
                 params[1] = fixedIsoBinName + isobin[-1]
                 line = '"'.join(params)
-                print("    cue FILE line -> " +line.rstrip('\n\r'))
+                self.logger.log("    cue FILE line -> " +line.rstrip('\n\r'))
                 
             newFile.write(line)
         oldFile.close()

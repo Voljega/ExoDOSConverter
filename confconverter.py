@@ -3,14 +3,15 @@ from commandhandler import CommandHandler
 
 class ConfConverter():
     
-    def __init__(self,games,exoDosDir,outputDir) :
+    def __init__(self,games,exoDosDir,outputDir, logger) :
         self.games = games
+        self.logger = logger
         self.exoDosDir = exoDosDir
         self.outputDir = outputDir
-        self.commandHandler = CommandHandler(self.outputDir)
+        self.commandHandler = CommandHandler(self.outputDir, self.logger)
 
     def process(self,game,genre) :
-        print("  convert dosbox.bat")
+        self.logger.log("  convert dosbox.bat")
         dest = os.path.join(self.outputDir,genre,game+".pc")
         exoDosboxConf = open(os.path.join(dest,game,"dosbox.conf"),'r')#original
         retroDosboxCfg = open(os.path.join(dest,"dosbox.cfg"),'w')#retroarch dosbox.cfg
@@ -66,11 +67,11 @@ class ConfConverter():
                 #remove cd to gamedir as it is already done, but keep others cd     
                 elif cmdline.lower().startswith("cd "):                
                     path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '),game)
-                    # TODO should be adapted coz games are in subfolder now
+                    # TODO should maybe be adapted coz games are in subfolder now
                     if path.lower() == game.lower() and not os.path.exists(os.path.join(gameDir,path)):
-                        print("    analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
+                        self.logger.log("    analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
                     else :
-                        print("    analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
+                        self.logger.log("    analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
                         retroDosboxBat.write(cmdline)
                 elif cmdline.lower().startswith("imgmount d"):
                     retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))
