@@ -1,4 +1,4 @@
-import os,shutil, subprocess, sys
+import os,shutil, subprocess, sys, traceback
 from confconverter import ConfConverter
 
 class ExoDOSConverter():
@@ -25,16 +25,32 @@ class ExoDOSConverter():
         
         count = 1;
         total = len(self.games)
+        errors = dict()
+        
         for game in self.games :
             try:
                 self.convertGame(game, gamelist, total, count)                
             except:
                 self.logger.log('Error %s while converting game %s' %(sys.exc_info()[0],game))
+                excInfo = traceback.format_exc()                
+                errors[game] =excInfo
                 
             count = count + 1
         
         self.metadataHandler.writeXml(self.outputDir, gamelist)
         self.logger.log('\n<--------- Finished Process --------->')
+        
+        if len(errors.keys())>0 :
+            self.logger.log('\n<--------- Errors rundown --------->')
+            self.logger.log('%i errors were found during process' %len(errors.keys()))
+            self.logger.log('See error log in your outputDir')
+            logFile = open(os.path.join(self.outputDir,'error_log.txt'),'w')
+            for key in list(errors.keys()) :
+                logFile.write("Found error when processing %s" %key+" :\n")
+                logFile.write(errors.get(key))
+                logFile.write("\n")
+            logFile.close()
+            
         
     def convertGame(self, game, gamelist, total, count) :
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game))        

@@ -115,7 +115,7 @@ class MetadataHandler():
             return 'ShootEmUp'
         elif 'Platform' in dosGame.genres :
             return 'Platform'
-        elif 'FPS' in dosGame.genres :
+        elif 'FPS' in dosGame.genres or 'First Person Shooter' in dosGame.genres :
             return 'Gun-FPS'
         elif 'Fighting' in dosGame.genres :
             return 'BeatEmUp'

@@ -13,14 +13,14 @@ class CommandHandler():
         return True
 
     def reducePath(self,path,game):
-        #self.logger.log("PATH CONVERT: %s" %path)
+        #self.logger.log("    PATH CONVERT: %s" %path)
         if path.lower().startswith(".\games") or path.lower().startswith("\games") or path.lower().startswith("games") :
             pathList = path.split('\\')        
             if pathList[0]=='.' :
                 pathList = pathList[1:]
             if len(pathList) > 1 and pathList[0].lower()=='games' and pathList[1].lower()==game.lower() :
                 path = ".\\"+ "\\".join(pathList[1:])
-        #self.logger.log("TO: %s" %path)
+        #self.logger.log("    TO: %s" %path)
         return path
         
     # TODO separate CD Mount and basic mount    

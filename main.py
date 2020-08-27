@@ -17,6 +17,3 @@ if __name__ == "__main__":
     
     gui = ExoGUI(scriptDir,logger, title, cache) 
     gui.draw()    
-
-            
-        

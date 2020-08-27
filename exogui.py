@@ -1,10 +1,9 @@
 import tkinter as Tk
-from tkinter import ttk,messagebox
 from operator import attrgetter
 import tkinter.font as Font
 import wckToolTips
 import conf,util
-import os,shutil
+import os,shutil, platform
 from exodosconverter import ExoDOSConverter
 from metadatahandler import MetadataHandler
 import _thread
@@ -25,8 +24,8 @@ class ExoGUI() :
         self.window.resizable(False,False)        
         self.startFontSize = self.DEFAULT_FONT_SIZE        
         
-#        if platform.system() == 'Windows' :
-#            self.window.iconbitmap('bestarcade.ico')
+        if platform.system() == 'Windows' :
+            self.window.iconbitmap('exodosicon.ico')
             
         self.setFontSize(self.startFontSize)
         self.window.title(title)        
@@ -84,6 +83,8 @@ class ExoGUI() :
     def handleExoDosFolder(self,*args) :
         exoDosDir = self.guiVars['exoDosDir'].get()
         
+        #TODO better test here with all subfolders and differenciation between v4 and v5 ?
+        # and maybe an error message somewhere
         if not os.path.isdir(exoDosDir) :
             self.logger.log("%s is not a directory or doesn't exist" %exoDosDir)
             self.exodosGamesValues.set([])
@@ -92,8 +93,9 @@ class ExoGUI() :
             self.selectGameButton['state']='disabled'
             self.deselectGameButton['state']='disabled'
         else :
+            self.logger.log("Loading exoDOS games list, this might take a while ...")
             self.fullnameToGameDir = util.fullnameToGameDir(exoDosDir)
-            self.exodosGamesValues.set(list(self.fullnameToGameDir.keys()))
+            self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
             self.exodosGamesListbox['state']='normal'
             self.selectedGamesListbox['state']='normal'
             self.selectGameButton['state']='normal'

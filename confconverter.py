@@ -51,7 +51,7 @@ class ConfConverter():
         
     def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,dest) :
         gameDir = os.path.join(self.exoDosDir,"Games",game)
-        cutLines = ["cd ..","cls","mount c","#","exit"]
+        cutLines = ["cd ..","cls","mount c","#","exit","echo off","echo on"]
         
         for cmdline in cmdlines :
             # keep conf in dosbox.cfg but comment it
