@@ -72,7 +72,6 @@ class MetadataHandler():
             shutil.copy2(dosGame.frontPic,os.path.join(outputDir,'downloaded_images'))
         if dosGame.manual is not None and os.path.exists(dosGame.manual) :
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        self.logger.log("")
         self.writeGamelistEntry(gamelist,dosGame,game,genre)
         return genre
     
@@ -82,13 +81,16 @@ class MetadataHandler():
         
     def writeGamelistEntry(self,gamelist,dosGame,game,genre):
         root = gamelist.getroot()
+        # TODO might want to search if subElement for the game already exists before writing it ?
         frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
         manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
         gameElt = etree.SubElement(root,'game')
+        year = dosGame.year+"0101T000000" if dosGame.year is not None else ''
+        
         etree.SubElement(gameElt,'path').text = "./"+genre+"/"+self.cleanString(game)+".pc"
         etree.SubElement(gameElt,'name').text = dosGame.name
         etree.SubElement(gameElt,'desc').text = dosGame.desc
-        etree.SubElement(gameElt,'releasedate').text = dosGame.year+"0101T000000"      
+        etree.SubElement(gameElt,'releasedate').text = year    
         etree.SubElement(gameElt,'developer').text = dosGame.developer
         etree.SubElement(gameElt,'publisher').text = dosGame.publisher
         etree.SubElement(gameElt,'genre').text = genre
@@ -102,15 +104,17 @@ class MetadataHandler():
     
     def buildGenre(self,dosGame):
         if 'Sports' in dosGame.genres :
-            return dosGame.genre
+            return 'Sports'
         elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
             return "Race"
         elif 'Pinball' in dosGame.genres :
             return 'Pinball'
-        elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres :
+        elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres :
             return "Puzzle"
         elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres :
             return 'RPG'
+        elif 'Flight Simulator' in dosGame.genres :
+            return 'Simulation'
         elif 'Shooter' in dosGame.genres :
             return 'ShootEmUp'
         elif 'Platform' in dosGame.genres :
@@ -121,14 +125,14 @@ class MetadataHandler():
             return 'BeatEmUp'
         elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres :
             return 'Strategy-Gestion'        
+        elif "Adventure" in dosGame.genres and "Action" in dosGame.genres :
+            return "Action-Adventure"
+        elif "Adventure" in dosGame.genres :
+            return "Adventure-Visual"
         elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres :
             return 'Strategy-Gestion'
         elif 'Simulation' in dosGame.genres :
             return 'Simulation'
-        elif "Adventure" in dosGame.genres and "Action" in dosGame.genres :
-            return "Action-Adventure"
-        elif "Adventure" in dosGame.genres :
-            return "Adventure"
         elif 'Action' in dosGame.genres :
             return 'Action-Adventure'
         else :

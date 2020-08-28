@@ -1,4 +1,4 @@
-import os
+import os,stat
 
 class CommandHandler():
     
@@ -13,53 +13,122 @@ class CommandHandler():
         return True
 
     def reducePath(self,path,game):
-        #self.logger.log("    PATH CONVERT: %s" %path)
+#        self.logger.log("    PATH CONVERT: %s" %path)
         if path.lower().startswith(".\games") or path.lower().startswith("\games") or path.lower().startswith("games") :
-            pathList = path.split('\\')        
+            pathList = path.split('\\')
             if pathList[0]=='.' :
                 pathList = pathList[1:]
-            if len(pathList) > 1 and pathList[0].lower()=='games' and pathList[1].lower()==game.lower() :
+            if len(pathList) > 1 and pathList[0].lower()=='games' : #and pathList[1].lower()==game.lower() :
                 path = ".\\"+ "\\".join(pathList[1:])
-        #self.logger.log("    TO: %s" %path)
+#        self.logger.log("    TO: %s" %path)
         return path
-        
-    # TODO separate CD Mount and basic mount    
-    def handleCDMount(self,line,game,dest) :          
+    
+    def pathListInCommandLine(self,line,startTokens,endTokens) :
         command = line.split(" ")    
         startIndex = -1
         endIndex = -1
         count =0
         for param in command :
-            if param == 'd' or param == 'a' or param == 'b':
+            if param.lower() in startTokens :
                 startIndex = count
-            elif param == '-t' :
+            elif param.lower() in endTokens :
                 endIndex = count
             count = count + 1
+            
+        if endIndex == -1 :
+            endIndex = len(command)
         
-        paths = command[startIndex+1:endIndex]
+        return command[startIndex+1:endIndex], command, startIndex,endIndex
+        
+    def handleImgmount(self,line,game,dest) :        
+        paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','c','d','e','y'],endTokens=['-t'])
+        
         prString = ""
-        #TODO paths in several part should be joined if same cd and we should work on that
-        # else it's several cds and it should be handled in else parts ...
-        for path in paths :
-            path = self.reducePath(path.replace('"',""),game)        
-            if len(paths)==1 :
-                self.logger.log("    clean single CD")
+        if len(paths)==1 :
+                path = self.reducePath(paths[0].replace('"',""),game)
+                self.logger.log("    clean single imgmount")
                 path = self.cleanCDname(path,dest)
+                prString = prString + " "+path
+        else :
+            # See if path contains ""
+            redoPath = " ".join(paths)
+            countChar = redoPath.count('"')
+            if countChar == 2 :
+                # Single path with space
+                # casetest: Take Back / CSS
+                path = self.reducePath(redoPath.replace('"',""),game)
+                self.logger.log("    clean single imgmount")
+                path = self.cleanCDname(path,dest)
+                prString = prString + " "+path
             else :
-                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE")
-                self.logger.log(paths)
-            prString = prString + " "+path
+                # several paths (multi cds)
+                self.logger.logList("    multi imgmount",paths)
+                # analyze paths to see if there are spaces in it  
+                # casetest: Star Trek Borg / STBorg
+                spaceInPaths = False
+                for path in paths :
+                    if path.startswith('"') and not path.endswith('"') :
+                        spaceInPaths = True
+                        break
+                if spaceInPaths :
+                    reshapedPaths = []
+                    fixedPath = ''
+                    for path in paths :
+                        if path.startswith('"') and not path.endswith('"') :
+                            fixedPath = path
+                        elif not path.startswith('"') and path.endswith('"') :
+                            fixedPath = fixedPath +" "+ path
+                            reshapedPaths.append(fixedPath)
+                            fixedPath = ""
+                        else :
+                            fixedPath = fixedPath +" "+path
+                    paths = reshapedPaths
+                        
+                cdCount = 1
+                for path in paths :
+                    path = self.reducePath(path.replace('"',""),game)
+                    path = self.cleanCDname(path,dest,cdCount)
+                    prString = prString + " "+'"'+path+'"'
+                    cdCount = cdCount + 1
         
-        # treat mount a and d here
-        # TODO shitty code to rework
-        if line.startswith("mount a") or line.startswith("mount d") :        
-            prString = dest.replace(self.outputDir+"\\","/recalbox/share/roms/dos/") + "/" + prString.strip()        
-            prString = ' "' + prString.replace("\\","/") +'"'        
-        
-        fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])        
+        fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])
+        self.logger.log("    imgmount path: "+line.rstrip('\n\r ') + " --> " +fullString.rstrip('\n\r ')) 
         return fullString
     
-    def cleanCDname(self,path,dest):
+    def handleMount(self,line,game,dest) :
+        paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','d','e'],endTokens=['-t'])
+        
+        prString = ""
+        if len(paths)==1 :
+            path = self.reducePath(paths[0].replace('"',""),game)
+            prString = prString +" "+path
+        else :
+             # See if path contains ""
+            redoPath = " ".join(paths)
+            countChar = redoPath.count('"')
+            if countChar == 2 :
+                path = self.reducePath(paths[0].replace('"',""),game)
+                prString = prString +" "+path
+            else :
+                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE")
+                self.logger.logList("    paths",paths)
+                for path in paths :
+                    path = self.reducePath(path.replace('"',""),game) 
+                    prString = prString +" "+path
+        
+        # Mount command needs to be absolute linux path
+        # rbDistribPrefix = "/recalbox/share/roms/dos"
+        batoceraDistribPrefix = "/userdata/roms/dos"        
+        if prString.strip().startswith('.') :            
+            prString = prString.strip()[1:]        
+        prString = batoceraDistribPrefix+"/"+game+".pc"+prString.strip()   
+        prString = ' "' + prString.replace("\\","/") +'"'
+       
+        fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])
+        self.logger.log("    mount path: "+line.rstrip('\n\r ') + " --> " +fullString.rstrip('\n\r '))
+        return fullString
+    
+    def cleanCDname(self,path,dest,cdCount=None):
         cdFileFullPath = os.path.join(dest,path)        
         if os.path.exists(cdFileFullPath) :
             if os.path.isdir(cdFileFullPath) :            
@@ -74,22 +143,26 @@ class CommandHandler():
                 cdsPath = "\\".join(cdFileFullPath.split('\\')[:-1])
                     
                 # Rename file to dos compatible name                
-                cdFilename = self.dosRename(cdsPath,cdFile,cdFilename,cdFileExt)
-                self.logger.log("    renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
+                cdFilename = self.dosRename(cdsPath,cdFile,cdFilename,cdFileExt,cdCount)
+                self.logger.log("      renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
                 
                 if cdFileExt == ".cue" :
-                    self.cleanCue(cdsPath,cdFilename)                   
+                    self.cleanCue(cdsPath,cdFilename,cdCount)               
                         
                 cleanedPath = "\\".join(pathList[:-1])+"\\"+cdFilename+cdFileExt
-                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
+#                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else :
-            self.logger.log("    <ERROR> path %s doesn't exist" %cdFileFullPath)
+            self.logger.log("      <ERROR> path %s doesn't exist" %cdFileFullPath)
             return path
         
-    def dosRename(self, path, originalFile, fileName, fileExt) :
+    def dosRename(self, path, originalFile, fileName, fileExt,cdCount) :
+        fileName = fileName.replace(" ","")
         if len(fileName) > 8 :
-            fileName = fileName[0:7]                    
+            if cdCount is None :
+                fileName = fileName[0:7]
+            else:
+                fileName = fileName[0:5]+str(cdCount)
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path,originalFile)
         targetTemp = os.path.join(path,fileName+"1"+fileExt)
@@ -98,21 +171,26 @@ class CommandHandler():
         os.rename(targetTemp, target)
         return fileName
     
-    def cleanCue(self,path,fileName):
+    def cleanCue(self,path,fileName,cdCount):
         oldFile = open(os.path.join(path,fileName+".cue"),'r')
         newFile = open(os.path.join(path,fileName+"-fix.cue"),'w')   
         for line in oldFile.readlines() :        
             if line.startswith("FILE") :
                 params = line.split('"')
                 isobin = os.path.splitext(params[1].lower())
-                fixedIsoBinName = self.dosRename(path,params[1],isobin[0],isobin[1])
+                fixedIsoBinName = self.dosRename(path,params[1],isobin[0],isobin[1],cdCount)
+                self.logger.log("      renamed %s to %s" %(params[1],fixedIsoBinName+isobin[1]))
+                # TODO might need to search for potential additional files (sub, ccd) with sameisobin[0] name and rename them too
+                # casetest: Pinball Arcade (1994) / PBArc94:
                 params[1] = fixedIsoBinName + isobin[-1]
                 line = '"'.join(params)
-                self.logger.log("    cue FILE line -> " +line.rstrip('\n\r'))
+                self.logger.log("      convert cue content -> " +line.rstrip('\n\r '))
                 
             newFile.write(line)
         oldFile.close()
         newFile.close()
+        #Remove readonly attribute if present before deleting
+        os.chmod( os.path.join(path,fileName+".cue"), stat.S_IWRITE )
         os.remove(os.path.join(path,fileName+".cue"))
         os.rename(os.path.join(path,fileName+"-fix.cue"),os.path.join(path,fileName+".cue"))
         

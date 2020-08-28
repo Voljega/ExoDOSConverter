@@ -16,6 +16,7 @@ class ExoGUI() :
         self.scriptDir = scriptDir
         self.setKey='exo'
         self.cache = cache
+        # TODO create conf file from guiStrings if it doesn't exist and do not ship it with tool anymore 
         self.configuration = conf.loadConf(os.path.join(self.scriptDir,util.confDir,util.getConfFilename(self.setKey)))
         self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
@@ -88,14 +89,17 @@ class ExoGUI() :
         if not os.path.isdir(exoDosDir) :
             self.logger.log("%s is not a directory or doesn't exist" %exoDosDir)
             self.exodosGamesValues.set([])
+            self.leftListLabel.set(self.guiStrings['leftList'].label+' (0)')
             self.exodosGamesListbox['state']='disabled'
             self.selectedGamesListbox['state']='disabled'
             self.selectGameButton['state']='disabled'
             self.deselectGameButton['state']='disabled'
         else :
             self.logger.log("Loading exoDOS games list, this might take a while ...")
+            #TODO thread issue on first launch, nothing is displayed for full collection
             self.fullnameToGameDir = util.fullnameToGameDir(exoDosDir)
             self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
+            self.leftListLabel.set(self.guiStrings['leftList'].label+' ('+str(len(self.fullnameToGameDir.keys()))+')')
             self.exodosGamesListbox['state']='normal'
             self.selectedGamesListbox['state']='normal'
             self.selectGameButton['state']='normal'
@@ -111,13 +115,18 @@ class ExoGUI() :
         self.leftFrame = Tk.Frame(self.selectionFrame)
         self.leftFrame.grid(column=0,row=0,sticky="W",pady=5)
         self.leftFrame.grid_columnconfigure(0, weight=3)
-        label = Tk.Label(self.leftFrame, text=self.guiStrings['leftList'].label)
+        self.leftListLabel = Tk.StringVar(value=self.guiStrings['leftList'].label)
+        label = Tk.Label(self.leftFrame, textvariable=self.leftListLabel)
         wckToolTips.register(label, self.guiStrings['leftList'].help)
         label.grid(column=0, row=0, sticky="W")
         self.exodosGamesValues = Tk.Variable(value=[])
         self.exodosGamesListbox = Tk.Listbox(self.leftFrame, listvariable=self.exodosGamesValues , selectmode=Tk.EXTENDED, width=70)
         self.exodosGamesListbox.grid(column=0,row=1,sticky="W",pady=5)
         self.exodosGamesListbox.grid_rowconfigure(0, weight=3)
+        
+        scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL,command=self.exodosGamesListbox.yview)
+        scrollbarLeft.grid(column=1,row=1,sticky=(Tk.N,Tk.S))
+        self.exodosGamesListbox['yscrollcommand'] = scrollbarLeft.set
         
         self.buttonsColumnFrame = Tk.Frame(self.selectionFrame,padx=10)
         self.buttonsColumnFrame.grid(column=1,row=0,pady=5)
@@ -138,7 +147,8 @@ class ExoGUI() :
         self.rightFrame = Tk.Frame(self.selectionFrame)
         self.rightFrame.grid(column=2,row=0,sticky="E",pady=5)
         self.rightFrame.grid_columnconfigure(2, weight=3)
-        label = Tk.Label(self.rightFrame, text=self.guiStrings['rightList'].label)
+        self.rightListLabel = Tk.StringVar(value=self.guiStrings['rightList'].label)
+        label = Tk.Label(self.rightFrame, textvariable=self.rightListLabel)
         wckToolTips.register(label, self.guiStrings['rightList'].help)
         label.grid(column=0, row=0, sticky="W")
         self.selectedGamesValues = Tk.Variable(value=[])        
@@ -146,15 +156,19 @@ class ExoGUI() :
         self.selectedGamesListbox.grid(column=0,row=1,sticky="E",pady=5)
         self.selectedGamesListbox.grid_columnconfigure(0, weight=3)
         
+        scrollbarRight = Tk.Scrollbar(self.rightFrame, orient=Tk.VERTICAL,command=self.selectedGamesListbox.yview)
+        scrollbarRight.grid(column=1,row=1,sticky=(Tk.N,Tk.S))
+        self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
+        
         self.handleExoDosFolder()
         
     def clickLeft(self) :
         selectedOnRight = self.selectedGamesListbox.curselection()
-        print(selectedOnRight)
         for sel in reversed(selectedOnRight) :
             self.selectedGamesListbox.delete(sel)
             
         self.selectedGamesListbox.selection_clear(0, Tk.END)
+        self.rightListLabel.set(self.guiStrings['rightList'].label+' ('+str(len(self.selectedGamesValues.get()))+')')
         
     def clickRight(self) :        
         selectedOnLeft = [self.exodosGamesListbox.get(int(item)) for item in self.exodosGamesListbox.curselection()]
@@ -162,13 +176,15 @@ class ExoGUI() :
         for sel in selectedOnLeft :
             if sel not in alreadyOnRight :
                 self.selectedGamesListbox.insert(Tk.END, sel)
+        self.selectedGamesValues.set(sorted(self.selectedGamesValues.get()))
         
         self.exodosGamesListbox.selection_clear(0, Tk.END)
+        self.rightListLabel.set(self.guiStrings['rightList'].label+' ('+str(len(self.selectedGamesValues.get()))+')')
         
     def drawButtonsFrame(self) :
         self.buttonsFrame = Tk.Frame(self.mainFrame,padx=10)
         self.buttonsFrame.grid(column=0,row=3,sticky="EW",pady=5)
-        emptyFrame = Tk.Frame(self.buttonsFrame,padx=10,width=385)
+        emptyFrame = Tk.Frame(self.buttonsFrame,padx=10,width=400)
         emptyFrame.grid(column=0,row=0,sticky="NEWS",pady=5)
         emptyFrame.grid_columnconfigure(0, weight=3)
         self.verifyButton = Tk.Button(self.buttonsFrame,text=self.guiStrings['verify'].label, command=self.clickVerify)
@@ -256,6 +272,7 @@ class ExoGUI() :
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" %exoDosDir)
         else :
             # TODO Move metadataHandler in exoDOSConverter ?
+            # TODO harmonize/rename paths : exoDosDir not well named + os.path.join(exoDosDir,'eXoDOS')
             metadataHandler = MetadataHandler(exoDosDir, self.cache,self.logger)
             exoDOSConverter = ExoDOSConverter(games, os.path.join(exoDosDir,'eXoDOS'), gamesDosDir, outputDir, metadataHandler,self.logger)
             _thread.start_new(exoDOSConverter.convertGames,())
@@ -275,7 +292,6 @@ class ExoGUI() :
         while not self.logger.log_queue.empty():
             line = self.logger.log_queue.get()            
             self.writeToConsole(line)
-            #TODO ?
             self.root.update_idletasks()
         self.logTest.after(10,self.updateConsoleFromQueue)
         

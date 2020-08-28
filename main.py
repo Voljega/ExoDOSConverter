@@ -8,7 +8,7 @@ outputDir = r'G:\ExoDOSConverted'
 
 if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
-    title = 'ExoDOSConverter 0.1beta'
+    title = 'ExoDOSConverter 0.2-beta'
     logger = Logger()
     logger.log(title)
     logger.log('Script path : '+scriptDir)

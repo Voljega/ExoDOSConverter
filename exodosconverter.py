@@ -50,6 +50,10 @@ class ExoDOSConverter():
                 logFile.write(errors.get(key))
                 logFile.write("\n")
             logFile.close()
+        elif os.path.exists(os.path.join(self.outputDir,'error_log.txt')) :
+            # Delete log from previous runs
+            os.remove(os.path.join(self.outputDir,'error_log.txt'))
+            
             
         
     def convertGame(self, game, gamelist, total, count) :

@@ -62,22 +62,21 @@ class ConfConverter():
             if self.commandHandler.useLine(cmdline,cutLines) :
                 if cmdline.lower().startswith("c:") :
                     retroDosboxBat.write(cmdline)
-                    # First add move into game dir
+                    # First add move into game subdir
                     retroDosboxBat.write("cd %s\n" %game)        
                 #remove cd to gamedir as it is already done, but keep others cd     
                 elif cmdline.lower().startswith("cd "):                
                     path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '),game)
-                    # TODO should maybe be adapted coz games are in subfolder now
                     if path.lower() == game.lower() and not os.path.exists(os.path.join(gameDir,path)):
-                        self.logger.log("    analyzing cd path %s -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
+                        self.logger.log("    cd command: '%s' -> path is game name and no existing subpath, removed" %cmdline.rstrip('\n\r '))
                     else :
-                        self.logger.log("    analyzing cd path %s -> kept" %cmdline.rstrip('\n\r '))
+                        self.logger.log("    cd command: '%s' -> kept" %cmdline.rstrip('\n\r '))
                         retroDosboxBat.write(cmdline)
-                elif cmdline.lower().startswith("imgmount d"):
-                    retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))
+                elif cmdline.lower().startswith("imgmount "):
+                    retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline,game,dest))
                     retroDosboxBat.write("pause\n")
                 elif cmdline.lower().startswith("mount "):
-                    retroDosboxBat.write(self.commandHandler.handleCDMount(cmdline,game,dest))
-                    retroDosboxBat.write("pause\n")
+                    retroDosboxBat.write(self.commandHandler.handleMount(cmdline,game,dest))
+                    retroDosboxBat.write("\npause\n")
                 else :
                     retroDosboxBat.write(cmdline)

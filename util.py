@@ -74,8 +74,9 @@ def loadPicCache(picCache) :
 def gameDirMap(gamesDosDir, games) :
     gameDict = dict()
     for game in games :
-        bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir,game)) if os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[0].lower() == 'install']
-        gameDict[bats[0]] = game if len(bats) == 1 else game
+        if os.path.isdir(os.path.join(gamesDosDir,game)) :
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir,game)) if os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[0].lower() == 'install']
+            gameDict[bats[0]] = game if len(bats) == 1 else game
             
     return gameDict
 
