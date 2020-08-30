@@ -76,6 +76,7 @@ class ExoDOSConverter():
             self.confConverter.process(game,genre)
         else :
             self.logger.log(">>> %i/%i >>> %s: already converted in output folder" %(count,total,game))
+            self.metadataHandler.processGame(game,gamelist,genre, self.outputDir)
         
         self.logger.log("")      
         
