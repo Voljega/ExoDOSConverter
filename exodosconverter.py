@@ -61,7 +61,8 @@ class ExoDOSConverter():
         
         if not os.path.exists(os.path.join(self.outputDir,genre,game+".pc")):
             self.logger.log(">>> %i/%i >>> %s: starting conversion" %(count,total,game))
-            
+            # TODO should be refactored as it now appears in both cases
+            # should also handle case where this game metadata already appears in gamelist.xml
             self.metadataHandler.processGame(game,gamelist,genre, self.outputDir)
             
             if not os.path.exists(os.path.join(self.exoDosDir,"Games",game)):
@@ -76,6 +77,8 @@ class ExoDOSConverter():
             self.confConverter.process(game,genre)
         else :
             self.logger.log(">>> %i/%i >>> %s: already converted in output folder" %(count,total,game))
+            # TODO should be refactored as it now appears in both cases
+            # should also handle case where this game metadata already appears in gamelist.xml
             self.metadataHandler.processGame(game,gamelist,genre, self.outputDir)
         
         self.logger.log("")      

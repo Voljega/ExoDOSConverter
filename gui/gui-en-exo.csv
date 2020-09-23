@@ -1,6 +1,6 @@
 id;label;help
 outputDir;Output directory;Path where your set will be created (exodos collection will be left untouched)
-exoDosDir;ExoDOS folder;Path to your eXoDOs collection
+collectionDir;Collection folder;Path to your eXoDOs collection
 left;Deselect game;Remove game(s) from selection
 right;Select game;Add game(s) to your selection
 leftList;ExoDOS Games;Full list of ExoDOS games

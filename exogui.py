@@ -12,14 +12,15 @@ class ExoGUI() :
     
     DEFAULT_FONT_SIZE = 9 
     
-    def __init__(self,scriptDir,logger,title,cache) :        
+    def __init__(self,scriptDir,logger,title) :        
         self.scriptDir = scriptDir
         self.setKey='exo'
-        self.cache = cache
+        self.cache = None
+        self.needsCacheRefresh = False;
         # TODO create conf file from guiStrings if it doesn't exist and do not ship it with tool anymore 
         self.configuration = conf.loadConf(os.path.join(self.scriptDir,util.confDir,util.getConfFilename(self.setKey)))
         self.guiVars = dict()
-        self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
+        self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))        
         
         self.window = Tk.Tk()
         self.window.resizable(False,False)        
@@ -63,13 +64,13 @@ class ExoGUI() :
         self.pathsFrame.grid_columnconfigure(1, weight=1)
         setRow = 0
         
-        label = Tk.Label(self.pathsFrame, text=self.guiStrings['exoDosDir'].label)
-        wckToolTips.register(label, self.guiStrings['exoDosDir'].help)
+        label = Tk.Label(self.pathsFrame, text=self.guiStrings['collectionDir'].label)
+        wckToolTips.register(label, self.guiStrings['collectionDir'].help)
         label.grid(column=0, row=setRow, padx=5,sticky="W")
-        self.guiVars['exoDosDir'] = Tk.StringVar()
-        self.guiVars['exoDosDir'].set(self.configuration['exoDosDir'])
-        self.guiVars['exoDosDir'].trace_add("write", self.handleExoDosFolder)
-        entry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['exoDosDir'])
+        self.guiVars['collectionDir'] = Tk.StringVar()
+        self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
+        self.guiVars['collectionDir'].trace_add("write", self.handleCollectionFolder)
+        entry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
         entry.grid(column=1, row=setRow, padx=5,sticky=("WE"))
         setRow = setRow + 1
         
@@ -79,15 +80,15 @@ class ExoGUI() :
         self.guiVars['outputDir'] = Tk.StringVar()
         self.guiVars['outputDir'].set(self.configuration['outputDir'])
         outputEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
-        outputEntry.grid(column=1, row=setRow, columnspan=5,padx=5,sticky="WE")
-
-    def handleExoDosFolder(self,*args) :
-        exoDosDir = self.guiVars['exoDosDir'].get()
+        outputEntry.grid(column=1, row=setRow, columnspan=5,padx=5,sticky="WE")    
+    
+    def handleCollectionFolder(self,*args) :
+        collectionDir = self.guiVars['collectionDir'].get()
         
         #TODO better test here with all subfolders and differenciation between v4 and v5 ?
         # and maybe an error message somewhere
-        if not os.path.isdir(exoDosDir) :
-            self.logger.log("%s is not a directory or doesn't exist" %exoDosDir)
+        if not os.path.isdir(collectionDir) :
+            self.logger.log("%s is not a directory or doesn't exist" %collectionDir)
             self.exodosGamesValues.set([])
             self.leftListLabel.set(self.guiStrings['leftList'].label+' (0)')
             self.exodosGamesListbox['state']='disabled'
@@ -95,9 +96,15 @@ class ExoGUI() :
             self.selectGameButton['state']='disabled'
             self.deselectGameButton['state']='disabled'
         else :
+            # Do not rebuild cache on first refresh of the value
+            if self.needsCacheRefresh is True :            
+                util.cleanCache(self.scriptDir)
+            else :
+               self.needsCacheRefresh = True 
+            self.cache = util.buildCache(self.scriptDir,collectionDir,self.logger)
             self.logger.log("Loading exoDOS games list, this might take a while ...")
             #TODO thread issue on first launch, nothing is displayed for full collection
-            self.fullnameToGameDir = util.fullnameToGameDir(exoDosDir)
+            self.fullnameToGameDir = util.fullnameToGameDir(collectionDir)
             self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
             self.leftListLabel.set(self.guiStrings['leftList'].label+' ('+str(len(self.fullnameToGameDir.keys()))+')')
             self.exodosGamesListbox['state']='normal'
@@ -160,7 +167,7 @@ class ExoGUI() :
         scrollbarRight.grid(column=1,row=1,sticky=(Tk.N,Tk.S))
         self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
         
-        self.handleExoDosFolder()
+        self.handleCollectionFolder()
         
     def clickLeft(self) :
         selectedOnRight = self.selectedGamesListbox.curselection()
@@ -244,7 +251,7 @@ class ExoGUI() :
     def clickVerify(self) :
         self.logger.log('\n<--------- Verify '+self.setKey+' Parameters --------->')
         error = False
-        for key in ['outputDir','exoDosDir'] :
+        for key in ['outputDir','collectionDir'] :
             if not os.path.exists(self.guiVars[key].get()) :
                 error = True
                 self.logger.log(key +' folder does not exist')
@@ -262,19 +269,18 @@ class ExoGUI() :
         self.selectGameButton['state']='disabled'
         self.deselectGameButton['state']='disabled'
         self.logger.log('\n<--------- Starting '+self.setKey+' Process --------->')
-        exoDosDir = self.guiVars['exoDosDir'].get()
+        collectionDir = self.guiVars['collectionDir'].get()
         outputDir = self.guiVars['outputDir'].get()
-        gamesDir = os.path.join(exoDosDir,"eXoDOS","Games")
+        gamesDir = os.path.join(collectionDir,"eXoDOS","Games")
         gamesDosDir = os.path.join(gamesDir,"!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
         
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir) :
-            self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" %exoDosDir)
+            self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" %collectionDir)
         else :
-            # TODO Move metadataHandler in exoDOSConverter ?
-            # TODO harmonize/rename paths : exoDosDir not well named + os.path.join(exoDosDir,'eXoDOS')
-            metadataHandler = MetadataHandler(exoDosDir, self.cache,self.logger)
-            exoDOSConverter = ExoDOSConverter(games, os.path.join(exoDosDir,'eXoDOS'), gamesDosDir, outputDir, metadataHandler,self.logger)
+            # TODO Move metadataHandler in exoDOSConverter ?            
+            metadataHandler = MetadataHandler(collectionDir, self.cache,self.logger)
+            exoDOSConverter = ExoDOSConverter(games, os.path.join(collectionDir,'eXoDOS'), gamesDosDir, outputDir, metadataHandler,self.logger)
             _thread.start_new(exoDOSConverter.convertGames,())
         
     def drawConsole(self) :

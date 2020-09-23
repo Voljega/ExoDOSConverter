@@ -12,8 +12,6 @@ if __name__ == "__main__":
     logger = Logger()
     logger.log(title)
     logger.log('Script path : '+scriptDir)
-        
-    cache = util.buildCache(scriptDir,exoDosDir,logger)
     
-    gui = ExoGUI(scriptDir,logger, title, cache) 
+    gui = ExoGUI(scriptDir,logger, title) 
     gui.draw()    

@@ -102,11 +102,11 @@ class MetadataHandler():
         self.logger.log("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
         return dosGame
     
-    def buildGenre(self,dosGame):
-        if 'Sports' in dosGame.genres :
-            return 'Sports'
-        elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
+    def buildGenre(self,dosGame):        
+        if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
             return "Race"
+        elif 'Sports' in dosGame.genres :
+            return 'Sports'
         elif 'Pinball' in dosGame.genres :
             return 'Pinball'
         elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres :

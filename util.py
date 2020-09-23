@@ -43,8 +43,8 @@ def findPic(gameName, cache, ext) :
         imgPath = gameplayPicCache.get(imgName)
     return imgPath
 
-def buildPicCache(imageFolder,picCache) :
-    print("Building cache %s" %picCache)
+def buildPicCache(imageFolder,picCache, logger) :
+    logger.log("Building cache %s" %picCache)
     picCacheFile = open(picCache,'w')
     cache = dict()
     if os.path.exists(imageFolder) :
@@ -61,8 +61,8 @@ def buildPicCache(imageFolder,picCache) :
     picCacheFile.close()
     return cache
 
-def loadPicCache(picCache) :
-    print("Loading cache %s" %picCache)
+def loadPicCache(picCache, logger) :
+    logger.log("Loading cache %s" %picCache)
     picCacheFile = open(picCache,'r')
     cache = dict()
     for line in picCacheFile.readlines() :
@@ -85,21 +85,33 @@ def fullnameToGameDir(exoDosDir) :
     games = [filename for filename in os.listdir(gamesDosDir)]
     return gameDirMap(gamesDosDir,games);
 
+def cleanCache(scriptDir) :
+    cacheDir = os.path.join(scriptDir,'cache')
+    frontPicCacheFile = os.path.join(cacheDir,'.frontPicCache')
+    if os.path.exists(frontPicCacheFile) :
+        os.remove(frontPicCacheFile)
+    titlePicCacheFile = os.path.join(cacheDir,'.titlePicCache')
+    if os.path.exists(titlePicCacheFile) :
+        os.remove(titlePicCacheFile)
+    gameplayPicCacheFile = os.path.join(cacheDir,'.gameplayPicCache')
+    if os.path.exists(gameplayPicCacheFile) :
+        os.remove(gameplayPicCacheFile)     
+
 def buildCache(scriptDir, exoDosDir, logger):
     cacheDir = os.path.join(scriptDir,'cache')
     if not os.path.exists(cacheDir) :
         os.mkdir(cacheDir)
         
     frontPicCacheFile = os.path.join(cacheDir,'.frontPicCache')
-    frontPicCache = loadPicCache(frontPicCacheFile) if os.path.exists(frontPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Box - Front'),frontPicCacheFile)
+    frontPicCache = loadPicCache(frontPicCacheFile, logger) if os.path.exists(frontPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Box - Front'),frontPicCacheFile, logger)
     logger.log("frontPicCache: %i entities" %len(frontPicCache.keys()))
     
     titlePicCacheFile = os.path.join(cacheDir,'.titlePicCache')
-    titlePicCache = loadPicCache(titlePicCacheFile) if os.path.exists(titlePicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Game Title'),titlePicCacheFile)
+    titlePicCache = loadPicCache(titlePicCacheFile, logger) if os.path.exists(titlePicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Game Title'),titlePicCacheFile, logger)
     logger.log("titlePicCache: %i entities" %len(titlePicCache.keys()))
     
     gameplayPicCacheFile = os.path.join(cacheDir,'.gameplayPicCache')
-    gameplayPicCache = loadPicCache(gameplayPicCacheFile) if os.path.exists(gameplayPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Gameplay'),gameplayPicCacheFile)
+    gameplayPicCache = loadPicCache(gameplayPicCacheFile, logger) if os.path.exists(gameplayPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Gameplay'),gameplayPicCacheFile, logger)
     logger.log("gameplayPicCache: %i entities" %len(gameplayPicCache.keys()))
             
     return frontPicCache, titlePicCache, gameplayPicCache
