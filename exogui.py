@@ -87,8 +87,8 @@ class ExoGUI() :
         
         #TODO better test here with all subfolders and differenciation between v4 and v5 ?
         # and maybe an error message somewhere
-        if not os.path.isdir(collectionDir) :
-            self.logger.log("%s is not a directory or doesn't exist" %collectionDir)
+        if not os.path.isdir(collectionDir) or not util.validCollectionPath(collectionDir) :
+            self.logger.log("%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" %collectionDir)
             self.exodosGamesValues.set([])
             self.leftListLabel.set(self.guiStrings['leftList'].label+' (0)')
             self.exodosGamesListbox['state']='disabled'

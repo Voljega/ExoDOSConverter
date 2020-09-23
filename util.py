@@ -80,8 +80,8 @@ def gameDirMap(gamesDosDir, games) :
             
     return gameDict
 
-def fullnameToGameDir(exoDosDir) :
-    gamesDosDir = os.path.join(exoDosDir,"eXoDOS","Games","!dos")
+def fullnameToGameDir(collectionDir) :
+    gamesDosDir = os.path.join(collectionDir,"eXoDOS","Games","!dos")
     games = [filename for filename in os.listdir(gamesDosDir)]
     return gameDirMap(gamesDosDir,games);
 
@@ -97,21 +97,24 @@ def cleanCache(scriptDir) :
     if os.path.exists(gameplayPicCacheFile) :
         os.remove(gameplayPicCacheFile)     
 
-def buildCache(scriptDir, exoDosDir, logger):
+def buildCache(scriptDir, collectionDir, logger):
     cacheDir = os.path.join(scriptDir,'cache')
     if not os.path.exists(cacheDir) :
         os.mkdir(cacheDir)
         
     frontPicCacheFile = os.path.join(cacheDir,'.frontPicCache')
-    frontPicCache = loadPicCache(frontPicCacheFile, logger) if os.path.exists(frontPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Box - Front'),frontPicCacheFile, logger)
+    frontPicCache = loadPicCache(frontPicCacheFile, logger) if os.path.exists(frontPicCacheFile) else buildPicCache(os.path.join(collectionDir,'Images','MS-DOS','Box - Front'),frontPicCacheFile, logger)
     logger.log("frontPicCache: %i entities" %len(frontPicCache.keys()))
     
     titlePicCacheFile = os.path.join(cacheDir,'.titlePicCache')
-    titlePicCache = loadPicCache(titlePicCacheFile, logger) if os.path.exists(titlePicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Game Title'),titlePicCacheFile, logger)
+    titlePicCache = loadPicCache(titlePicCacheFile, logger) if os.path.exists(titlePicCacheFile) else buildPicCache(os.path.join(collectionDir,'Images','MS-DOS','Screenshot - Game Title'),titlePicCacheFile, logger)
     logger.log("titlePicCache: %i entities" %len(titlePicCache.keys()))
     
     gameplayPicCacheFile = os.path.join(cacheDir,'.gameplayPicCache')
-    gameplayPicCache = loadPicCache(gameplayPicCacheFile, logger) if os.path.exists(gameplayPicCacheFile) else buildPicCache(os.path.join(exoDosDir,'Images','MS-DOS','Screenshot - Gameplay'),gameplayPicCacheFile, logger)
+    gameplayPicCache = loadPicCache(gameplayPicCacheFile, logger) if os.path.exists(gameplayPicCacheFile) else buildPicCache(os.path.join(collectionDir,'Images','MS-DOS','Screenshot - Gameplay'),gameplayPicCacheFile, logger)
     logger.log("gameplayPicCache: %i entities" %len(gameplayPicCache.keys()))
             
     return frontPicCache, titlePicCache, gameplayPicCache
+
+def validCollectionPath(collectionPath):
+    return os.path.exists(os.path.join(collectionPath,'eXoDOS')) and os.path.exists(os.path.join(collectionPath,'eXoDOS','Games')) and os.path.exists(os.path.join(collectionPath,'Metadata')) and os.path.exists(os.path.join(collectionPath,'Images'))

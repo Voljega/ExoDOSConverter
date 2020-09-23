@@ -1,7 +1,6 @@
 import os.path, sys
 from exogui import ExoGUI
 from logger import Logger
-import util
 
 exoDosDir = r"G:\Romsets\eXoDOS4"
 outputDir = r'G:\ExoDOSConverted'
