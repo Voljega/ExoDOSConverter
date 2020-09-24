@@ -100,11 +100,21 @@ class ExoGUI() :
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
         
+        self.exodosVersionLabel = Tk.Label(self.configurationFrame, text=self.guiStrings['exodosVersion'].label)
+        wckToolTips.register(self.exodosVersionLabel, self.guiStrings['exodosVersion'].help)
+        self.exodosVersionLabel.grid(column=2, row=0,sticky="W",pady=5)        
+        self.guiVars['exodosVersion'] = Tk.StringVar()
+        self.guiVars['exodosVersion'].set(self.configuration['exodosVersion'])
+        self.exodosVersionComboBox = ttk.Combobox(self.configurationFrame, state="readonly", textvariable=self.guiVars['exodosVersion'])
+        self.exodosVersionComboBox.grid(column=3,row=0, sticky="W",pady=5,padx=5)
+        self.exodosVersionValues = util.exodosVersions.copy()
+        self.exodosVersionComboBox['values'] = self.exodosVersionValues
+        
         self.guiVars['genreSubFolders'] = Tk.IntVar()
         self.guiVars['genreSubFolders'].set(self.configuration['genreSubFolders'])        
         self.useGenreSubFolderCheckButton = Tk.Checkbutton(self.configurationFrame,text=self.guiStrings['genreSubFolders'].label, variable=self.guiVars['genreSubFolders'], onvalue=1, offvalue = 0)
         wckToolTips.register(self.useGenreSubFolderCheckButton, self.guiStrings['genreSubFolders'].help)
-        self.useGenreSubFolderCheckButton.grid(column=2,row=0,sticky="W",pady=5,padx=5)
+        self.useGenreSubFolderCheckButton.grid(column=5,row=0,sticky="W",pady=5,padx=5)
     
     # Listener for collection path modifications
     def handleCollectionFolder(self,*args) :
@@ -320,6 +330,7 @@ class ExoGUI() :
         self.deselectGameButton['state']='disabled'
         self.filterEntry['state']='disabled'
         self.conversionTypeComboBox['state']='disabled'
+        self.exodosVersionComboBox['state']='disabled'
         self.useGenreSubFolderCheckButton['state']='disabled'
         self.collectionEntry['state']='disabled'
         self.outputEntry['state']='disabled'

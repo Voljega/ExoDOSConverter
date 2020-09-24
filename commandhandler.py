@@ -1,4 +1,5 @@
 import os,stat
+import util
 
 # Converts dosbox commands to desired format and paths, at the moment Batocera/ Recalbox linux flavor
 class CommandHandler():
@@ -122,13 +123,17 @@ class CommandHandler():
                     path = self.reducePath(path.replace('"',""),game) 
                     prString = prString +" "+path
         
-        # Mount command needs to be absolute linux path
-        # rbDistribPrefix = "/recalbox/share/roms/dos"
-        batoceraDistribPrefix = "/userdata/roms/dos"        
+        # Mount command needs to be absolute linux path        
+        distribPrefix = ''
+        if conversionType == util.batocera :
+            distribPrefix = "/userdata/roms/dos"
+        elif conversionType == util.recalbox :
+            distribPrefix = "/recalbox/share/roms/dos"
+            
         if prString.strip().startswith('.') :            
             prString = prString.strip()[1:]
         gameString =  "/"+genre+"/"+game+".pc" if useGenreSubFolders else "/"+game+".pc"
-        prString = batoceraDistribPrefix+gameString+prString.strip()
+        prString = distribPrefix+gameString+prString.strip()
         prString = ' "' + prString.replace("\\","/") +'"'
        
         fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])

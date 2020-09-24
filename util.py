@@ -14,7 +14,9 @@ simplemenu = 'OpenDingux SimpleMenu'
 esoteric = 'OpenDingux Esoteric'
 #TODO the bright future
 #conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
-conversionTypes = [batocera,recalbox,retropie] 
+conversionTypes = [batocera,recalbox,retropie]
+
+exodosVersions=['v4','v5'] 
 
 def getKeySetString(string,setKey) :
         return string.replace('{setKey}',setKey)
