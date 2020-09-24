@@ -85,7 +85,7 @@ class MetadataHandler():
         if dosGame.manual is not None and os.path.exists(dosGame.manual) :
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         self.writeGamelistEntry(gamelist,dosGame,game,genre, useGenreSubFolders)
-        return genre
+        return dosGame
     
     # Replaces “ ” ’ …
     def cleanString(self, s) :

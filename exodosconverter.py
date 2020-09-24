@@ -66,10 +66,9 @@ class ExoDOSConverter():
         #TODO See if it is still mandatory as we could retrieve that from self.metadataHandler.processGame now
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game))
         self.logger.log(">>> %i/%i >>> %s: starting conversion" %(count,total,game))
-        self.metadataHandler.processGame(game,gamelist,genre, self.outputDir, self.useGenreSubFolders, self.conversionType)
+        metadata = self.metadataHandler.processGame(game,gamelist,genre, self.outputDir, self.useGenreSubFolders, self.conversionType)
         
         dest = os.path.join(self.outputDir,genre,game+".pc") if self.useGenreSubFolders else os.path.join(self.outputDir,game+".pc")
-        #TODO needs rework to handle or not genre folder
         if not os.path.exists(dest):            
             if not os.path.exists(os.path.join(self.exoDosDir,"Games",game)):
                 self.logger.log("  needs installation...")
@@ -79,7 +78,7 @@ class ExoDOSConverter():
             else :
                 self.logger.log("  already installed")
             
-            self.copyGameFiles(game,dest)    
+            self.copyGameFiles(game,dest,metadata)    
             self.confConverter.process(game,dest,genre)
         else :
             self.logger.log("  already converted in output folder")
@@ -87,12 +86,17 @@ class ExoDOSConverter():
         self.logger.log("")      
         
     # Copy game files and game dosbox.conf to output dir    
-    def copyGameFiles(self,game,gameOutputDir):
+    def copyGameFiles(self,game,gameOutputDir,metadata):
         dest = os.path.join(gameOutputDir,game)
         self.logger.log("  copy game data")        
         # Copy game files in game.pc/game
         shutil.copytree(os.path.join(self.exoDosDir,"Games",game),dest)
         self.logger.log("  copy dosbox conf")
-         # Copy dosbox.conf in game.pc
+        # Copy dosbox.conf in game.pc
         shutil.copy2(os.path.join(self.exoDosDir,"Games","!dos",game,"dosbox.conf"),os.path.join(dest,"dosbox.conf"))
+        # Create blank file with full game name
+        fullname = metadata.name+' ('+str(metadata.year)+').txt'
+        f = open(os.path.join(gameOutputDir,fullname),'w')
+        f.write(metadata.desc)
+        f.close()
         
