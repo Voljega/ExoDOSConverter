@@ -95,6 +95,7 @@ class ExoGUI() :
             self.selectedGamesListbox['state']='disabled'
             self.selectGameButton['state']='disabled'
             self.deselectGameButton['state']='disabled'
+            self.filterEntry['state']='disabled'
         else :
             # Do not rebuild cache on first refresh of the value
             if self.needsCacheRefresh is True :            
@@ -103,6 +104,7 @@ class ExoGUI() :
                self.needsCacheRefresh = True 
             self.cache = util.buildCache(self.scriptDir,collectionDir,self.logger)
             self.logger.log("Loading exoDOS games list, this might take a while ...")
+            self.guiVars['filter'].set('')
             #TODO thread issue on first launch, nothing is displayed for full collection
             self.fullnameToGameDir = util.fullnameToGameDir(collectionDir)
             self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
@@ -111,7 +113,15 @@ class ExoGUI() :
             self.selectedGamesListbox['state']='normal'
             self.selectGameButton['state']='normal'
             self.deselectGameButton['state']='normal'
-        
+            self.filterEntry['state']='normal'            
+    
+    def filterGamesList  (self,*args) :
+        filterValue = self.guiVars['filter'].get()        
+        # also number of games should be properly displayed based on filter, needs update most likely
+        filteredGameslist = [g for g in self.fullnameToGameDir.keys() if filterValue.lower() in g.lower()]        
+        self.exodosGamesListbox.selection_clear(0, Tk.END)        
+        self.exodosGamesValues.set(sorted(filteredGameslist))
+        self.leftListLabel.set(self.guiStrings['leftList'].label+' ('+str(len(self.exodosGamesValues.get()))+')')
     
     def drawSelectionFrame(self) :
         
@@ -119,8 +129,15 @@ class ExoGUI() :
         self.selectionFrame.grid(column=0,row=1,sticky="EW",pady=5)
         self.selectionFrame.grid_columnconfigure(0, weight=1)
         
+        self.guiVars['filter'] = Tk.StringVar()
+        self.guiVars['filter'].set('')
+        self.guiVars['filter'].trace_add("write", self.filterGamesList)
+        self.filterEntry = Tk.Entry(self.selectionFrame,textvariable=self.guiVars['filter'])
+        self.filterEntry.grid(column=0,row=0,sticky='W')
+        wckToolTips.register(self.filterEntry, self.guiStrings['filter'].help)
+        
         self.leftFrame = Tk.Frame(self.selectionFrame)
-        self.leftFrame.grid(column=0,row=0,sticky="W",pady=5)
+        self.leftFrame.grid(column=0,row=1,sticky="W",pady=5)
         self.leftFrame.grid_columnconfigure(0, weight=3)
         self.leftListLabel = Tk.StringVar(value=self.guiStrings['leftList'].label)
         label = Tk.Label(self.leftFrame, textvariable=self.leftListLabel)
@@ -136,7 +153,7 @@ class ExoGUI() :
         self.exodosGamesListbox['yscrollcommand'] = scrollbarLeft.set
         
         self.buttonsColumnFrame = Tk.Frame(self.selectionFrame,padx=10)
-        self.buttonsColumnFrame.grid(column=1,row=0,pady=5)
+        self.buttonsColumnFrame.grid(column=1,row=1,pady=5)
         self.buttonsColumnFrame.grid_columnconfigure(1, weight = 1)
         emptyFrame = Tk.Frame(self.buttonsColumnFrame,padx=10)        
         emptyFrame.grid(column=0,row=0,pady=5)    
@@ -152,7 +169,7 @@ class ExoGUI() :
         emptyFrame.grid(column=0,row=8,pady=5)
         
         self.rightFrame = Tk.Frame(self.selectionFrame)
-        self.rightFrame.grid(column=2,row=0,sticky="E",pady=5)
+        self.rightFrame.grid(column=2,row=1,sticky="E",pady=5)
         self.rightFrame.grid_columnconfigure(2, weight=3)
         self.rightListLabel = Tk.StringVar(value=self.guiStrings['rightList'].label)
         label = Tk.Label(self.rightFrame, textvariable=self.rightListLabel)
@@ -220,7 +237,7 @@ class ExoGUI() :
         confFile = open(os.path.join(self.scriptDir,util.confDir,util.getConfFilename(self.setKey)),"w",encoding="utf-8")
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys :
-            if key.id not in ['verify','save','proceed','confirm','left','right','leftList','rightList'] :
+            if key.id not in ['verify','save','proceed','confirm','left','right','leftList','rightList','filter'] :
                 if key.help :
                         confFile.write('# ' + key.help.replace('#n','\n# ')+ '\n')
                 if key.id == 'images' :
@@ -268,6 +285,7 @@ class ExoGUI() :
         self.selectedGamesListbox['state']='disabled'
         self.selectGameButton['state']='disabled'
         self.deselectGameButton['state']='disabled'
+        self.filterEntry['state']='disabled'
         self.logger.log('\n<--------- Starting '+self.setKey+' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
         outputDir = self.guiVars['outputDir'].get()
