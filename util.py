@@ -16,7 +16,9 @@ esoteric = 'OpenDingux Esoteric'
 #conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
 conversionTypes = [batocera,recalbox,retropie]
 
-exodosVersions=['v4','v5'] 
+exodosVersions=['v4','v5']
+
+ 
 
 def getKeySetString(string,setKey) :
         return string.replace('{setKey}',setKey)
@@ -42,6 +44,17 @@ def loadUIStrings(scriptDir,guiStringsFilename) :
             order = order + 1
     file.close()
     return guiStrings
+
+# Returns distrib roms directory prefix
+def getRomsFolderPrefix(conversionType) :    
+    if conversionType == batocera :
+        return "/userdata/roms/dos"
+    elif conversionType == recalbox :
+        return "/recalbox/share/roms/dos"
+    elif conversionType == retropie :
+        return "/home/pi/RetroPie/roms/pc"
+    else :
+        return "."
 
 # Checks validity of the collection path and its content
 def validCollectionPath(collectionPath):

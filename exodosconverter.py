@@ -1,6 +1,7 @@
 import os,shutil, subprocess, sys, traceback
 from confconverter import ConfConverter
 from metadatahandler import MetadataHandler
+import util
 
 # Main Converter
 class ExoDOSConverter():
@@ -79,6 +80,7 @@ class ExoDOSConverter():
             
             self.copyGameFiles(game,dest,metadata)    
             self.confConverter.process(game,dest,genre)
+            self.postConversion(game,genre, dest)
         else :
             self.logger.log("  already converted in output folder")
         
@@ -94,8 +96,35 @@ class ExoDOSConverter():
         # Copy dosbox.conf in game.pc
         shutil.copy2(os.path.join(self.exoDosDir,"Games","!dos",game,"dosbox.conf"),os.path.join(dest,"dosbox.conf"))
         # Create blank file with full game name
-        fullname = metadata.name+' ('+str(metadata.year)+').txt'
-        f = open(os.path.join(gameOutputDir,fullname),'w')
+        cleanGameName = metadata.name.replace(':','-').replace('?','').replace('!','').replace('/','-').replace('\\','-')
+        fullname = cleanGameName+' ('+str(metadata.year)+').txt'
+        f = open(os.path.join(gameOutputDir,fullname),'w',encoding='utf8')
         f.write(metadata.desc)
         f.close()
+        
+    # Post-conversion operations for various conversion types
+    def postConversion(self, game, genre, gameOutputDir) :
+        if self.conversionType == util.retropie :
+            self.logger.log("  retropie post-conversion")            
+            dosboxCfg = open(os.path.join(gameOutputDir,"dosbox.cfg"),'a')
+            # add mount c at end of dosbox.cfg
+            romsFolder = util.getRomsFolderPrefix(self.conversionType)
+            retropieGameDir = romsFolder+"/"+genre+"/"+game+".pc" if self.useGenreSubFolders else romsFolder+"/"+game+".pc"
+            dosboxCfg.write("mount c "+retropieGameDir+"\n")
+            dosboxCfg.write("c:\n")
+            # copy all instructions from dosbox.bat to end of dosbox.cfg
+            dosboxBat = open(os.path.join(gameOutputDir,"dosbox.bat"),'r')#retroarch dosbox.bat
+            for cmdLine in dosboxBat.readlines() :
+                dosboxCfg.write(cmdLine)
+            # delete dosbox.bat
+            dosboxCfg.close()
+            dosboxBat.close()
+            os.remove(os.path.join(gameOutputDir,"dosbox.bat"))
+            # generate sh file
+            # TODO see if possible to pass along dosbox.bat file, would be better, see if possible to use batocera style
+            shFile = open(os.path.join(gameOutputDir,"launch.sh"),'w')
+            shFile.write("!/bin/bash\n")
+            shFile.write("/opt/retropie/emulators/dosbox/bin/dosbox -conf "+retropieGameDir+"/dosbox.cfg\n")
+            shFile.close()
+            
         
