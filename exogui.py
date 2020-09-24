@@ -1,13 +1,14 @@
 import tkinter as Tk
+from tkinter import ttk,messagebox
 from operator import attrgetter
 import tkinter.font as Font
 import wckToolTips
 import conf,util
 import os,shutil, platform
 from exodosconverter import ExoDOSConverter
-from metadatahandler import MetadataHandler
 import _thread
 
+# Main GUI
 class ExoGUI() :
     
     DEFAULT_FONT_SIZE = 9 
@@ -47,18 +48,20 @@ class ExoGUI() :
         text_font.configure(size=value)
         fixed_font = Font.nametofont("TkFixedFont")
         fixed_font.configure(size=value)
-        
+    
+    # Main mama Frame    
     def drawMainframe(self) :
         self.mainFrame = Tk.Frame(self.root,padx=10,pady=0)
         self.mainFrame.grid(column=0,row=1,sticky="EW",pady=5)
         self.mainFrame.grid_columnconfigure(0, weight=1)
         self.drawPathsFrame()
+        self.drawConfigurationFrame()
         self.drawSelectionFrame()        
         self.drawButtonsFrame()
         self.drawConsole()
-        
+    
+    # Paths frame    
     def drawPathsFrame(self) :
-        # Romsets frame
         self.pathsFrame = Tk.LabelFrame(self.mainFrame,text="Your Paths",padx=10,pady=5)
         self.pathsFrame.grid(column=0,row=0,sticky="EW",pady=5)
         self.pathsFrame.grid_columnconfigure(1, weight=1)
@@ -70,8 +73,8 @@ class ExoGUI() :
         self.guiVars['collectionDir'] = Tk.StringVar()
         self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
         self.guiVars['collectionDir'].trace_add("write", self.handleCollectionFolder)
-        entry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
-        entry.grid(column=1, row=setRow, padx=5,sticky=("WE"))
+        self.collectionEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
+        self.collectionEntry.grid(column=1, row=setRow, padx=5,sticky=("WE"))
         setRow = setRow + 1
         
         outputDirLabel = Tk.Label(self.pathsFrame, text=self.guiStrings['outputDir'].label)
@@ -79,9 +82,31 @@ class ExoGUI() :
         outputDirLabel.grid(column=0, row=setRow, padx=5,sticky=(Tk.W))
         self.guiVars['outputDir'] = Tk.StringVar()
         self.guiVars['outputDir'].set(self.configuration['outputDir'])
-        outputEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
-        outputEntry.grid(column=1, row=setRow, columnspan=5,padx=5,sticky="WE")    
+        self.outputEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
+        self.outputEntry.grid(column=1, row=setRow, columnspan=5,padx=5,sticky="WE")
     
+    # Configuration Frame    
+    def drawConfigurationFrame(self) :
+        self.configurationFrame = Tk.LabelFrame(self.mainFrame,text="Configuration",padx=10,pady=5)
+        self.configurationFrame.grid(column=0,row=1,sticky="EW",pady=5)
+        
+        self.conversionTypeLabel = Tk.Label(self.configurationFrame, text=self.guiStrings['conversionType'].label)
+        wckToolTips.register(self.conversionTypeLabel, self.guiStrings['conversionType'].help)
+        self.conversionTypeLabel.grid(column=0, row=0,sticky="W",pady=5)        
+        self.guiVars['conversionType'] = Tk.StringVar()
+        self.guiVars['conversionType'].set(self.configuration['conversionType'])
+        self.conversionTypeComboBox = ttk.Combobox(self.configurationFrame, state="readonly", textvariable=self.guiVars['conversionType'])
+        self.conversionTypeComboBox.grid(column=1,row=0, sticky="W",pady=5,padx=5)
+        self.conversionTypeValues = util.conversionTypes.copy()
+        self.conversionTypeComboBox['values'] = self.conversionTypeValues
+        
+        self.guiVars['genreSubFolders'] = Tk.IntVar()
+        self.guiVars['genreSubFolders'].set(self.configuration['genreSubFolders'])        
+        self.useGenreSubFolderCheckButton = Tk.Checkbutton(self.configurationFrame,text=self.guiStrings['genreSubFolders'].label, variable=self.guiVars['genreSubFolders'], onvalue=1, offvalue = 0)
+        wckToolTips.register(self.useGenreSubFolderCheckButton, self.guiStrings['genreSubFolders'].help)
+        self.useGenreSubFolderCheckButton.grid(column=2,row=0,sticky="W",pady=5,padx=5)
+    
+    # Listener for collection path modifications
     def handleCollectionFolder(self,*args) :
         collectionDir = self.guiVars['collectionDir'].get()
         
@@ -115,18 +140,18 @@ class ExoGUI() :
             self.deselectGameButton['state']='normal'
             self.filterEntry['state']='normal'            
     
+    # Listener for filter entry modification
     def filterGamesList  (self,*args) :
-        filterValue = self.guiVars['filter'].get()        
-        # also number of games should be properly displayed based on filter, needs update most likely
+        filterValue = self.guiVars['filter'].get()
         filteredGameslist = [g for g in self.fullnameToGameDir.keys() if filterValue.lower() in g.lower()]        
         self.exodosGamesListbox.selection_clear(0, Tk.END)        
         self.exodosGamesValues.set(sorted(filteredGameslist))
         self.leftListLabel.set(self.guiStrings['leftList'].label+' ('+str(len(self.exodosGamesValues.get()))+')')
     
-    def drawSelectionFrame(self) :
-        
+    # Selection Frame
+    def drawSelectionFrame(self) :        
         self.selectionFrame = Tk.LabelFrame(self.mainFrame,padx=10,pady=5)
-        self.selectionFrame.grid(column=0,row=1,sticky="EW",pady=5)
+        self.selectionFrame.grid(column=0,row=2,sticky="EW",pady=5)
         self.selectionFrame.grid_columnconfigure(0, weight=1)
         
         self.guiVars['filter'] = Tk.StringVar()
@@ -185,7 +210,8 @@ class ExoGUI() :
         self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
         
         self.handleCollectionFolder()
-        
+    
+    # Listener to remove game from selection    
     def clickLeft(self) :
         selectedOnRight = self.selectedGamesListbox.curselection()
         for sel in reversed(selectedOnRight) :
@@ -193,7 +219,8 @@ class ExoGUI() :
             
         self.selectedGamesListbox.selection_clear(0, Tk.END)
         self.rightListLabel.set(self.guiStrings['rightList'].label+' ('+str(len(self.selectedGamesValues.get()))+')')
-        
+    
+    # Listener to ad game to selection 
     def clickRight(self) :        
         selectedOnLeft = [self.exodosGamesListbox.get(int(item)) for item in self.exodosGamesListbox.curselection()]
         alreadyOnRight = self.selectedGamesValues.get()
@@ -204,7 +231,8 @@ class ExoGUI() :
         
         self.exodosGamesListbox.selection_clear(0, Tk.END)
         self.rightListLabel.set(self.guiStrings['rightList'].label+' ('+str(len(self.selectedGamesValues.get()))+')')
-        
+    
+    # Action buttons frame    
     def drawButtonsFrame(self) :
         self.buttonsFrame = Tk.Frame(self.mainFrame,padx=10)
         self.buttonsFrame.grid(column=0,row=3,sticky="EW",pady=5)
@@ -223,12 +251,14 @@ class ExoGUI() :
         emptyFrame = Tk.Frame(self.buttonsFrame,padx=10, width=350)
         emptyFrame.grid(column=4,row=0,sticky="NEWS",pady=5)
         emptyFrame.grid_columnconfigure(4, weight=3)
-        
+    
+    # Listener for Save button    
     def clickSave(self) :
         self.logger.log ('\n<--------- Saving configuration --------->')
         self.saveConfFile()
         self.saveConfInMem()    
     
+    # Saves to conf file
     def saveConfFile(self) :        
         confBackupFilePath = os.path.join(self.scriptDir,util.confDir,util.getConfBakFilename(self.setKey))
         if os.path.exists(confBackupFilePath) :
@@ -251,6 +281,7 @@ class ExoGUI() :
         confFile.close()
         self.logger.log ('    Configuration saved in '+util.getConfFilename(self.setKey)+' file')    
     
+    # Saves in memory
     def saveConfInMem(self) :
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))        
         for key in listKeys :
@@ -264,7 +295,8 @@ class ExoGUI() :
                     if key.id in self.guiVars :
                         self.configuration[key.id] = str(self.guiVars[key.id].get())
         self.logger.log('    Configuration saved in memory')       
-
+    
+    # Listener for Verify button
     def clickVerify(self) :
         self.logger.log('\n<--------- Verify '+self.setKey+' Parameters --------->')
         error = False
@@ -275,7 +307,8 @@ class ExoGUI() :
             
         if not error :
             self.logger.log('All Good!')
-
+    
+    # Listener for Proceed Button
     def clickProceed(self) :
         self.logger.log ('\n<--------- Saving '+self.setKey+' configuration --------->')        
         self.verifyButton['state'] = 'disabled'
@@ -286,9 +319,18 @@ class ExoGUI() :
         self.selectGameButton['state']='disabled'
         self.deselectGameButton['state']='disabled'
         self.filterEntry['state']='disabled'
+        self.conversionTypeComboBox['state']='disabled'
+        self.useGenreSubFolderCheckButton['state']='disabled'
+        self.collectionEntry['state']='disabled'
+        self.outputEntry['state']='disabled'
+        
         self.logger.log('\n<--------- Starting '+self.setKey+' Process --------->')
+        #TODO see if there's a way to have more simpler parameters passed to converter and logging here, better simplify code in converter 
         collectionDir = self.guiVars['collectionDir'].get()
+        conversionType = self.guiVars['conversionType'].get()
+        useGenreSubFolders = True if self.guiVars['genreSubFolders'].get() == 1 else False
         outputDir = self.guiVars['outputDir'].get()
+        #TODO better move this to converter when v5 is released and properly handle it, or move it to verify ? Also use messagebox
         gamesDir = os.path.join(collectionDir,"eXoDOS","Games")
         gamesDosDir = os.path.join(gamesDir,"!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
@@ -296,11 +338,10 @@ class ExoGUI() :
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir) :
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" %collectionDir)
         else :
-            # TODO Move metadataHandler in exoDOSConverter ?            
-            metadataHandler = MetadataHandler(collectionDir, self.cache,self.logger)
-            exoDOSConverter = ExoDOSConverter(games, os.path.join(collectionDir,'eXoDOS'), gamesDosDir, outputDir, metadataHandler,self.logger)
+            exoDOSConverter = ExoDOSConverter(games, self.cache, collectionDir, gamesDosDir, outputDir, conversionType, useGenreSubFolders,self.logger)
             _thread.start_new(exoDOSConverter.convertGames,())
-        
+    
+    # Console Frame    
     def drawConsole(self) :
         self.consoleFrame = Tk.Frame(self.root, padx=10)
         self.consoleFrame.grid(column=0,row=5,sticky="EW",pady=5)
@@ -312,13 +353,15 @@ class ExoGUI() :
         self.logTest['yscrollcommand'] = self.scrollbar.set
         self.logTest.after(10,self.updateConsoleFromQueue)
     
+    # Grabs messages from logger queue
     def updateConsoleFromQueue(self):        
         while not self.logger.log_queue.empty():
             line = self.logger.log_queue.get()            
             self.writeToConsole(line)
             self.root.update_idletasks()
         self.logTest.after(10,self.updateConsoleFromQueue)
-        
+    
+    # Write message to console    
     def writeToConsole(self, msg):                
         numlines = self.logTest.index('end - 1 line').split('.')[0]
         self.logTest['state'] = 'normal'

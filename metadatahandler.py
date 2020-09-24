@@ -5,6 +5,7 @@ import util
 
 DosGame = collections.namedtuple('DosGame', 'dosname metadataname name genres publisher developer year frontPic manual desc')
 
+# Metadata exporting
 class MetadataHandler():
     
     def __init__(self,exoDosDir, cache,logger) :
@@ -12,11 +13,13 @@ class MetadataHandler():
         self.cache = cache
         self.logger = logger
         self.metadatas = dict()
-        
+    
+    # Reads a given node    
     def get(self,i,e):
         ll=i.find(e)        
         return ll.text if ll != None else None
     
+    # Inits in-memory gamelist xml either by opening the file or creating it
     def initXml(self, outputDir) :
         if os.path.exists(os.path.join(outputDir,"gamelist.xml")) :
             parser = etree.XMLParser(encoding="utf-8")
@@ -25,13 +28,15 @@ class MetadataHandler():
             tree = etree.ElementTree()
             tree._setroot(etree.Element('gameList'))
             return tree
-        
+    
+    # Write full in-memory gamelist xml to outputDir    
     def writeXml(self, outputDir, gamelist) :
         xmlstr = minidom.parseString(etree.tostring(gamelist.getroot())).toprettyxml(indent="   ", newl="\r")
         xmlstr = '\n'.join([s for s in xmlstr.splitlines() if s.strip()])
         with open(os.path.join(outputDir,"gamelist.xml"), "wb") as f:
             f.write(xmlstr.encode('utf-8'))
-        
+    
+    # Parse exoDos metadata file    
     def parseXmlMetadata(self) :
         xmlPath = os.path.join(self.exoDosDir,'Data','Platforms','MS-DOS.xml')
         metadatas = dict();
@@ -63,8 +68,15 @@ class MetadataHandler():
         self.logger.log('Loaded %i metadatas' %len(metadatas.keys()))
         self.metadatas = metadatas
         return metadatas
-        
-    def processGame(self, game, gamelist, genre, outputDir) :
+    
+    # Retrieve exoDos metadata for a given game
+    def handleMetadata(self,game) :
+        dosGame = self.metadatas.get(game)
+        self.logger.log("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
+        return dosGame
+    
+    # Process and export metadata to in-memory gamelist xml for a given game    
+    def processGame(self, game, gamelist, genre, outputDir, useGenreSubFolders, conversionType) :
         dosGame = self.handleMetadata(game)
         self.logger.log("  computed genre %s" %genre)
         self.logger.log("  copy pics and manual")
@@ -72,22 +84,24 @@ class MetadataHandler():
             shutil.copy2(dosGame.frontPic,os.path.join(outputDir,'downloaded_images'))
         if dosGame.manual is not None and os.path.exists(dosGame.manual) :
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        self.writeGamelistEntry(gamelist,dosGame,game,genre)
+        self.writeGamelistEntry(gamelist,dosGame,game,genre, useGenreSubFolders)
         return genre
     
-    # replace “ ” ’ …
+    # Replaces “ ” ’ …
     def cleanString(self, s) :
         return s.replace('&','&amp;')
-        
-    def writeGamelistEntry(self,gamelist,dosGame,game,genre):
+    
+    # Write metada for a given game to in-memory gamelist xml
+    def writeGamelistEntry(self,gamelist,dosGame,game,genre,useGenreSubFolders):
         root = gamelist.getroot()
         # TODO might want to search if subElement for the game already exists before writing it ?
         frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
         manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
         gameElt = etree.SubElement(root,'game')
-        year = dosGame.year+"0101T000000" if dosGame.year is not None else ''
+        year = dosGame.year+"0101T000000" if dosGame.year is not None else ''        
+        path = "./"+genre+"/"+self.cleanString(game)+".pc" if useGenreSubFolders else "./"+self.cleanString(game)+".pc"
         
-        etree.SubElement(gameElt,'path').text = "./"+genre+"/"+self.cleanString(game)+".pc"
+        etree.SubElement(gameElt,'path').text = path
         etree.SubElement(gameElt,'name').text = dosGame.name
         etree.SubElement(gameElt,'desc').text = dosGame.desc
         etree.SubElement(gameElt,'releasedate').text = year    
@@ -97,11 +111,7 @@ class MetadataHandler():
         etree.SubElement(gameElt,'manual').text = manual
         etree.SubElement(gameElt,'image').text = frontPic
     
-    def handleMetadata(self,game) :
-        dosGame = self.metadatas.get(game)
-        self.logger.log("  Metadata: %s (%s), genres: %s" %(dosGame.name,dosGame.year," | ".join(dosGame.genres)))     
-        return dosGame
-    
+    # Convert multi genres exodos format to a single one
     def buildGenre(self,dosGame):        
         if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
             return "Race"

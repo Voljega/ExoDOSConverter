@@ -1,24 +1,28 @@
 import os
 from commandhandler import CommandHandler
 
+# Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter():
     
-    def __init__(self,games,exoDosDir,outputDir, logger) :
+    def __init__(self,games,exoDosDir,outputDir,useGenreSubFolders,conversionType,logger) :
         self.games = games
         self.logger = logger
         self.exoDosDir = exoDosDir
         self.outputDir = outputDir
+        self.useGenreSubFolders = useGenreSubFolders
+        self.conversionType = conversionType
         self.commandHandler = CommandHandler(self.outputDir, self.logger)
-
-    def process(self,game,genre) :
-        self.logger.log("  convert dosbox.bat")
-        dest = os.path.join(self.outputDir,genre,game+".pc")
+    
+    # Converts exoDos dosbox.conf to dosbox.cfg and dosbox.bat
+    def process(self,game,dest,genre) :
+        self.logger.log("  create dosbox.bat")
         exoDosboxConf = open(os.path.join(dest,game,"dosbox.conf"),'r')#original
         retroDosboxCfg = open(os.path.join(dest,"dosbox.cfg"),'w')#retroarch dosbox.cfg
         retroDosboxBat = open(os.path.join(dest,"dosbox.bat"),'w')#retroarch dosbox.bat
         
         count = 0
         lines = exoDosboxConf.readlines()
+        # TODO modify exoDos dosbox.conf to custom dosbox.cfg (including commenting [autoexec] part), might need to be put in a function and reworked
         for cmdline in lines :
             if cmdline.startswith("fullscreen"):
                 retroDosboxCfg.write("fullscreen=true\n")
@@ -37,7 +41,7 @@ class ConfConverter():
                 retroDosboxCfg.write("\n")
             elif cmdline.startswith("[autoexec]"):
                 retroDosboxCfg.write(cmdline)          
-                self.createDosboxBat(lines[count+1:],retroDosboxBat,retroDosboxCfg,game,dest)
+                self.createDosboxBat(lines[count+1:],retroDosboxBat,retroDosboxCfg,game,dest,genre)
                 break
             else :
                 retroDosboxCfg.write(cmdline)
@@ -48,8 +52,9 @@ class ConfConverter():
         os.remove(os.path.join(dest,game,"dosbox.conf"))
         retroDosboxCfg.close()
         retroDosboxBat.close()        
-        
-    def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,dest) :
+    
+    # Creates dosbox.bat from dosbox.conf [autoexec] part
+    def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,dest,genre) :
         gameDir = os.path.join(self.exoDosDir,"Games",game)
         cutLines = ["cd ..","cls","mount c","#","exit","echo off","echo on"]
         
@@ -76,7 +81,7 @@ class ConfConverter():
                     retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline,game,dest))
                     retroDosboxBat.write("pause\n")
                 elif cmdline.lower().startswith("mount "):
-                    retroDosboxBat.write(self.commandHandler.handleMount(cmdline,game,dest))
+                    retroDosboxBat.write(self.commandHandler.handleMount(cmdline,game,dest,genre,self.useGenreSubFolders,self.conversionType))
                     retroDosboxBat.write("\npause\n")
                 else :
                     retroDosboxBat.write(cmdline)

@@ -1,17 +1,20 @@
 import os,stat
 
+# Converts dosbox commands to desired format and paths, at the moment Batocera/ Recalbox linux flavor
 class CommandHandler():
     
     def __init__(self,outputDir, logger) :
         self.outputDir = outputDir
         self.logger = logger
-        
+    
+    # Checks if a command line should be kept or not    
     def useLine(self,l,cLines):
         for cL in cLines :
             if l.strip().lower().startswith(cL) :
                 return False
         return True
-
+    
+    # Removes games parts from exoDos paths
     def reducePath(self,path,game):
 #        self.logger.log("    PATH CONVERT: %s" %path)
         if path.lower().startswith(".\games") or path.lower().startswith("\games") or path.lower().startswith("games") :
@@ -23,6 +26,7 @@ class CommandHandler():
 #        self.logger.log("    TO: %s" %path)
         return path
     
+    # Parses command lines path parts
     def pathListInCommandLine(self,line,startTokens,endTokens) :
         command = line.split(" ")    
         startIndex = -1
@@ -39,7 +43,8 @@ class CommandHandler():
             endIndex = len(command)
         
         return command[startIndex+1:endIndex], command, startIndex,endIndex
-        
+    
+    # Converts imgmount command line    
     def handleImgmount(self,line,game,dest) :        
         paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','c','d','e','y'],endTokens=['-t'])
         
@@ -95,7 +100,8 @@ class CommandHandler():
         self.logger.log("    imgmount path: "+line.rstrip('\n\r ') + " --> " +fullString.rstrip('\n\r ')) 
         return fullString
     
-    def handleMount(self,line,game,dest) :
+    # Converts mount command line
+    def handleMount(self,line,game,dest,genre,useGenreSubFolders,conversionType) :
         paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','d','e'],endTokens=['-t'])
         
         prString = ""
@@ -120,14 +126,32 @@ class CommandHandler():
         # rbDistribPrefix = "/recalbox/share/roms/dos"
         batoceraDistribPrefix = "/userdata/roms/dos"        
         if prString.strip().startswith('.') :            
-            prString = prString.strip()[1:]        
-        prString = batoceraDistribPrefix+"/"+game+".pc"+prString.strip()   
+            prString = prString.strip()[1:]
+        gameString =  "/"+genre+"/"+game+".pc" if useGenreSubFolders else "/"+game+".pc"
+        prString = batoceraDistribPrefix+gameString+prString.strip()
         prString = ' "' + prString.replace("\\","/") +'"'
        
         fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    mount path: "+line.rstrip('\n\r ') + " --> " +fullString.rstrip('\n\r '))
         return fullString
     
+    # Rename a filename to a dos compatible 8 char name    
+    def dosRename(self, path, originalFile, fileName, fileExt,cdCount) :
+        fileName = fileName.replace(" ","")
+        if len(fileName) > 8 :
+            if cdCount is None :
+                fileName = fileName[0:7]
+            else:
+                fileName = fileName[0:5]+str(cdCount)
+        # Double rename file to avoid trouble with case on Windows
+        source = os.path.join(path,originalFile)
+        targetTemp = os.path.join(path,fileName+"1"+fileExt)
+        target = os.path.join(path,fileName+fileExt)        
+        os.rename(source, targetTemp)        
+        os.rename(targetTemp, target)
+        return fileName
+    
+    # Cleans cd names to a dos compatible 8 char name
     def cleanCDname(self,path,dest,cdCount=None):
         cdFileFullPath = os.path.join(dest,path)        
         if os.path.exists(cdFileFullPath) :
@@ -155,22 +179,8 @@ class CommandHandler():
         else :
             self.logger.log("      <ERROR> path %s doesn't exist" %cdFileFullPath)
             return path
-        
-    def dosRename(self, path, originalFile, fileName, fileExt,cdCount) :
-        fileName = fileName.replace(" ","")
-        if len(fileName) > 8 :
-            if cdCount is None :
-                fileName = fileName[0:7]
-            else:
-                fileName = fileName[0:5]+str(cdCount)
-        # Double rename file to avoid trouble with case on Windows
-        source = os.path.join(path,originalFile)
-        targetTemp = os.path.join(path,fileName+"1"+fileExt)
-        target = os.path.join(path,fileName+fileExt)        
-        os.rename(source, targetTemp)        
-        os.rename(targetTemp, target)
-        return fileName
     
+    # Cleans cue files content to dos compatible 8 char name
     def cleanCue(self,path,fileName,cdCount):
         oldFile = open(os.path.join(path,fileName+".cue"),'r')
         newFile = open(os.path.join(path,fileName+"-fix.cue"),'w')   

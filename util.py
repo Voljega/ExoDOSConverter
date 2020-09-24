@@ -6,6 +6,16 @@ confDir = r"conf"
 confFilename = r"conf-{setKey}"
 guiStringsFilename = r'gui-en-{setKey}.csv'
 
+batocera = 'Batocera'
+recalbox= 'Recalbox'
+retropie = 'Retropie'
+mister = 'MiSTer'
+simplemenu = 'OpenDingux SimpleMenu'
+esoteric = 'OpenDingux Esoteric'
+#TODO the bright future
+#conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
+conversionTypes = [batocera,recalbox,retropie] 
+
 def getKeySetString(string,setKey) :
         return string.replace('{setKey}',setKey)
 
@@ -18,7 +28,7 @@ def getConfBakFilename(setKey) :
 def getGuiStringsFilename(setKey) :
     return getKeySetString(guiStringsFilename,setKey)
 
-# UI Strings
+# Loads UI Strings
 def loadUIStrings(scriptDir,guiStringsFilename) :
     guiStrings = dict()
     file = open(os.path.join(scriptDir,'GUI',guiStringsFilename),'r',encoding="utf-8")
@@ -31,6 +41,27 @@ def loadUIStrings(scriptDir,guiStringsFilename) :
     file.close()
     return guiStrings
 
+# Checks validity of the collection path and its content
+def validCollectionPath(collectionPath):
+    return os.path.exists(os.path.join(collectionPath,'eXoDOS')) and os.path.exists(os.path.join(collectionPath,'eXoDOS','Games')) and os.path.exists(os.path.join(collectionPath,'Metadata')) and os.path.exists(os.path.join(collectionPath,'Images'))
+
+# Builds a map of full game name with year to corresponding !dos folder name using the bat file found in each !dos folder
+def gameDirMap(gamesDosDir, games) :
+    gameDict = dict()
+    for game in games :
+        if os.path.isdir(os.path.join(gamesDosDir,game)) :
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir,game)) if os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[0].lower() == 'install']
+            gameDict[bats[0]] = game if len(bats) == 1 else game
+            
+    return gameDict
+
+# Parse the collection to generate list of games
+def fullnameToGameDir(collectionDir) :
+    gamesDosDir = os.path.join(collectionDir,"eXoDOS","Games","!dos")
+    games = [filename for filename in os.listdir(gamesDosDir)]
+    return gameDirMap(gamesDosDir,games);
+
+# Finds pic for a game in the three pics caches
 def findPic(gameName, cache, ext) :
     frontPicCache, titlePicCache, gameplayPicCache = cache
     imgName = (gameName+'-01'+ext).replace(':','_').replace("'",'_')
@@ -43,6 +74,7 @@ def findPic(gameName, cache, ext) :
         imgPath = gameplayPicCache.get(imgName)
     return imgPath
 
+# Constructs a specific pic cache
 def buildPicCache(imageFolder,picCache, logger) :
     logger.log("Building cache %s" %picCache)
     picCacheFile = open(picCache,'w')
@@ -61,6 +93,7 @@ def buildPicCache(imageFolder,picCache, logger) :
     picCacheFile.close()
     return cache
 
+# Loads a specific pic cache
 def loadPicCache(picCache, logger) :
     logger.log("Loading cache %s" %picCache)
     picCacheFile = open(picCache,'r')
@@ -71,20 +104,7 @@ def loadPicCache(picCache, logger) :
     picCacheFile.close()
     return cache
 
-def gameDirMap(gamesDosDir, games) :
-    gameDict = dict()
-    for game in games :
-        if os.path.isdir(os.path.join(gamesDosDir,game)) :
-            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir,game)) if os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[0].lower() == 'install']
-            gameDict[bats[0]] = game if len(bats) == 1 else game
-            
-    return gameDict
-
-def fullnameToGameDir(collectionDir) :
-    gamesDosDir = os.path.join(collectionDir,"eXoDOS","Games","!dos")
-    games = [filename for filename in os.listdir(gamesDosDir)]
-    return gameDirMap(gamesDosDir,games);
-
+# Clean all three pic caches
 def cleanCache(scriptDir) :
     cacheDir = os.path.join(scriptDir,'cache')
     frontPicCacheFile = os.path.join(cacheDir,'.frontPicCache')
@@ -97,6 +117,7 @@ def cleanCache(scriptDir) :
     if os.path.exists(gameplayPicCacheFile) :
         os.remove(gameplayPicCacheFile)     
 
+#Builds or loads all three pic caches
 def buildCache(scriptDir, collectionDir, logger):
     cacheDir = os.path.join(scriptDir,'cache')
     if not os.path.exists(cacheDir) :
@@ -115,6 +136,3 @@ def buildCache(scriptDir, collectionDir, logger):
     logger.log("gameplayPicCache: %i entities" %len(gameplayPicCache.keys()))
             
     return frontPicCache, titlePicCache, gameplayPicCache
-
-def validCollectionPath(collectionPath):
-    return os.path.exists(os.path.join(collectionPath,'eXoDOS')) and os.path.exists(os.path.join(collectionPath,'eXoDOS','Games')) and os.path.exists(os.path.join(collectionPath,'Metadata')) and os.path.exists(os.path.join(collectionPath,'Images'))
