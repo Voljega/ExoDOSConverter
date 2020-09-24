@@ -105,47 +105,50 @@ class MetadataHandler():
             gameElt = etree.SubElement(root,'game')
             etree.SubElement(gameElt,'path').text = path
             etree.SubElement(gameElt,'name').text = dosGame.name
-            etree.SubElement(gameElt,'desc').text = dosGame.desc
+            etree.SubElement(gameElt,'desc').text = dosGame.desc if dosGame.desc is not None else ''
             etree.SubElement(gameElt,'releasedate').text = year    
-            etree.SubElement(gameElt,'developer').text = dosGame.developer
-            etree.SubElement(gameElt,'publisher').text = dosGame.publisher
+            etree.SubElement(gameElt,'developer').text = dosGame.developer if dosGame.developer is not None else ''
+            etree.SubElement(gameElt,'publisher').text = dosGame.publisher if dosGame.publisher is not None else ''
             etree.SubElement(gameElt,'genre').text = genre
             etree.SubElement(gameElt,'manual').text = manual
             etree.SubElement(gameElt,'image').text = frontPic
         
     # Convert multi genres exodos format to a single one
-    def buildGenre(self,dosGame):        
-        if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
-            return "Race"
-        elif 'Sports' in dosGame.genres :
-            return 'Sports'
-        elif 'Pinball' in dosGame.genres :
-            return 'Pinball'
-        elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres :
-            return "Puzzle"
-        elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres :
-            return 'RPG'
-        elif 'Flight Simulator' in dosGame.genres :
-            return 'Simulation'
-        elif 'Shooter' in dosGame.genres :
-            return 'ShootEmUp'
-        elif 'Platform' in dosGame.genres :
-            return 'Platform'
-        elif 'FPS' in dosGame.genres or 'First Person Shooter' in dosGame.genres :
-            return 'Gun-FPS'
-        elif 'Fighting' in dosGame.genres :
-            return 'BeatEmUp'
-        elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres :
-            return 'Strategy-Gestion'        
-        elif "Adventure" in dosGame.genres and "Action" in dosGame.genres :
-            return "Action-Adventure"
-        elif "Adventure" in dosGame.genres :
-            return "Adventure-Visual"
-        elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres :
-            return 'Strategy-Gestion'
-        elif 'Simulation' in dosGame.genres :
-            return 'Simulation'
-        elif 'Action' in dosGame.genres :
-            return 'Action-Adventure'
+    def buildGenre(self,dosGame):
+        if dosGame is not None and dosGame.genres is not None :
+            if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
+                return "Race"
+            elif 'Sports' in dosGame.genres :
+                return 'Sports'
+            elif 'Pinball' in dosGame.genres :
+                return 'Pinball'
+            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres :
+                return "Puzzle"
+            elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres :
+                return 'RPG'
+            elif 'Flight Simulator' in dosGame.genres :
+                return 'Simulation'
+            elif 'Shooter' in dosGame.genres :
+                return 'ShootEmUp'
+            elif 'Platform' in dosGame.genres :
+                return 'Platform'
+            elif 'FPS' in dosGame.genres or 'First Person Shooter' in dosGame.genres :
+                return 'Gun-FPS'
+            elif 'Fighting' in dosGame.genres :
+                return 'BeatEmUp'
+            elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres :
+                return 'Strategy-Gestion'        
+            elif "Adventure" in dosGame.genres and "Action" in dosGame.genres :
+                return "Action-Adventure"
+            elif "Adventure" in dosGame.genres :
+                return "Adventure-Visual"
+            elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres :
+                return 'Strategy-Gestion'
+            elif 'Simulation' in dosGame.genres :
+                return 'Simulation'
+            elif 'Action' in dosGame.genres :
+                return 'Action-Adventure'
+            else :
+                return 'Unknown'
         else :
             return 'Unknown'
