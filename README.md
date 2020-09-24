@@ -1,6 +1,11 @@
 # ExoDOSConverter
 
-a custom converter of the ExoDOS collection v4 to several emulation station based distribution format : Recalbox, Batocera, Retropie and soon OpenDingux and MiSTer
+a custom converter of the ExoDOS collection v4 to several emulation station based distribution format : 
+ - Recalbox
+ - Batocera
+ - Retropie (partial)
+ - OpenDingux (partial)
+ - MiSTer (in the future)
 
 ## ExoDOS
 
@@ -18,9 +23,8 @@ For now the tool works with current versions of the collection
 The aim of this tool is to convert any selection of games of the ExoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
 
 The conversion should cover the following :
-
-    conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
-    scrapping of the game metadata, including front boxart and manuals
+ - conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
+ - scrapping of the game metadata, including front boxart and manuals
 
 As the ExoDOSCollection itself uses a lot of `.bat` script and other Windows-only features, this tool will also be windows only.
 This might evolve is some workaround are found to fully exploit this on Linux on other OSes
