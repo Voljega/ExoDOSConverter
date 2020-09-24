@@ -63,7 +63,6 @@ class ExoDOSConverter():
             
     # Full conversion for a given game    
     def convertGame(self, game, gamelist, total, count) :
-        #TODO See if it is still mandatory as we could retrieve that from self.metadataHandler.processGame now
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game))
         self.logger.log(">>> %i/%i >>> %s: starting conversion" %(count,total,game))
         metadata = self.metadataHandler.processGame(game,gamelist,genre, self.outputDir, self.useGenreSubFolders, self.conversionType)

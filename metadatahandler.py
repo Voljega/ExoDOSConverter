@@ -94,23 +94,25 @@ class MetadataHandler():
     # Write metada for a given game to in-memory gamelist xml
     def writeGamelistEntry(self,gamelist,dosGame,game,genre,useGenreSubFolders):
         root = gamelist.getroot()
-        # TODO might want to search if subElement for the game already exists before writing it ?
+
         frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
         manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
-        gameElt = etree.SubElement(root,'game')
         year = dosGame.year+"0101T000000" if dosGame.year is not None else ''        
         path = "./"+genre+"/"+self.cleanString(game)+".pc" if useGenreSubFolders else "./"+self.cleanString(game)+".pc"
         
-        etree.SubElement(gameElt,'path').text = path
-        etree.SubElement(gameElt,'name').text = dosGame.name
-        etree.SubElement(gameElt,'desc').text = dosGame.desc
-        etree.SubElement(gameElt,'releasedate').text = year    
-        etree.SubElement(gameElt,'developer').text = dosGame.developer
-        etree.SubElement(gameElt,'publisher').text = dosGame.publisher
-        etree.SubElement(gameElt,'genre').text = genre
-        etree.SubElement(gameElt,'manual').text = manual
-        etree.SubElement(gameElt,'image').text = frontPic
-    
+        existsInGamelist = [child for child in root.iter('game') if self.get(child,"name") == dosGame.name and self.get(child,"releasedate") == year]
+        if len(existsInGamelist) == 0 :
+            gameElt = etree.SubElement(root,'game')
+            etree.SubElement(gameElt,'path').text = path
+            etree.SubElement(gameElt,'name').text = dosGame.name
+            etree.SubElement(gameElt,'desc').text = dosGame.desc
+            etree.SubElement(gameElt,'releasedate').text = year    
+            etree.SubElement(gameElt,'developer').text = dosGame.developer
+            etree.SubElement(gameElt,'publisher').text = dosGame.publisher
+            etree.SubElement(gameElt,'genre').text = genre
+            etree.SubElement(gameElt,'manual').text = manual
+            etree.SubElement(gameElt,'image').text = frontPic
+        
     # Convert multi genres exodos format to a single one
     def buildGenre(self,dosGame):        
         if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
