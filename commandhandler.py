@@ -46,14 +46,14 @@ class CommandHandler():
         return command[startIndex+1:endIndex], command, startIndex,endIndex
     
     # Converts imgmount command line    
-    def handleImgmount(self,line,game,dest) :        
+    def handleImgmount(self,line,game,localGameOutputDir) :        
         paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','c','d','e','y'],endTokens=['-t'])
         
         prString = ""
         if len(paths)==1 :
                 path = self.reducePath(paths[0].replace('"',""),game)
                 self.logger.log("    clean single imgmount")
-                path = self.cleanCDname(path,dest)
+                path = self.cleanCDname(path,localGameOutputDir)
                 prString = prString + " "+path
         else :
             # See if path contains ""
@@ -61,16 +61,16 @@ class CommandHandler():
             countChar = redoPath.count('"')
             if countChar == 2 :
                 # Single path with space
-                # casetest: Take Back / CSS
+                # TESTCASE: Take Back / CSS
                 path = self.reducePath(redoPath.replace('"',""),game)
                 self.logger.log("    clean single imgmount")
-                path = self.cleanCDname(path,dest)
+                path = self.cleanCDname(path,localGameOutputDir)
                 prString = prString + " "+path
             else :
                 # several paths (multi cds)
                 self.logger.logList("    multi imgmount",paths)
                 # analyze paths to see if there are spaces in it  
-                # casetest: Star Trek Borg / STBorg
+                # TESTCASE: Star Trek Borg / STBorg
                 spaceInPaths = False
                 for path in paths :
                     if path.startswith('"') and not path.endswith('"') :
@@ -93,7 +93,7 @@ class CommandHandler():
                 cdCount = 1
                 for path in paths :
                     path = self.reducePath(path.replace('"',""),game)
-                    path = self.cleanCDname(path,dest,cdCount)
+                    path = self.cleanCDname(path,localGameOutputDir,cdCount)
                     prString = prString + " "+'"'+path+'"'
                     cdCount = cdCount + 1
         
@@ -102,11 +102,12 @@ class CommandHandler():
         return fullString
     
     # Converts mount command line
-    def handleMount(self,line,game,dest,genre,useGenreSubFolders,conversionType) :
+    def handleMount(self,line,game,localGameOutputDir,genre,useGenreSubFolders,conversionType) :
         paths, command, startIndex,endIndex = self.pathListInCommandLine(line,startTokens=['a','b','d','e'],endTokens=['-t'])
         
         prString = ""
         if len(paths)==1 :
+            # TESTCASE: Sidewalk (1987) / Sidewalk
             path = self.reducePath(paths[0].replace('"',""),game)
             prString = prString +" "+path
         else :
@@ -151,8 +152,8 @@ class CommandHandler():
         return fileName
     
     # Cleans cd names to a dos compatible 8 char name
-    def cleanCDname(self,path,dest,cdCount=None):
-        cdFileFullPath = os.path.join(dest,path)        
+    def cleanCDname(self,path,localGameOutputDir,cdCount=None):
+        cdFileFullPath = os.path.join(localGameOutputDir,path)        
         if os.path.exists(cdFileFullPath) :
             if os.path.isdir(cdFileFullPath) :            
                 return path
@@ -190,7 +191,7 @@ class CommandHandler():
                 fixedIsoBinName = self.dosRename(path,params[1],isobin[0],isobin[1],cdCount)
                 self.logger.log("      renamed %s to %s" %(params[1],fixedIsoBinName+isobin[1]))
                 # TODO might need to search for potential additional files (sub, ccd) with sameisobin[0] name and rename them too
-                # casetest: Pinball Arcade (1994) / PBArc94:
+                # TESTCASE: Pinball Arcade (1994) / PBArc94:
                 params[1] = fixedIsoBinName + isobin[-1]
                 line = '"'.join(params)
                 self.logger.log("      convert cue content -> " +line.rstrip('\n\r '))

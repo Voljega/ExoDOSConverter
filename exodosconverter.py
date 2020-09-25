@@ -68,8 +68,9 @@ class ExoDOSConverter():
         self.logger.log(">>> %i/%i >>> %s: starting conversion" %(count,total,game))
         metadata = self.metadataHandler.processGame(game,gamelist,genre, self.outputDir, self.useGenreSubFolders, self.conversionType)
         
-        dest = os.path.join(self.outputDir,genre,game+".pc") if self.useGenreSubFolders else os.path.join(self.outputDir,game+".pc")
-        if not os.path.exists(dest):            
+        localParentOutputDir = os.path.join(self.outputDir,genre) if self.useGenreSubFolders else os.path.join(self.outputDir)
+        localGameOutputDir = os.path.join(self.outputDir,genre,game+".pc") if self.useGenreSubFolders else os.path.join(self.outputDir,game+".pc")
+        if not os.path.exists(localGameOutputDir):            
             if not os.path.exists(os.path.join(self.exoDosDir,"Games",game)):
                 self.logger.log("  needs installation...")
                 #automatic F and N to validate answers to exo's install.bat, might want to allow other values in the future
@@ -78,53 +79,56 @@ class ExoDOSConverter():
             else :
                 self.logger.log("  already installed")
             
-            self.copyGameFiles(game,dest,metadata)    
-            self.confConverter.process(game,dest,genre)
-            self.postConversion(game,genre, dest)
+            self.copyGameFiles(game,localGameOutputDir,metadata)    
+            self.confConverter.process(game,localGameOutputDir,genre)
+            self.postConversion(game,genre,localGameOutputDir,localParentOutputDir, metadata)
         else :
             self.logger.log("  already converted in output folder")
         
         self.logger.log("")      
         
     # Copy game files and game dosbox.conf to output dir    
-    def copyGameFiles(self,game,gameOutputDir,metadata):
-        dest = os.path.join(gameOutputDir,game)
+    def copyGameFiles(self,game,localGameOutputDir,metadata):
+        localGameDataOutputDir = os.path.join(localGameOutputDir,game)
         self.logger.log("  copy game data")        
         # Copy game files in game.pc/game
-        shutil.copytree(os.path.join(self.exoDosDir,"Games",game),dest)
+        shutil.copytree(os.path.join(self.exoDosDir,"Games",game),localGameDataOutputDir)
         self.logger.log("  copy dosbox conf")
         # Copy dosbox.conf in game.pc
-        shutil.copy2(os.path.join(self.exoDosDir,"Games","!dos",game,"dosbox.conf"),os.path.join(dest,"dosbox.conf"))
-        # Create blank file with full game name
-        cleanGameName = metadata.name.replace(':','-').replace('?','').replace('!','').replace('/','-').replace('\\','-')
-        fullname = cleanGameName+' ('+str(metadata.year)+').txt'
-        f = open(os.path.join(gameOutputDir,fullname),'w',encoding='utf8')
+        shutil.copy2(os.path.join(self.exoDosDir,"Games","!dos",game,"dosbox.conf"),os.path.join(localGameDataOutputDir,"dosbox.conf"))
+        # Create blank file with full game name        
+        f = open(os.path.join(localGameOutputDir,util.getCleanGameID(metadata,'.txt')),'w',encoding='utf8')
         f.write(metadata.desc)
         f.close()
         
     # Post-conversion operations for various conversion types
-    def postConversion(self, game, genre, gameOutputDir) :
+    def postConversion(self,game,genre,localGameOutputDir,localParentOutputDir, metadata) :
         if self.conversionType == util.retropie :
-            self.logger.log("  retropie post-conversion")            
-            dosboxCfg = open(os.path.join(gameOutputDir,"dosbox.cfg"),'a')
-            # add mount c at end of dosbox.cfg
-            romsFolder = util.getRomsFolderPrefix(self.conversionType)
-            retropieGameDir = romsFolder+"/"+genre+"/"+game+".pc" if self.useGenreSubFolders else romsFolder+"/"+game+".pc"
-            dosboxCfg.write("mount c "+retropieGameDir+"\n")
-            dosboxCfg.write("c:\n")
-            # copy all instructions from dosbox.bat to end of dosbox.cfg
-            dosboxBat = open(os.path.join(gameOutputDir,"dosbox.bat"),'r')#retroarch dosbox.bat
-            for cmdLine in dosboxBat.readlines() :
-                dosboxCfg.write(cmdLine)
-            # delete dosbox.bat
-            dosboxCfg.close()
-            dosboxBat.close()
-            os.remove(os.path.join(gameOutputDir,"dosbox.bat"))
-            # generate sh file
-            # TODO see if possible to pass along dosbox.bat file, would be better, see if possible to use batocera style
-            shFile = open(os.path.join(gameOutputDir,"launch.sh"),'w')
-            shFile.write("!/bin/bash\n")
-            shFile.write("/opt/retropie/emulators/dosbox/bin/dosbox -conf "+retropieGameDir+"/dosbox.cfg\n")
-            shFile.close()
+            self.postConversionForRetropie(game,genre,localGameOutputDir,localParentOutputDir, metadata)
+
+    def postConversionForRetropie(self,game,genre,localGameOutputDir,localParentOutputDir, metadata) :
+        self.logger.log("  retropie post-conversion")            
+        dosboxCfg = open(os.path.join(localGameOutputDir,"dosbox.cfg"),'a')
+        # add mount c at end of dosbox.cfg
+        romsFolder = util.getRomsFolderPrefix(self.conversionType)
+        retropieGameDir = romsFolder+"/"+genre+"/"+game+".pc" if self.useGenreSubFolders else romsFolder+"/"+game+".pc"
+        dosboxCfg.write("mount c "+retropieGameDir+"\n")
+        dosboxCfg.write("c:\n")
+        # copy all instructions from dosbox.bat to end of dosbox.cfg
+        dosboxBat = open(os.path.join(localGameOutputDir,"dosbox.bat"),'r')#retroarch dosbox.bat
+        for cmdLine in dosboxBat.readlines() :
+            dosboxCfg.write(cmdLine)
+        # delete dosbox.bat
+        dosboxCfg.close()
+        dosboxBat.close()
+        os.remove(os.path.join(localGameOutputDir,"dosbox.bat"))
+        # move dosbox.cfg to {game}.conf at top level
+        shutil.move(os.path.join(localGameOutputDir,"dosbox.cfg"), os.path.join(localParentOutputDir,util.getCleanGameID(metadata,'.conf')))
+        # TODO not needed anymore apprently, to remove in the future
+        # generate sh file        
+        # shFile = open(os.path.join(gameOutputDir,"launch.sh"),'w')
+        # shFile.write("!/bin/bash\n")
+        # shFile.write("/opt/retropie/emulators/dosbox/bin/dosbox -conf "+retropieGameDir+"/dosbox.cfg\n")
+        # shFile.close()
             
         

@@ -84,21 +84,25 @@ class MetadataHandler():
             shutil.copy2(dosGame.frontPic,os.path.join(outputDir,'downloaded_images'))
         if dosGame.manual is not None and os.path.exists(dosGame.manual) :
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        self.writeGamelistEntry(gamelist,dosGame,game,genre, useGenreSubFolders)
+        self.writeGamelistEntry(gamelist,dosGame,game,genre, useGenreSubFolders,conversionType)
         return dosGame
     
     # Replaces “ ” ’ …
-    def cleanString(self, s) :
+    def cleanXmlString(self, s) :
         return s.replace('&','&amp;')
     
     # Write metada for a given game to in-memory gamelist xml
-    def writeGamelistEntry(self,gamelist,dosGame,game,genre,useGenreSubFolders):
+    def writeGamelistEntry(self,gamelist,dosGame,game,genre,useGenreSubFolders,conversionType):
         root = gamelist.getroot()
 
         frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
         manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
-        year = dosGame.year+"0101T000000" if dosGame.year is not None else ''        
-        path = "./"+genre+"/"+self.cleanString(game)+".pc" if useGenreSubFolders else "./"+self.cleanString(game)+".pc"
+        year = dosGame.year+"0101T000000" if dosGame.year is not None else ''
+        
+        if conversionType == util.retropie :
+            path = "./"+genre+"/"+util.getCleanGameID(dosGame,'.conf') if useGenreSubFolders else "./"+util.getCleanGameID(dosGame,'.conf')
+        else :
+            path = "./"+genre+"/"+self.cleanXmlString(game)+".pc" if useGenreSubFolders else "./"+self.cleanXmlString(game)+".pc"
         
         existsInGamelist = [child for child in root.iter('game') if self.get(child,"name") == dosGame.name and self.get(child,"releasedate") == year]
         if len(existsInGamelist) == 0 :

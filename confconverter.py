@@ -14,11 +14,11 @@ class ConfConverter():
         self.commandHandler = CommandHandler(self.outputDir, self.logger)
     
     # Converts exoDos dosbox.conf to dosbox.cfg and dosbox.bat
-    def process(self,game,dest,genre) :
+    def process(self,game,localGameOutputDir,genre) :
         self.logger.log("  create dosbox.bat")
-        exoDosboxConf = open(os.path.join(dest,game,"dosbox.conf"),'r')#original
-        retroDosboxCfg = open(os.path.join(dest,"dosbox.cfg"),'w')#retroarch dosbox.cfg
-        retroDosboxBat = open(os.path.join(dest,"dosbox.bat"),'w')#retroarch dosbox.bat
+        exoDosboxConf = open(os.path.join(localGameOutputDir,game,"dosbox.conf"),'r')#original
+        retroDosboxCfg = open(os.path.join(localGameOutputDir,"dosbox.cfg"),'w')#retroarch dosbox.cfg
+        retroDosboxBat = open(os.path.join(localGameOutputDir,"dosbox.bat"),'w')#retroarch dosbox.bat
         
         count = 0
         lines = exoDosboxConf.readlines()
@@ -41,7 +41,7 @@ class ConfConverter():
                 retroDosboxCfg.write("\n")
             elif cmdline.startswith("[autoexec]"):
                 retroDosboxCfg.write(cmdline)          
-                self.createDosboxBat(lines[count+1:],retroDosboxBat,retroDosboxCfg,game,dest,genre)
+                self.createDosboxBat(lines[count+1:],retroDosboxBat,retroDosboxCfg,game,localGameOutputDir,genre)
                 break
             else :
                 retroDosboxCfg.write(cmdline)
@@ -49,12 +49,12 @@ class ConfConverter():
             count = count +1
         
         exoDosboxConf.close()
-        os.remove(os.path.join(dest,game,"dosbox.conf"))
+        os.remove(os.path.join(localGameOutputDir,game,"dosbox.conf"))
         retroDosboxCfg.close()
         retroDosboxBat.close()        
     
     # Creates dosbox.bat from dosbox.conf [autoexec] part
-    def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,dest,genre) :
+    def createDosboxBat(self,cmdlines,retroDosboxBat,retroDosboxCfg,game,localGameOutputDir,genre) :
         gameDir = os.path.join(self.exoDosDir,"Games",game)
         cutLines = ["cd ..","cls","mount c","#","exit","echo off","echo on"]
         
@@ -78,10 +78,10 @@ class ConfConverter():
                         self.logger.log("    cd command: '%s' -> kept" %cmdline.rstrip('\n\r '))
                         retroDosboxBat.write(cmdline)
                 elif cmdline.lower().startswith("imgmount "):
-                    retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline,game,dest))
+                    retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline,game,localGameOutputDir))
                     retroDosboxBat.write("pause\n")
                 elif cmdline.lower().startswith("mount "):
-                    retroDosboxBat.write(self.commandHandler.handleMount(cmdline,game,dest,genre,self.useGenreSubFolders,self.conversionType))
+                    retroDosboxBat.write(self.commandHandler.handleMount(cmdline,game,localGameOutputDir,genre,self.useGenreSubFolders,self.conversionType))
                     retroDosboxBat.write("\npause\n")
                 else :
                     retroDosboxBat.write(cmdline)

@@ -12,13 +12,11 @@ retropie = 'Retropie'
 mister = 'MiSTer'
 simplemenu = 'OpenDingux SimpleMenu'
 esoteric = 'OpenDingux Esoteric'
+conversionTypes = [batocera,recalbox,retropie]
 #TODO the bright future
 #conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
-conversionTypes = [batocera,recalbox,retropie]
 
-exodosVersions=['v4','v5']
-
- 
+exodosVersions=['v4','v5'] 
 
 def getKeySetString(string,setKey) :
         return string.replace('{setKey}',setKey)
@@ -44,6 +42,11 @@ def loadUIStrings(scriptDir,guiStringsFilename) :
             order = order + 1
     file.close()
     return guiStrings
+
+# Return full clean game name 
+def getCleanGameID(metadata,ext) :
+    cleanGameName = metadata.name.replace(':','-').replace('?','').replace('!','').replace('/','-').replace('\\','-')
+    return cleanGameName+' ('+str(metadata.year)+')'+ext
 
 # Returns distrib roms directory prefix
 def getRomsFolderPrefix(conversionType) :    
@@ -132,7 +135,7 @@ def cleanCache(scriptDir) :
     if os.path.exists(gameplayPicCacheFile) :
         os.remove(gameplayPicCacheFile)     
 
-#Builds or loads all three pic caches
+# Builds or loads all three pic caches
 def buildCache(scriptDir, collectionDir, logger):
     cacheDir = os.path.join(scriptDir,'cache')
     if not os.path.exists(cacheDir) :
