@@ -1,4 +1,5 @@
 import os.path, collections
+#from PIL import Image
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
 
@@ -10,9 +11,9 @@ batocera = 'Batocera'
 recalbox= 'Recalbox'
 retropie = 'Retropie'
 mister = 'MiSTer'
-simplemenu = 'OpenDingux SimpleMenu'
-esoteric = 'OpenDingux Esoteric'
-conversionTypes = [batocera,recalbox,retropie]
+simplemenu = 'OpenDingux/SimpleMenu'
+esoteric = 'OpenDingux/Esoteric'
+conversionTypes = [batocera,recalbox,retropie,simplemenu,esoteric]
 #TODO the bright future
 #conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
 
@@ -42,6 +43,16 @@ def loadUIStrings(scriptDir,guiStringsFilename) :
             order = order + 1
     file.close()
     return guiStrings
+
+# Resize image for opendingux
+def resize(imgPath) :
+    print('Image resize is deactivated')
+    #    im = Image.open(imgPath)
+    #    height = 200
+    #    wpercent = (height/float(im.size[1]))
+    #    vsize = int((float(im.size[0])*float(wpercent)))
+    #    im = im.resize((vsize,height), Image.ANTIALIAS)    
+    #    im.save(imgPath, "PNG")
 
 # Return full clean game name 
 def getCleanGameID(metadata,ext) :

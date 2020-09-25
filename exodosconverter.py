@@ -45,6 +45,16 @@ class ExoDOSConverter():
             count = count + 1
         
         self.metadataHandler.writeXml(self.outputDir, gamelist)
+        
+        # Cleaning for opendingux conversions
+        if self.conversionType in [util.esoteric, util.simplemenu] :
+            self.logger.log('Post cleaning for opendingux')
+            # Remove gamelist.xml and downloaded_images folder    
+            if os.path.exists(os.path.join(self.outputDir,'gamelist.xml')) :
+                os.remove(os.path.join(self.outputDir,'gamelist.xml'))            
+            if os.path.exists(os.path.join(self.outputDir,'downloaded_images')) :
+                shutil.rmtree(os.path.join(self.outputDir,'downloaded_images'))
+            
         self.logger.log('\n<--------- Finished Process --------->')
         
         if len(errors.keys())>0 :
@@ -105,6 +115,24 @@ class ExoDOSConverter():
     def postConversion(self,game,genre,localGameOutputDir,localParentOutputDir, metadata) :
         if self.conversionType == util.retropie :
             self.postConversionForRetropie(game,genre,localGameOutputDir,localParentOutputDir, metadata)
+        elif self.conversionType in [util.esoteric, util.simplemenu] :
+            self.postConversionForOpenDingux(game,genre,localGameOutputDir,localParentOutputDir, metadata)
+            
+    def postConversionForOpenDingux(self,game,genre,localGameOutputDir,localParentOutputDir, metadata) :
+        self.logger.log("  opendingux post-conversion")
+        openDinguxPicDir = '.previews' if self.conversionType == util.esoteric else '.media'
+        # Copy image to opendingux img folder for game.pc
+        distPicPath = os.path.join(localParentOutputDir,openDinguxPicDir)
+        if not os.path.exists(distPicPath) :
+            os.mkdir(distPicPath)                
+        shutil.copy2(metadata.frontPic,os.path.join(distPicPath,game+'.pc.png'))
+        # Resize image
+        util.resize(os.path.join(distPicPath,game+'.pc.png'))
+        # Copy image to opendingux img folder for game.pc/dosbox.bat
+        dosboxBatPicPath = os.path.join(localGameOutputDir,openDinguxPicDir)
+        if not os.path.exists(dosboxBatPicPath) :
+            os.mkdir(dosboxBatPicPath)
+        shutil.copy2(os.path.join(distPicPath,game+'.pc.png'),os.path.join(dosboxBatPicPath,'dosbox.png'))        
 
     def postConversionForRetropie(self,game,genre,localGameOutputDir,localParentOutputDir, metadata) :
         self.logger.log("  retropie post-conversion")            
