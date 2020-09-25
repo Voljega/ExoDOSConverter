@@ -160,18 +160,25 @@ class CommandHandler():
             else :                                   
                 pathList = path.split('\\')
                 cdFile = pathList[-1]                       
-                cdFilename = os.path.splitext(cdFile)[0].lower()
+                oldCdFilename = os.path.splitext(cdFile)[0].lower()
                 cdFileExt = os.path.splitext(cdFile)[-1].lower()                
                 
                 # Root path of CDs
                 cdsPath = "\\".join(cdFileFullPath.split('\\')[:-1])
                     
                 # Rename file to dos compatible name                
-                cdFilename = self.dosRename(cdsPath,cdFile,cdFilename,cdFileExt,cdCount)
+                cdFilename = self.dosRename(cdsPath,cdFile,oldCdFilename,cdFileExt,cdCount)
                 self.logger.log("      renamed %s to %s" %(cdFile,cdFilename+cdFileExt))
                 
                 if cdFileExt == ".cue" :
-                    self.cleanCue(cdsPath,cdFilename,cdCount)               
+                    self.cleanCue(cdsPath,cdFilename,cdCount)
+                    
+                # Clean remaining ccd and sub file which might have the same name as the cue file
+                otherCdFiles = [file for file in os.listdir(cdsPath) if os.path.splitext(file)[0].lower() == oldCdFilename and os.path.splitext(file)[-1].lower() in ['.ccd','.sub']]
+                for otherCdFile in otherCdFiles :
+                    otherCdFileExt = os.path.splitext(otherCdFile)[-1].lower()                    
+                    otherCdFilename = self.dosRename(cdsPath,otherCdFile,cdFilename,otherCdFileExt,cdCount)
+                    self.logger.log("      renamed %s to %s" %(otherCdFile,otherCdFilename+otherCdFileExt))
                         
                 cleanedPath = "\\".join(pathList[:-1])+"\\"+cdFilename+cdFileExt
 #                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))

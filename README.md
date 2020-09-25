@@ -1,9 +1,9 @@
 # ExoDOSConverter
 
-a custom converter of the ExoDOS collection v4 to several emulation station based distribution format : 
+a custom converter of the ExoDOS collection v4 to several EmulationStation and/or Linux based distributions format : 
  - Recalbox
  - Batocera
- - Retropie (partial)
+ - Retropie
  - OpenDingux (partial)
  - MiSTer (in the future)
 
@@ -34,9 +34,9 @@ This might evolve is some workaround are found to fully exploit this on Linux on
 For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
 However it is a conversion / rewrite of a same previous command line tool, which I used in the past to convert a few thousands of games from both ExoDOS and ExoWin3x collection without too much trouble, so it should already be in an ok state
 
-Fully supported distributions are Batocera and Recalbox.
+Fully supported distributions are Batocera, Recalbox and Retropie.
 It should work with OpenDingux too, minus the boxart.
 
-Retropie needs a little work still, and in the future, I will try to add MiSTer compatibility
+In the future, I will try to add MiSTer compatibility
 
 
