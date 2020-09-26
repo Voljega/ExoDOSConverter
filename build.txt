@@ -1,6 +1,6 @@
 If you want to build your own executable on Windows, it's pretty straightforward :
-- Install your Python 3.3 environment (on Windows I use Anaconda)
-- Launch python prompt (Anaconda prompt on Windows)
+- Install your Python 3.8 environment
+- Launch python prompt
 - Install pyinstaller with this command : `pip install pyinstaller`
 - Copy all `.py` files and the `exodosicon.ico` file in a work directory
 - Go into the work directory and type : `pyinstaller --icon=exodosicon.ico --clean -F main.py`

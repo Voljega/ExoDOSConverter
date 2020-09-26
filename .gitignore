@@ -3,3 +3,4 @@
 *.bak
 ExoDOSConverter.iml
 **/.idea
+**/venv

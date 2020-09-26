@@ -1,5 +1,5 @@
 import os.path, collections
-#from PIL import Image
+from PIL import Image
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
 
@@ -46,13 +46,12 @@ def loadUIStrings(scriptDir,guiStringsFilename) :
 
 # Resize image for opendingux
 def resize(imgPath) :
-    print('Image resize is deactivated')
-    #    im = Image.open(imgPath)
-    #    height = 200
-    #    wpercent = (height/float(im.size[1]))
-    #    vsize = int((float(im.size[0])*float(wpercent)))
-    #    im = im.resize((vsize,height), Image.ANTIALIAS)    
-    #    im.save(imgPath, "PNG")
+   im = Image.open(imgPath)
+   height = 200
+   wpercent = (height/float(im.size[1]))
+   vsize = int((float(im.size[0])*float(wpercent)))
+   im = im.resize((vsize,height), Image.ANTIALIAS)
+   im.save(imgPath, "PNG")
 
 # Return full clean game name 
 def getCleanGameID(metadata,ext) :

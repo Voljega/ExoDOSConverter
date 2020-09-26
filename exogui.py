@@ -17,7 +17,7 @@ class ExoGUI() :
         self.scriptDir = scriptDir
         self.setKey='exo'
         self.cache = None
-        self.needsCacheRefresh = False;
+        self.needsCacheRefresh = False
         # TODO create conf file from guiStrings if it doesn't exist and do not ship it with tool anymore 
         self.configuration = conf.loadConf(os.path.join(self.scriptDir,util.confDir,util.getConfFilename(self.setKey)))
         self.guiVars = dict()
