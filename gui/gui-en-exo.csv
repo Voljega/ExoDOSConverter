@@ -4,6 +4,7 @@ collectionDir;Collection folder;Path to your eXoDOs collection
 conversionType;Conversion Type;Choose your conversion type
 exodosVersion;eXoDOS version;Your exoDOS collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
+mapper;Mapper;Mapper for controls mapping
 filter;Filter games;Filter games
 left;Deselect game;Remove game(s) from selection
 right;Select game;Add game(s) to your selection

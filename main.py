@@ -1,4 +1,5 @@
-import os.path, sys
+import os.path
+import sys
 from exogui import ExoGUI
 from logger import Logger
 
@@ -7,7 +8,7 @@ outputDir = r'G:\ExoDOSConverted'
 
 if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
-    title = 'eXoDOSConverter 0.4-beta'
+    title = 'eXoDOSConverter 0.5-beta'
     logger = Logger()
     logger.log(title)
     logger.log('Script path : '+scriptDir)

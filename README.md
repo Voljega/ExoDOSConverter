@@ -38,4 +38,22 @@ Fully supported distributions are Batocera, Recalbox, Retropie and OpenDingux.
 
 Next step is to add MiSTer compatibility
 
+## RG350
 
+For RG350, select the flavor of frontend you are using (either SimpleMenu or Esoteric/GxMenu)
+Don't forget to select 'RG350' for the mapper, this will generate the defaut mapping for controls :
+ - DPad: directions
+ - Select: ESC
+ - Start: Enter
+ - A: Left Alt
+ - B: Space
+ - X: Left Control
+ - Y: Left Shift
+ - L1: n
+ - R1: y
+ 
+ Remember that L1 displays the virtual keyboard.
+ Power+B activates the mouse on right stick, with L2 and R2 as left and right buttons
+
+Launch the game by clicking `dosbox.bat` inside the game folder
+If the default mappings are not enough, modify 'mapper.map' inside the game folder 
