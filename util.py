@@ -40,7 +40,7 @@ def getGuiStringsFilename(setKey):
 # Loads UI Strings
 def loadUIStrings(scriptDir, guiStringsFilename):
     guiStrings = dict()
-    file = open(os.path.join(scriptDir, 'GUI', guiStringsFilename), 'r', encoding="utf-8")
+    file = open(os.path.join(scriptDir, 'gui', guiStringsFilename), 'r', encoding="utf-8")
     order = 0
     for line in file.readlines()[1:]:
         confLine = line.split(";")
