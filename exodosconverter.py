@@ -6,6 +6,7 @@ import traceback
 from confconverter import ConfConverter
 from metadatahandler import MetadataHandler
 import util
+from zipfile import ZipFile
 
 
 # Main Converter
@@ -91,13 +92,21 @@ class ExoDOSConverter:
                                                                                                      game + ".pc")
         if not os.path.exists(localGameOutputDir):
             if not os.path.exists(os.path.join(self.exoDosDir, "Games", game)):
-                self.logger.log("  needs installation...")
-                # automatic F and N to validate answers to exo's install.bat, might want to allow other values in the future
-                subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir, game),
-                                shell=False)
-                self.logger.log("  installed")
+                self.logger.log("  needs unzipping...")
+                # previous method kept for technical purpose
+                # automatic Y, F and N to validate answers to exo's install.bat
+                # fullscreen = true, output=overlay, aspect=true
+                # subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir, game),
+                #                 shell=False)
+
+                # unzip game (xxxx).zip from unzip line in game/install.bat
+                # following options should be set in dosbox.conf / actually do it later in converter
+                # fullscreen = true, output=overlay, aspect=true
+                self.unzipGame(os.path.join(self.gamesDosDir, game, 'install.bat'))
+
+                self.logger.log("  unzipped")
             else:
-                self.logger.log("  already installed")
+                self.logger.log("  already unzipped")
 
             self.copyGameFiles(game, localGameOutputDir, metadata)
             self.confConverter.process(game, localGameOutputDir, genre)
@@ -107,8 +116,23 @@ class ExoDOSConverter:
 
         self.logger.log("")
 
-        # Copy game files and game dosbox.conf to output dir
+    # Unzip game zip
+    def unzipGame(self, gameInstallBat):
+        installFile = open(gameInstallBat, 'r')
+        zipParam = None
+        for line in installFile.readlines():
+            if line.startswith('unzip "'):
+                zipParam = line.split('"')[1]
+        installFile.close()
+        if zipParam is not None:
+            with ZipFile(os.path.join(self.exoDosDir, "Games", zipParam), 'r') as zipFile:
+                # Extract all the contents of zip file in current directory
+                self.logger.log("  unzipping " + zipParam)
+                zipFile.extractall(path=os.path.join(self.exoDosDir, "Games"))
+        else:
+            self.logger.log("  ERROR no zip file found in " + gameInstallBat)
 
+    # Copy game files and game dosbox.conf to output dir
     def copyGameFiles(self, game, localGameOutputDir, metadata):
         localGameDataOutputDir = os.path.join(localGameOutputDir, game)
         self.logger.log("  copy game data")

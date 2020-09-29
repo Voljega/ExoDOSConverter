@@ -1,4 +1,5 @@
-import os.path, collections
+import os.path
+import collections
 from PIL import Image
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
@@ -14,8 +15,6 @@ mister = 'MiSTer'
 simplemenu = 'OpenDingux/SimpleMenu'
 esoteric = 'OpenDingux/Esoteric'
 conversionTypes = [batocera, recalbox, retropie, simplemenu, esoteric]
-# TODO the bright future
-# conversionTypes = [batorecal,retropie,mister,simplemenu,esoteric]
 
 exodosVersions = ['v4', 'v5']
 
@@ -88,7 +87,7 @@ def validCollectionPath(collectionPath):
         os.path.join(collectionPath, 'Metadata')) and os.path.exists(os.path.join(collectionPath, 'Images'))
 
 
-# Builds a map of full game name with year to corresponding !dos folder name using the bat file found in each !dos folder
+# Builds map of full game name with year to corresponding !dos folder name using the bat file found in each !dos folder
 def gameDirMap(gamesDosDir, games):
     gameDict = dict()
     for game in games:
