@@ -15,6 +15,8 @@ For those of you for which this name doesn't mean anything, ExoDOS Collection is
 It is based on Launchbox and Windows only though
 There's also an ExoDOSWin3x collection for Windows 3.1 games
 
+Before using this tool, don't forget to install the collection with its `setup.bat`
+
 ## The Tool
 
 ExoDOSConverter is a rework with GUI of an old project of mine, and the aim is to fully support ExoDOS v5 and ExoWin3x v2 when they are released.
@@ -75,7 +77,21 @@ Don't forget to select 'RG350' for the mapper, this will generate the defaut map
  - R1: y
  
  Remember that L1 displays the virtual keyboard.
- Power+B activates the mouse on right stick, with L2 and R2 as left and right buttons
+ Power+B activates the mouse on right stick, with L2 and R2 as left and right buttons 
 
 Launch the game by clicking `dosbox.bat` inside the game folder
-If the default mappings are practical for the game, modify 'mapper.map' inside the game folder 
+If the default mappings are practical for the game, modify 'mapper.map' inside the game folder
+
+You can quit dosbox by `Power+Select`
+
+*EDIT Note :* 
+
+The specific nature of dosbox on RG350 doesn't actually allows for custom mapping on a game by game basis, nor does it takes into account the dosbox.cfg for each game.
+
+The only way to do that at the moment seems to modify `dosbox.conf` in `/media/data/local/home/.dosbox/` :
+
+- copy the `mapper.map` of the game into  `/media/data/local/home/.dosbox/`
+- edit the line starting with `mapper` and change the mapper name to `mapper.map`
+- you can then modify the mapper.map file however you want, but this mapping will be taken into account for all games
+
+I'm still in search of a solution to allow a real custom configuration and mapping for all games on RG350
