@@ -43,11 +43,12 @@ cd ExoDOSConverter            # change to ExoDOSConverter directory
 chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned version)
 ```
 - If you didn't install the collection beforehand on Windows or with wine by executing `setup.bat`, you'll need to do that or  alternatively:
->Unzip `XODOSMetadata.zip` to the root of the collection, this should create a `Images` folder
+>Unzip `XODOSMetadata.zip` to the home dir of the collection, this should create a `Images` folder
 
->Unzip `!DOSmetadata.zip` to the root of the collection, this should create a `eXoDOS/Games/!dos folder`
+>Unzip `!DOSmetadata.zip` to the home dir of the collection, this should create a `eXoDOS/Games/!dos folder`
 
->Unzip `LaunchBox.zip` to the root of the collection, this should create a `Metadata` folder
+>Unzip `LaunchBox.zip` to the home dir of the collection, this should create a `Metadata` folder
+
 - launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
 
 ## State of development
