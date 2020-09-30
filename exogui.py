@@ -142,6 +142,7 @@ class ExoGUI:
         if not os.path.isdir(collectionDir) or not util.validCollectionPath(collectionDir):
             self.logger.log(
                 "%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" % collectionDir)
+            self.logger.log("Did you install the collection with setup.bat beforehand ?")
             self.exodosGamesValues.set([])
             self.leftListLabel.set(self.guiStrings['leftList'].label + ' (0)')
             self.exodosGamesListbox['state'] = 'disabled'
