@@ -87,24 +87,14 @@ def validCollectionPath(collectionPath):
         os.path.join(collectionPath, 'Metadata')) and os.path.exists(os.path.join(collectionPath, 'Images'))
 
 
-# Builds map of full game name with year to corresponding !dos folder name using the bat file found in each !dos folder
-def gameDirMap(gamesDosDir, games):
+# Parse the collection static cache file to generate list of games
+def fullnameToGameDir(scriptDir):
     gameDict = dict()
-    for game in games:
-        if os.path.isdir(os.path.join(gamesDosDir, game)):
-            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir, game)) if
-                    os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
-                                                                                 0].lower() == 'install']
-            gameDict[bats[0]] = game if len(bats) == 1 else game
-
+    collectFile = open(os.path.join(scriptDir,'data','collec-v4.csv'),'r')
+    for line in collectFile.readlines():
+        strings = line.split(';')
+        gameDict[strings[0]] = strings[1].rstrip('\n\r')
     return gameDict
-
-
-# Parse the collection to generate list of games
-def fullnameToGameDir(collectionDir):
-    gamesDosDir = os.path.join(collectionDir, "eXoDOS", "Games", "!dos")
-    games = [filename for filename in os.listdir(gamesDosDir)]
-    return gameDirMap(gamesDosDir, games)
 
 
 # Finds pic for a game in the three pics caches

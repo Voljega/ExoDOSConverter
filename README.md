@@ -82,7 +82,7 @@ Don't forget to select 'RG350' for the mapper, this will generate the defaut map
 Launch the game by clicking `dosbox.bat` inside the game folder
 If the default mappings are practical for the game, modify 'mapper.map' inside the game folder
 
-You can quit dosbox by `Power+Select`
+You can quit dosbox with `Power+Select`
 
 *EDIT Note :* 
 

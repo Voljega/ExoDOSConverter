@@ -23,6 +23,8 @@ class ExoGUI:
             os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)))
         self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
+        # TODO will need to reload that when changing version
+        self.fullnameToGameDir = util.fullnameToGameDir(scriptDir)
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
@@ -34,7 +36,6 @@ class ExoGUI:
         self.setFontSize(self.startFontSize)
         self.window.title(title)
         self.logger = logger
-        self.fullnameToGameDir = dict()
 
     def draw(self):
         self.root = Tk.Frame(self.window, padx=10, pady=5)
@@ -143,8 +144,6 @@ class ExoGUI:
             self.logger.log(
                 "%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" % collectionDir)
             self.logger.log("Did you install the collection with setup.bat beforehand ?")
-            self.exodosGamesValues.set([])
-            self.leftListLabel.set(self.guiStrings['leftList'].label + ' (0)')
             self.exodosGamesListbox['state'] = 'disabled'
             self.selectedGamesListbox['state'] = 'disabled'
             self.selectGameButton['state'] = 'disabled'
@@ -157,13 +156,7 @@ class ExoGUI:
             else:
                 self.needsCacheRefresh = True
             self.cache = util.buildCache(self.scriptDir, collectionDir, self.logger)
-            self.logger.log("Loading exoDOS games list, this might take a while ...")
             self.guiVars['filter'].set('')
-            # TODO thread issue on first launch, nothing is displayed for full collection
-            self.fullnameToGameDir = util.fullnameToGameDir(collectionDir)
-            self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
-            self.leftListLabel.set(
-                self.guiStrings['leftList'].label + ' (' + str(len(self.fullnameToGameDir.keys())) + ')')
             self.exodosGamesListbox['state'] = 'normal'
             self.selectedGamesListbox['state'] = 'normal'
             self.selectGameButton['state'] = 'normal'
@@ -204,6 +197,11 @@ class ExoGUI:
                                              selectmode=Tk.EXTENDED, width=70)
         self.exodosGamesListbox.grid(column=0, row=1, sticky="W", pady=5)
         self.exodosGamesListbox.grid_rowconfigure(0, weight=3)
+
+        # TODO will need to refresh that when changing exodos version
+        self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
+        self.leftListLabel.set(
+            self.guiStrings['leftList'].label + ' (' + str(len(self.fullnameToGameDir.keys())) + ')')
 
         scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exodosGamesListbox.yview)
         scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S))
@@ -377,6 +375,7 @@ class ExoGUI:
         gamesDir = os.path.join(collectionDir, "eXoDOS", "Games")
         gamesDosDir = os.path.join(gamesDir, "!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
+        # TODO we could go from list of full game names now, as 'games' short names from !dos folder should correspond to dir in the zip of each game
 
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir):
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)
