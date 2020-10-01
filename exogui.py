@@ -148,6 +148,8 @@ class ExoGUI:
             self.selectedGamesListbox['state'] = 'disabled'
             self.selectGameButton['state'] = 'disabled'
             self.deselectGameButton['state'] = 'disabled'
+            self.selectAllGamesButton['state'] = 'disabled'
+            self.unselectAllGamesButton['state'] = 'disabled'
             self.filterEntry['state'] = 'disabled'
         else:
             # Do not rebuild cache on first refresh of the value
@@ -161,6 +163,8 @@ class ExoGUI:
             self.selectedGamesListbox['state'] = 'normal'
             self.selectGameButton['state'] = 'normal'
             self.deselectGameButton['state'] = 'normal'
+            self.selectAllGamesButton['state'] = 'normal'
+            self.unselectAllGamesButton['state'] = 'normal'
             self.filterEntry['state'] = 'normal'
 
             # Listener for filter entry modification
@@ -189,9 +193,23 @@ class ExoGUI:
         self.leftFrame.grid(column=0, row=1, sticky="W", pady=5)
         self.leftFrame.grid_columnconfigure(0, weight=3)
         self.leftListLabel = Tk.StringVar(value=self.guiStrings['leftList'].label)
-        label = Tk.Label(self.leftFrame, textvariable=self.leftListLabel)
+
+        hatLeftFrame = Tk.Frame(self.leftFrame)
+        hatLeftFrame.grid(column=0,row=0, sticky='WE')
+        hatLeftFrame.grid_columnconfigure(0, weight=3)
+
+        label = Tk.Label(hatLeftFrame, textvariable=self.leftListLabel, anchor='w')
         wckToolTips.register(label, self.guiStrings['leftList'].help)
         label.grid(column=0, row=0, sticky="W")
+
+        emptyFrame = Tk.Frame(hatLeftFrame, width=10)
+        emptyFrame.grid(column=1,row=0, sticky='W')
+
+        self.selectAllGamesButton = Tk.Button(hatLeftFrame, text=self.guiStrings['selectall'].label,
+                                              command=self.selectAll)
+        wckToolTips.register(self.selectAllGamesButton, self.guiStrings['selectall'].help)
+        self.selectAllGamesButton.grid(column=2, row=0, sticky='E')
+
         self.exodosGamesValues = Tk.Variable(value=[])
         self.exodosGamesListbox = Tk.Listbox(self.leftFrame, listvariable=self.exodosGamesValues,
                                              selectmode=Tk.EXTENDED, width=70)
@@ -204,7 +222,7 @@ class ExoGUI:
             self.guiStrings['leftList'].label + ' (' + str(len(self.fullnameToGameDir.keys())) + ')')
 
         scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exodosGamesListbox.yview)
-        scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S))
+        scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S),)
         self.exodosGamesListbox['yscrollcommand'] = scrollbarLeft.set
 
         self.buttonsColumnFrame = Tk.Frame(self.selectionFrame, padx=10)
@@ -226,10 +244,25 @@ class ExoGUI:
         self.rightFrame = Tk.Frame(self.selectionFrame)
         self.rightFrame.grid(column=2, row=1, sticky="E", pady=5)
         self.rightFrame.grid_columnconfigure(2, weight=3)
-        self.rightListLabel = Tk.StringVar(value=self.guiStrings['rightList'].label)
-        label = Tk.Label(self.rightFrame, textvariable=self.rightListLabel)
+        self.rightListLabel = Tk.StringVar(value=self.guiStrings['rightList'].label + ' (0)')
+
+        hatRightFrame = Tk.Frame(self.rightFrame)
+        hatRightFrame.grid(column=0, row=0, sticky='WE')
+        hatRightFrame.grid_columnconfigure(0, weight=3)
+
+        label = Tk.Label(hatRightFrame, textvariable=self.rightListLabel, anchor='w')
         wckToolTips.register(label, self.guiStrings['rightList'].help)
         label.grid(column=0, row=0, sticky="W")
+
+        emptyFrame = Tk.Frame(hatRightFrame, width=10)
+        emptyFrame.grid(column=1, row=0, sticky='W')
+
+        self.unselectAllGamesButton = Tk.Button(hatRightFrame, text=self.guiStrings['unselectall'].label,
+                                              command=self.unselectAll)
+        wckToolTips.register(self.unselectAllGamesButton, self.guiStrings['unselectall'].help)
+        self.unselectAllGamesButton.grid(column=2, row=0, sticky='E')
+
+
         self.selectedGamesValues = Tk.Variable(value=[])
         self.selectedGamesListbox = Tk.Listbox(self.rightFrame, listvariable=self.selectedGamesValues,
                                                selectmode=Tk.EXTENDED, width=70)
@@ -252,7 +285,26 @@ class ExoGUI:
         self.rightListLabel.set(
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
-    # Listener to ad game to selection 
+    # Listener to add all games to the selection
+    def selectAll(self):
+        selectedAll = self.exodosGamesValues.get()
+        alreadyOnRight = self.selectedGamesValues.get()
+        for sel in selectedAll:
+            if sel not in alreadyOnRight:
+                self.selectedGamesListbox.insert(Tk.END, sel)
+        self.selectedGamesValues.set(sorted(self.selectedGamesValues.get()))
+
+        self.exodosGamesListbox.selection_clear(0, Tk.END)
+        self.rightListLabel.set(
+            self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
+
+    # Listener to remove all games from the selection
+    def unselectAll(self):
+        self.selectedGamesValues.set([])
+        self.rightListLabel.set(
+            self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
+
+    # Listener to add selected game to selection
     def clickRight(self):
         selectedOnLeft = [self.exodosGamesListbox.get(int(item)) for item in self.exodosGamesListbox.curselection()]
         alreadyOnRight = self.selectedGamesValues.get()
@@ -305,7 +357,7 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'filter']:
+                              'filter', 'selectall', 'unselectall']:
                 if key.help:
                     confFile.write('# ' + key.help.replace('#n', '\n# ') + '\n')
                 if key.id == 'images':
@@ -324,7 +376,7 @@ class ExoGUI:
     def saveConfInMem(self):
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
-            if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList']:
+            if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList', 'selectall', 'unselectall']:
                 if key.id == 'images':
                     imagesValue = self.guiVars[self.guiStrings['images'].label + ' #1'].get()
                     if self.guiStrings['images'].label + ' #2' in self.guiVars:
@@ -358,6 +410,8 @@ class ExoGUI:
         self.selectedGamesListbox['state'] = 'disabled'
         self.selectGameButton['state'] = 'disabled'
         self.deselectGameButton['state'] = 'disabled'
+        self.selectAllGamesButton['state'] = 'disabled'
+        self.unselectAllGamesButton['state'] = 'disabled'
         self.filterEntry['state'] = 'disabled'
         self.conversionTypeComboBox['state'] = 'disabled'
         self.exodosVersionComboBox['state'] = 'disabled'
@@ -375,6 +429,7 @@ class ExoGUI:
         gamesDir = os.path.join(collectionDir, "eXoDOS", "Games")
         gamesDosDir = os.path.join(gamesDir, "!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
+        self.logger.log(str(len(games)) + ' game(s) selected for conversion')
         # TODO we could go from list of full game names now, as 'games' short names from !dos folder should correspond to dir in the zip of each game
 
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir):

@@ -206,7 +206,7 @@ class ExoDOSConverter:
         # move dosbox.cfg to {game}.conf at top level
         shutil.move(os.path.join(localGameOutputDir, "dosbox.cfg"),
                     os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '.conf')))
-        # TODO not needed anymore apprently, to remove in the future
+        # TODO not needed anymore apparently, to remove in the future
         # generate sh file        
         # shFile = open(os.path.join(gameOutputDir,"launch.sh"),'w')
         # shFile.write("!/bin/bash\n")
