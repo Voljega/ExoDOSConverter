@@ -84,7 +84,7 @@ def getRomsFolderPrefix(conversionType):
 def validCollectionPath(collectionPath):
     return os.path.exists(os.path.join(collectionPath, 'eXoDOS')) and os.path.exists(
         os.path.join(collectionPath, 'eXoDOS', 'Games')) and os.path.exists(
-        os.path.join(collectionPath, 'Metadata')) and os.path.exists(os.path.join(collectionPath, 'Images'))
+        os.path.join(collectionPath, 'xml')) and os.path.exists(os.path.join(collectionPath, 'Images'))
 
 
 # Parse the collection static cache file to generate list of games
