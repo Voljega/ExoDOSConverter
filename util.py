@@ -14,7 +14,7 @@ retropie = 'Retropie'
 mister = 'MiSTer'
 simplemenu = 'OpenDingux/SimpleMenu'
 esoteric = 'OpenDingux/Esoteric'
-conversionTypes = [batocera, recalbox, retropie, simplemenu, esoteric]
+conversionTypes = [batocera, recalbox, retropie, simplemenu, esoteric, mister]
 
 exodosVersions = ['v4', 'v5']
 

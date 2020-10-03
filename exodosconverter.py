@@ -6,7 +6,7 @@ import traceback
 from confconverter import ConfConverter
 from metadatahandler import MetadataHandler
 import util
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 # Main Converter
@@ -53,9 +53,9 @@ class ExoDOSConverter:
 
         self.metadataHandler.writeXml(self.outputDir, gamelist)
 
-        # Cleaning for opendingux conversions
-        if self.conversionType in [util.esoteric, util.simplemenu]:
-            self.logger.log('Post cleaning for opendingux')
+        # Cleaning for some conversions
+        if self.conversionType in [util.esoteric, util.simplemenu, util.mister]:
+            self.logger.log('Post cleaning for '+self.conversionType)
             # Remove gamelist.xml and downloaded_images folder    
             if os.path.exists(os.path.join(self.outputDir, 'gamelist.xml')):
                 os.remove(os.path.join(self.outputDir, 'gamelist.xml'))
@@ -153,6 +153,24 @@ class ExoDOSConverter:
             self.postConversionForRetropie(game, genre, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType in [util.esoteric, util.simplemenu]:
             self.postConversionForOpenDingux(game, genre, localGameOutputDir, localParentOutputDir, metadata)
+        elif self.conversionType == util.mister:
+            self.postConversionForMister(game, genre, localGameOutputDir, localParentOutputDir, metadata)
+
+    # Post-conversion for MiSTeR for a given game
+    def postConversionForMister(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
+        self.logger.log("  MiSTer post-conversion")
+        # Rename dosbox.bat to launch.bat
+        shutil.move(os.path.join(localGameOutputDir, "dosbox.bat"), os.path.join(localGameOutputDir, "launch.bat"))
+        # Move CDs to cdgames/gamefolder
+        # Change imgmount iso command to imgset ide10 cdgames/gamefolder/game.iso
+        # Include imgset in the outputDir ?
+        # Convert imgmount or mount of floppy to imgset fdd0 /floppy/filename.img
+        # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
+        # Zip internal game dir to longgamename.zip
+        shutil.make_archive(os.path.join(localGameOutputDir, util.getCleanGameID(metadata, '')), 'zip', localGameOutputDir, game)
+        # Delete everything unrelated
+        shutil.rmtree(os.path.join(localGameOutputDir,game))
+        os.remove(os.path.join(localGameOutputDir,'dosbox.cfg'))
 
     # Post-conversion for openDingux for a given game
     def postConversionForOpenDingux(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):

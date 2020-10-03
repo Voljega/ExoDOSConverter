@@ -135,8 +135,6 @@ class MetadataHandler():
                 return 'Pinball'
             elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres:
                 return "Puzzle"
-            elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres:
-                return 'RPG'
             elif 'Flight Simulator' in dosGame.genres:
                 return 'Simulation'
             elif 'Shooter' in dosGame.genres:
@@ -149,6 +147,8 @@ class MetadataHandler():
                 return 'BeatEmUp'
             elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres:
                 return 'Strategy-Gestion'
+            elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres:
+                return 'RPG'
             elif "Adventure" in dosGame.genres and "Action" in dosGame.genres:
                 return "Action-Adventure"
             elif "Adventure" in dosGame.genres:

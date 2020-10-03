@@ -198,8 +198,9 @@ class CommandHandler:
     def cleanCue(self, path, fileName, cdCount):
         oldFile = open(os.path.join(self.localOutputPath(path), fileName + ".cue"), 'r')
         newFile = open(os.path.join(self.localOutputPath(path), fileName + "-fix.cue"), 'w')
+        modifiedFirstLine = False
         for line in oldFile.readlines():
-            if line.startswith("FILE"):
+            if line.startswith("FILE") and not modifiedFirstLine:
                 params = line.split('"')
                 isobin = os.path.splitext(params[1].lower())
                 fixedIsoBinName = self.dosRename(path, params[1], isobin[0], isobin[1], cdCount)
@@ -208,6 +209,8 @@ class CommandHandler:
                 params[1] = fixedIsoBinName + isobin[-1]
                 line = '"'.join(params)
                 self.logger.log("      convert cue content -> " + line.rstrip('\n\r '))
+                # Only do it for the first Line
+                modifiedFirstLine = True
 
             newFile.write(line)
         oldFile.close()
