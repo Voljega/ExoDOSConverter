@@ -8,7 +8,7 @@ outputDir = r'G:\ExoDOSConverted'
 
 if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
-    title = 'eXoDOSConverter 0.5-beta'
+    title = 'eXoDOSConverter 0.6-beta'
     logger = Logger()
     logger.log(title)
     logger.log('Script path : '+scriptDir)
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     gui = ExoGUI(scriptDir,logger, title) 
     gui.draw()
 
-# TODO V5 :
+# TODO ExoDOS V5 :
 # In the launchbox folder v4 had a folder called "eXoDOS". this is now just "eXo"
 # So all exo projects can reside there
 # Then, under "eXoDOS" there used to be a "Games" folder

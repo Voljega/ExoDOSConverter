@@ -65,6 +65,7 @@ class MetadataHandler():
                     manualpath = util.localOutputPath(os.path.join(self.exoDosDir, manual)) if manual is not None else None
                     frontPic = util.findPic(name, self.cache, '.jpg')
                     frontPic = frontPic if frontPic is not None else util.findPic(name, self.cache, '.png')
+                    frontPic = frontPic if frontPic is not None else util.findPic(name, self.cache, '.gif')
                     #                    print(frontPic if frontPic is not None else 'IMG NOT FOUND')
                     metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
                                        manualpath, desc)

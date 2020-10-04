@@ -159,9 +159,8 @@ class ExoDOSConverter:
     # Post-conversion for MiSTeR for a given game
     def postConversionForMister(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
         self.logger.log("  MiSTer post-conversion")
-        # Rename dosbox.bat to launch.bat
+        # Remove any C: from dosbox.bat, rename to launch.bat, remove dosbox.cfg
         os.remove(os.path.join(localGameOutputDir, 'dosbox.cfg'))
-        # TODO Remove any C: from dosbox.bat
         dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')
         launchBat = open(os.path.join(localGameOutputDir, "launch.bat"), 'w')
         lines = dosboxBat.readlines()
