@@ -1,4 +1,5 @@
 import os.path
+import platform
 import collections
 from PIL import Image
 
@@ -50,6 +51,12 @@ def loadUIStrings(scriptDir, guiStringsFilename):
     file.close()
     return guiStrings
 
+# Handle os escaping of path in local output dir
+def localOutputPath(path):
+    if platform.system() == 'Windows':
+        return path
+    else:
+        return path.replace('\\', '/')
 
 # Resize image for opendingux
 def resize(imgPath):

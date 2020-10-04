@@ -1,4 +1,8 @@
-import os, shutil, collections, sys
+import os
+import shutil
+import collections
+import sys
+import platform
 import xml.etree.ElementTree as etree
 from xml.dom import minidom
 import util
@@ -58,7 +62,7 @@ class MetadataHandler():
                     publisher = self.get(g, 'Publisher')
                     genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
                     manual = self.get(g, 'ManualPath')
-                    manualpath = os.path.join(self.exoDosDir, manual) if manual is not None else None
+                    manualpath = util.localOutputPath(os.path.join(self.exoDosDir, manual)) if manual is not None else None
                     frontPic = util.findPic(name, self.cache, '.jpg')
                     frontPic = frontPic if frontPic is not None else util.findPic(name, self.cache, '.png')
                     #                    print(frontPic if frontPic is not None else 'IMG NOT FOUND')
@@ -85,7 +89,6 @@ class MetadataHandler():
         self.logger.log("  copy pics and manual")
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic):
             shutil.copy2(dosGame.frontPic, os.path.join(outputDir, 'downloaded_images'))
-        # TODO most likely problem on linux there ...
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         self.writeGamelistEntry(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
@@ -99,9 +102,12 @@ class MetadataHandler():
     def writeGamelistEntry(self, gamelist, dosGame, game, genre, useGenreSubFolders, conversionType):
         root = gamelist.getroot()
 
-        # TODO fix both of these on linux ...
-        frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
-        manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
+        if platform.system() == 'Windows':
+            frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
+            manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
+        else :
+            frontPic = './downloaded_images/' + dosGame.frontPic.split('/')[-1] if dosGame.frontPic is not None else ''
+            manual = './manuals/' + dosGame.manual.split('/')[-1] if dosGame.manual is not None else ''
 
         year = dosGame.year + "0101T000000" if dosGame.year is not None else ''
 

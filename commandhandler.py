@@ -1,5 +1,5 @@
-import os, stat
-import platform
+import os
+import stat
 import util
 
 
@@ -152,15 +152,15 @@ class CommandHandler:
         source = os.path.join(path, originalFile)
         targetTemp = os.path.join(path, fileName + "1" + fileExt)
         target = os.path.join(path, fileName + fileExt)
-        os.rename(self.localOutputPath(source), self.localOutputPath(targetTemp))
-        os.rename(self.localOutputPath(targetTemp), self.localOutputPath(target))
+        os.rename(util.localOutputPath(source), util.localOutputPath(targetTemp))
+        os.rename(util.localOutputPath(targetTemp), util.localOutputPath(target))
         return fileName
 
     # Cleans cd names to a dos compatible 8 char name
     def cleanCDname(self, path, localGameOutputDir, cdCount=None):
         cdFileFullPath = os.path.join(localGameOutputDir, path)
-        if os.path.exists(self.localOutputPath(cdFileFullPath)):
-            if os.path.isdir(self.localOutputPath(cdFileFullPath)):
+        if os.path.exists(util.localOutputPath(cdFileFullPath)):
+            if os.path.isdir(util.localOutputPath(cdFileFullPath)):
                 return path
             else:
                 pathList = path.split('\\')
@@ -179,7 +179,7 @@ class CommandHandler:
                     self.cleanCue(cdsPath, cdFilename, cdCount)
 
                 # Clean remaining ccd and sub file which might have the same name as the cue file
-                otherCdFiles = [file for file in os.listdir(self.localOutputPath(cdsPath)) if
+                otherCdFiles = [file for file in os.listdir(util.localOutputPath(cdsPath)) if
                                 os.path.splitext(file)[0].lower() == oldCdFilename and os.path.splitext(file)[
                                     -1].lower() in ['.ccd', '.sub']]
                 for otherCdFile in otherCdFiles:
@@ -196,8 +196,8 @@ class CommandHandler:
 
     # Cleans cue files content to dos compatible 8 char name
     def cleanCue(self, path, fileName, cdCount):
-        oldFile = open(os.path.join(self.localOutputPath(path), fileName + ".cue"), 'r')
-        newFile = open(os.path.join(self.localOutputPath(path), fileName + "-fix.cue"), 'w')
+        oldFile = open(os.path.join(util.localOutputPath(path), fileName + ".cue"), 'r')
+        newFile = open(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"), 'w')
         modifiedFirstLine = False
         for line in oldFile.readlines():
             if line.startswith("FILE") and not modifiedFirstLine:
@@ -216,13 +216,7 @@ class CommandHandler:
         oldFile.close()
         newFile.close()
         # Remove readonly attribute if present before deleting
-        os.chmod(os.path.join(self.localOutputPath(path), fileName + ".cue"), stat.S_IWRITE)
-        os.remove(os.path.join(self.localOutputPath(path), fileName + ".cue"))
-        os.rename(os.path.join(self.localOutputPath(path), fileName + "-fix.cue"), os.path.join(self.localOutputPath(path), fileName + ".cue"))
+        os.chmod(os.path.join(util.localOutputPath(path), fileName + ".cue"), stat.S_IWRITE)
+        os.remove(os.path.join(util.localOutputPath(path), fileName + ".cue"))
+        os.rename(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"), os.path.join(util.localOutputPath(path), fileName + ".cue"))
 
-    # Handle os escaping of path in local output dir
-    def localOutputPath(self, path):
-        if platform.system() == 'Windows':
-            return path
-        else:
-            return path.replace('\\', '/')
