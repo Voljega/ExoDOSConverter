@@ -31,6 +31,15 @@ The conversion should cover the following :
 As the ExoDOSCollection itself uses a lot of `.bat` script and other Windows-only features, this tool will also be windows only.
 This might evolve is some workaround are found to fully exploit this on Linux on other OSes
 
+## State of development
+
+For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
+This will be corrected when possible
+
+Fully supported distributions are Batocera, Recalbox, Retropie and OpenDingux.
+
+Next step is to add MiSTer compatibility
+
 ### LINUX INSTALLATION AND EXECUTION :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)
 - first install Tkinter for python3 if needed : `sudo apt-get install python3-tk`
@@ -50,15 +59,6 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 >Unzip `!DOSmetadata.zip` to the home dir of the collection, this should create a `eXoDOS/Games/!dos folder`
 
 - launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
-
-## State of development
-
-For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
-This will be corrected when possible
-
-Fully supported distributions are Batocera, Recalbox, Retropie and OpenDingux.
-
-Next step is to add MiSTer compatibility
 
 ## RG350
 

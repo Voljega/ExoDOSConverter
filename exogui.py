@@ -154,6 +154,7 @@ class ExoGUI:
         else:
             # Do not rebuild cache on first refresh of the value
             if self.needsCacheRefresh is True:
+                self.logger.log("Rebuild image caches")
                 util.cleanCache(self.scriptDir)
             else:
                 self.needsCacheRefresh = True

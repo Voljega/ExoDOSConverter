@@ -85,6 +85,7 @@ class MetadataHandler():
         self.logger.log("  copy pics and manual")
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic):
             shutil.copy2(dosGame.frontPic, os.path.join(outputDir, 'downloaded_images'))
+        # TODO most likely problem on linux there ...
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         self.writeGamelistEntry(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
@@ -98,8 +99,10 @@ class MetadataHandler():
     def writeGamelistEntry(self, gamelist, dosGame, game, genre, useGenreSubFolders, conversionType):
         root = gamelist.getroot()
 
+        # TODO fix both of these on linux ...
         frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
         manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
+
         year = dosGame.year + "0101T000000" if dosGame.year is not None else ''
 
         if conversionType == util.retropie:
