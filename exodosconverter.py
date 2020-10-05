@@ -121,8 +121,9 @@ class ExoDOSConverter:
         installFile = open(gameInstallBat, 'r')
         zipParam = None
         for line in installFile.readlines():
-            if line.startswith('unzip "'):
+            if line.startswith('unzip "') or line.startswith('unzip -o "'):
                 zipParam = line.split('"')[1]
+                break
         installFile.close()
         if zipParam is not None:
             with ZipFile(os.path.join(self.exoDosDir, "Games", zipParam), 'r') as zipFile:

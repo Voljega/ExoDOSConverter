@@ -143,7 +143,7 @@ class MetadataHandler():
                 return 'Sports'
             elif 'Pinball' in dosGame.genres:
                 return 'Pinball'
-            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres:
+            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres or "Casino" in dosGame.genres:
                 return "Puzzle"
             elif 'Flight Simulator' in dosGame.genres:
                 return 'Simulation'
