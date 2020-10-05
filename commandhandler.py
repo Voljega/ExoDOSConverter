@@ -106,6 +106,16 @@ class CommandHandler:
         return fullString
 
     # Converts mount command line
+    def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
+        path = line.replace('boot ','').rstrip(' \n\r')
+        path = self.reducePath(path.replace('"', ""), game)
+        fullString = "boot " + path + "\n"
+        if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(path))):
+            self.logger.log("      <ERROR> path %s doesn't exist" % path)
+        self.logger.log("    boot path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
+        return fullString
+
+    # Converts mount command line
     def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens=['a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
                                                                           endTokens=['-t'])

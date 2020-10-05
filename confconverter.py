@@ -91,5 +91,8 @@ class ConfConverter:
                     retroDosboxBat.write(self.commandHandler.handleMount(cmdline, game, localGameOutputDir, genre,
                                                                          self.useGenreSubFolders, self.conversionType))
                     retroDosboxBat.write("\npause\n")
+                elif cmdline.lower().startswith("boot "):
+                    retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, genre,
+                                                                         self.useGenreSubFolders, self.conversionType))
                 else:
                     retroDosboxBat.write(cmdline)
