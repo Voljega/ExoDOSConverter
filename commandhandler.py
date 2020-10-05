@@ -36,7 +36,7 @@ class CommandHandler:
         endIndex = -1
         count = 0
         for param in command:
-            if param.lower() in startTokens:
+            if param.lower() in startTokens and startIndex == -1:
                 startIndex = count
             elif param.lower() in endTokens:
                 endIndex = count
@@ -50,14 +50,14 @@ class CommandHandler:
     # Converts imgmount command line    
     def handleImgmount(self, line, game, localGameOutputDir):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
-                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'y'],
-                                                                          endTokens=['-t'])
+                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'y', '2'],
+                                                                          endTokens=['-t', '-size'])
 
         prString = ""
         if len(paths) == 1:
             path = self.reducePath(paths[0].replace('"', ""), game)
             self.logger.log("    clean single imgmount")
-            path = self.cleanCDname(path, localGameOutputDir)
+            path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir)
             prString = prString + " " + path
         else:
             # See if path contains ""
@@ -103,7 +103,7 @@ class CommandHandler:
 
         fullString = " ".join(command[0:startIndex + 1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    imgmount path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
-        return fullString
+        return fullString.rstrip(' ')
 
     # Converts mount command line
     def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):

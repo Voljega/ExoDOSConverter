@@ -86,7 +86,7 @@ class ConfConverter:
                         retroDosboxBat.write(cmdline)
                 elif cmdline.lower().startswith("imgmount "):
                     retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir))
-                    retroDosboxBat.write("pause\n")
+                    retroDosboxBat.write("\npause\n")
                 elif cmdline.lower().startswith("mount "):
                     retroDosboxBat.write(self.commandHandler.handleMount(cmdline, game, localGameOutputDir, genre,
                                                                          self.useGenreSubFolders, self.conversionType))
