@@ -107,7 +107,7 @@ class CommandHandler:
 
     # Converts mount command line
     def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
-        paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens=['a', 'b', 'd', 'e'],
+        paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens=['a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
                                                                           endTokens=['-t'])
 
         prString = ""
