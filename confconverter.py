@@ -57,8 +57,7 @@ class ConfConverter:
         retroDosboxCfg.close()
         retroDosboxBat.close()
 
-        # Creates dosbox.bat from dosbox.conf [autoexec] part
-
+    # Creates dosbox.bat from dosbox.conf [autoexec] part
     def createDosboxBat(self, cmdlines, retroDosboxBat, retroDosboxCfg, game, localGameOutputDir, genre):
         gameDir = os.path.join(self.exoDosDir, "Games", game)
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]

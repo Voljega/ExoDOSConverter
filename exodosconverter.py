@@ -91,22 +91,17 @@ class ExoDOSConverter:
                                           game + ".pc") if self.useGenreSubFolders else os.path.join(self.outputDir,
                                                                                                      game + ".pc")
         if not os.path.exists(localGameOutputDir):
-            if not os.path.exists(os.path.join(self.exoDosDir, "Games", game)):
-                self.logger.log("  needs unzipping...")
-                # previous method kept for technical purpose
-                # automatic Y, F and N to validate answers to exo's install.bat
-                # fullscreen = true, output=overlay, aspect=true
-                # subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir, game),
-                #                 shell=False)
+            # previous method kept for doc purpose
+            # automatic Y, F and N to validate answers to exo's install.bat
+            # fullscreen = true, output=overlay, aspect=true
+            # subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(self.gamesDosDir, game),
+            #                 shell=False)
 
-                # unzip game (xxxx).zip from unzip line in game/install.bat
-                # following options should be set in dosbox.conf / actually do it later in converter
-                # fullscreen = true, output=overlay, aspect=true
-                self.unzipGame(os.path.join(self.gamesDosDir, game, 'install.bat'))
-
-                self.logger.log("  unzipped")
-            else:
-                self.logger.log("  already unzipped")
+            # unzip game (xxxx).zip from unzip line in game/install.bat
+            # following options should be set in dosbox.conf / actually do it later in converter
+            # fullscreen = true, output=overlay, aspect=true
+            self.unzipGame(os.path.join(self.gamesDosDir, game, 'install.bat'), localGameOutputDir, game)
+            self.logger.log("  unzipped")
 
             self.copyGameFiles(game, localGameOutputDir, metadata)
             self.confConverter.process(game, localGameOutputDir, genre)
@@ -117,7 +112,7 @@ class ExoDOSConverter:
         self.logger.log("")
 
     # Unzip game zip
-    def unzipGame(self, gameInstallBat):
+    def unzipGame(self, gameInstallBat, localGameOutputDir, game):
         installFile = open(gameInstallBat, 'r')
         zipParam = None
         for line in installFile.readlines():
@@ -129,16 +124,21 @@ class ExoDOSConverter:
             with ZipFile(os.path.join(self.exoDosDir, "Games", zipParam), 'r') as zipFile:
                 # Extract all the contents of zip file in current directory
                 self.logger.log("  unzipping " + zipParam)
-                zipFile.extractall(path=os.path.join(self.exoDosDir, "Games"))
+                zipFile.extractall(path=localGameOutputDir)
+            # TODO check folder name // !dos folder, if no good rename it
+            unzippedDirs = [file for file in os.listdir(localGameOutputDir) if os.path.isdir(os.path.join(localGameOutputDir, file))]
+            if len(unzippedDirs) == 1 and unzippedDirs[0] != game:
+                self.logger.log("  fixing extracted dir %s to !dos name %s" % (unzippedDirs[0], game))
+                os.rename(os.path.join(localGameOutputDir, unzippedDirs[0]), os.path.join(localGameOutputDir, game))
         else:
             self.logger.log("  ERROR no zip file found in " + gameInstallBat)
 
     # Copy game files and game dosbox.conf to output dir
     def copyGameFiles(self, game, localGameOutputDir, metadata):
         localGameDataOutputDir = os.path.join(localGameOutputDir, game)
-        self.logger.log("  copy game data")
-        # Copy game files in game.pc/game
-        shutil.copytree(os.path.join(self.exoDosDir, "Games", game), localGameDataOutputDir)
+        # self.logger.log("  copy game data")
+        # # Copy game files in game.pc/game
+        # shutil.copytree(os.path.join(self.exoDosDir, "Games", game), localGameDataOutputDir)
         self.logger.log("  copy dosbox conf")
         # Copy dosbox.conf in game.pc
         shutil.copy2(os.path.join(self.exoDosDir, "Games", "!dos", game, "dosbox.conf"),

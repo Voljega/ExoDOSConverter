@@ -124,6 +124,7 @@ def buildPicCache(imageFolder, picCache, logger):
     picCacheFile = open(picCache, 'w')
     cache = dict()
     if os.path.exists(imageFolder):
+        # TODO Bug ??? if not os.path.isdir(file) and not if not os.path.isdir(os.path.join(imageFolder, file)) ?
         rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(file)]
         subFolders = [file for file in os.listdir(imageFolder) if os.path.isdir(os.path.join(imageFolder, file))]
         for image in rootImages:
