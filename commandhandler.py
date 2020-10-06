@@ -50,7 +50,7 @@ class CommandHandler:
     # Converts imgmount command line    
     def handleImgmount(self, line, game, localGameOutputDir):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
-                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'y', '2'],
+                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'y', '0', '2'],
                                                                           endTokens=['-t', '-size'])
 
         prString = ""
@@ -107,8 +107,8 @@ class CommandHandler:
 
     # Converts mount command line
     def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
-        bootPath = line.replace('boot ','').rstrip(' \n\r')
-        if bootPath != '-l c':
+        bootPath = line.replace('boot ','').replace('BOOT ','').rstrip(' \n\r')
+        if bootPath != '-l c' and bootPath != '-l c>null':
             # reduce except for boot -l c
             paths = bootPath.split(' ')
             cleanedPath = []
