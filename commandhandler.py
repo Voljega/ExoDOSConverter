@@ -38,7 +38,7 @@ class CommandHandler:
         for param in command:
             if param.lower() in startTokens and startIndex == -1:
                 startIndex = count
-            elif param.lower() in endTokens:
+            elif param.lower() in endTokens and endIndex == -1:
                 endIndex = count
             count = count + 1
 
@@ -57,7 +57,7 @@ class CommandHandler:
         if len(paths) == 1:
             path = self.reducePath(paths[0].replace('"', ""), game)
             self.logger.log("    clean single imgmount")
-            path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir)
+            path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir, game)
             prString = prString + " " + path
         else:
             # See if path contains ""
@@ -68,7 +68,7 @@ class CommandHandler:
                 # TESTCASE: Take Back / CSS
                 path = self.reducePath(redoPath.replace('"', ""), game)
                 self.logger.log("    clean single imgmount")
-                path = self.cleanCDname(path, localGameOutputDir)
+                path = self.cleanCDname(path, localGameOutputDir, game)
                 prString = prString + " " + path
             else:
                 # several paths (multi cds)
@@ -97,7 +97,7 @@ class CommandHandler:
                 cdCount = 1
                 for path in paths:
                     path = self.reducePath(path.replace('"', ""), game)
-                    path = self.cleanCDname(path, localGameOutputDir, cdCount)
+                    path = self.cleanCDname(path, localGameOutputDir, game, cdCount)
                     prString = prString + " " + '"' + path + '"'
                     cdCount = cdCount + 1
 
@@ -173,7 +173,7 @@ class CommandHandler:
         return fileName
 
     # Cleans cd names to a dos compatible 8 char name
-    def cleanCDname(self, path, localGameOutputDir, cdCount=None):
+    def cleanCDname(self, path, localGameOutputDir, game, cdCount=None):
         cdFileFullPath = os.path.join(localGameOutputDir, path)
         if os.path.exists(util.localOutputPath(cdFileFullPath)):
             if os.path.isdir(util.localOutputPath(cdFileFullPath)):
@@ -207,7 +207,8 @@ class CommandHandler:
                 #                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else:
-            self.logger.log("      <ERROR> path %s doesn't exist" % cdFileFullPath)
+            if not os.path.exists(os.path.join(localGameOutputDir, game, path)):
+                self.logger.log("      <ERROR> path %s doesn't exist" % cdFileFullPath)
             return path
 
     # Cleans cue files content to dos compatible 8 char name
