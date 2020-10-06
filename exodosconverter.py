@@ -125,7 +125,7 @@ class ExoDOSConverter:
                 # Extract all the contents of zip file in current directory
                 self.logger.log("  unzipping " + zipParam)
                 zipFile.extractall(path=localGameOutputDir)
-            # TODO check folder name // !dos folder, if no good rename it
+            # Check folder name // !dos folder, if not the same rename it to the !dos one
             unzippedDirs = [file for file in os.listdir(localGameOutputDir) if os.path.isdir(os.path.join(localGameOutputDir, file))]
             if len(unzippedDirs) == 1 and unzippedDirs[0] != game:
                 self.logger.log("  fixing extracted dir %s to !dos name %s" % (unzippedDirs[0], game))

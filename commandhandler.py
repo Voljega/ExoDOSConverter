@@ -107,17 +107,25 @@ class CommandHandler:
 
     # Converts mount command line
     def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
-        path = line.replace('boot ','').rstrip(' \n\r')
-        if path != '-l c':
+        bootPath = line.replace('boot ','').rstrip(' \n\r')
+        if bootPath != '-l c':
             # reduce except for boot -l c
-            path = self.reducePath(path.replace('"', ""), game)
-            # Verify path
-            postfix = path.find('-l')
-            chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
-            if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
-                if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
-                    self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)))
-        fullString = "boot " + path + "\n"
+            paths = bootPath.split(' ')
+            cleanedPath = []
+            for path in paths:
+                if path not in ['-l', 'a']:
+                    path = self.reducePath(path.replace('"', ""), game)
+                    # Verify path
+                    postfix = path.find('-l')
+                    chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
+                    if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
+                        if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
+                            self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)))
+                cleanedPath.append(path)
+
+            bootPath = " ".join(cleanedPath)
+
+        fullString = "boot " + bootPath + "\n"
         self.logger.log("    boot path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
         return fullString
 

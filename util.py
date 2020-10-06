@@ -70,8 +70,7 @@ def resize(imgPath):
 
 # Return full clean game name
 def getCleanGameID(metadata, ext):
-    cleanGameName = metadata.name.replace(':', '-').replace('?', '').replace('!', '').replace('/', '-').replace('\\',
-                                                                                                                '-')
+    cleanGameName = metadata.name.replace(':', '-').replace('?', '').replace('!', '').replace('/', '-').replace('\\','-').replace('*','_')
     return cleanGameName + ' (' + str(metadata.year) + ')' + ext
 
 
