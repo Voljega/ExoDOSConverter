@@ -50,7 +50,7 @@ class CommandHandler:
     # Converts imgmount command line    
     def handleImgmount(self, line, game, localGameOutputDir):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
-                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'y', '0', '2'],
+                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'y', '0', '2'],
                                                                           endTokens=['-t', '-size'])
 
         prString = ""
@@ -172,6 +172,8 @@ class CommandHandler:
                 fileName = fileName[0:7]
             else:
                 fileName = fileName[0:5] + str(cdCount)
+        if os.path.exists(os.path.join(path, fileName + fileExt)):
+            fileName = fileName = fileName[0:6] + "1"
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path, originalFile)
         targetTemp = os.path.join(path, fileName + "1" + fileExt)
