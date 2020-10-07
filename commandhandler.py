@@ -112,6 +112,9 @@ class CommandHandler:
             # reduce except for boot -l c
             paths = bootPath.split(' ')
             cleanedPath = []
+            if paths[0].startswith('"') and (paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')) :
+                paths = [" ".join(paths)]
+                #TODO needs renaming in that case
             for path in paths:
                 if path not in ['-l', 'a']:
                     path = self.reducePath(path.replace('"', ""), game)
@@ -172,7 +175,7 @@ class CommandHandler:
                 fileName = fileName[0:7]
             else:
                 fileName = fileName[0:5] + str(cdCount)
-        if os.path.exists(os.path.join(path, fileName + fileExt)):
+        if os.path.exists(os.path.join(path, fileName + fileExt)) and cdCount is None:
             fileName = fileName = fileName[0:6] + "1"
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path, originalFile)
