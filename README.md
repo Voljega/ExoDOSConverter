@@ -96,7 +96,7 @@ I'm still in search of a solution to allow a real custom configuration and mappi
 
 ## Known issues
 
-A few games in eXoDOS v4 have some generation issues.
+A few games in eXoDOS v4 have some conversion issues with this tool.
 
 #### The 11th Hour (1995)
 
