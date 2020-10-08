@@ -112,11 +112,11 @@ class CommandHandler:
             # reduce except for boot -l c
             paths = bootPath.split(' ')
             cleanedPath = []
-            if paths[0].startswith('"') and (paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')) :
+            if paths[0].startswith('"') and (paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
                 paths = [" ".join(paths)]
-                #TODO needs renaming in that case
+                #TODO needs renaming in that case (spaces inside image name)
             for path in paths:
-                if path not in ['-l', 'a']:
+                if path not in ['-l', 'a', 'a:']:
                     path = self.reducePath(path.replace('"', ""), game)
                     # Verify path
                     postfix = path.find('-l')
@@ -175,7 +175,8 @@ class CommandHandler:
                 fileName = fileName[0:7]
             else:
                 fileName = fileName[0:5] + str(cdCount)
-        if os.path.exists(os.path.join(path, fileName + fileExt)) and cdCount is None:
+        # TESTCASE : Ripper (1996) / ripper shouldn't enter here
+        if os.path.exists(os.path.join(path, fileName + fileExt)) and (fileName+fileExt) != originalFile.lower() and cdCount is None:
             fileName = fileName = fileName[0:6] + "1"
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path, originalFile)
