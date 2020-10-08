@@ -93,3 +93,74 @@ The only way to do that at the moment seems to modify `dosbox.conf` in `/media/d
 - you can then modify the mapper.map file however you want, but this mapping will be taken into account for all games
 
 I'm still in search of a solution to allow a real custom configuration and mapping for all games on RG350
+
+## Known issues
+
+A few games in eXoDOS v4 have some generation issues.
+
+#### The 11th Hour (1995)
+
+The generation autodetects some error but the game actually should run fine.
+
+The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\11thHour` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+mount c .\Games\
+@imgmount d ".\Games\11thhour\discs\1.cue" ".\Games\11thhour\discs\2.cue" ".\Games\11thhour\discs\3.cue" ".\Games\11thhour\discs\4.cue" -t iso
+cd ..
+@c:
+@echo off
+cls
+echo.
+echo Press Ctrl-F4 when prompted to switch CD's.
+echo.
+pause
+@call run
+exit
+```
+
+#### Pim-Pam-Pum (1992)
+
+The archive of the game contains some strange file with a special character at the beginning which seems to be unused by the game.
+Unzip the `Pim-Pam-Pum (1992).zip` archive, suppress the file (named eihter `_EC.SAM` or some variation with a special character instead of `_`).
+Then recompress folder `PimPam` and rename the zip as `Pim-Pam-Pum (1992).zip`
+
+#### BAT 2 - The Koshan Conspiracy (1992).zip
+
+This floppy version uses the CD of the CD version
+
+The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\KCDFlop` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+cd ..
+@cd ..
+@mount c .\Games\
+@c:
+cls
+@cd kcdflop
+@koshan.com
+exit
+```
+
+#### Enterprise (1989)
+
+An extra imgmount command is used which shouldn't be here
+
+The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\Enterp89` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+mount c .\Games\Enterp89
+c:
+@cls
+@boot ENTERPRI.IMG -l a
+exit
+```
+
+#### Zombieville (1997)
+
+The game is fine but the cue file are not properly recognized by the converter
+Unzip the `Zombieville (1997).zip` archive, and modify the first lines of the two cue files.
+For `Zombieville.Cd1Of2.cue` : `FILE "Zombieville.Cd1Of2.bin" BINARY`  
+For `Zombieville.Cd2Of2.cue` : `FILE "Zombieville.Cd2Of2.bin" BINARY`
+
+Then recompress folder `zombvill` and rename the zip as `Zombieville (1997).zip`
