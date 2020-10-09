@@ -102,7 +102,7 @@ A few games in eXoDOS v4 have some conversion issues with this tool.
 
 The generation autodetects some error but the game actually should run fine.
 
-The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\11thHour` of the collection can be fixed like that to pass generation:
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\11thHour` of the collection can be fixed like that to pass generation:
 ```
 [autoexec]
 mount c .\Games\
@@ -129,7 +129,7 @@ Then recompress folder `PimPam` and rename the zip as `Pim-Pam-Pum (1992).zip`
 
 This floppy version uses the CD of the CD version
 
-The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\KCDFlop` of the collection can be fixed like that to pass generation:
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\KCDFlop` of the collection can be fixed like that to pass generation:
 ```
 [autoexec]
 cd ..
@@ -146,7 +146,7 @@ exit
 
 An extra imgmount command is used which shouldn't be here
 
-The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\Enterp89` of the collection can be fixed like that to pass generation:
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\Enterp89` of the collection can be fixed like that to pass generation:
 ```
 [autoexec]
 mount c .\Games\Enterp89
@@ -166,11 +166,11 @@ For `Zombieville.Cd2Of2.cue` : `FILE "Zombieville.Cd2Of2.bin" BINARY`
 Then recompress folder `zombvill` and rename the zip as `Zombieville (1997).zip`
 
 
-### Das Hexagon-Kartell
+#### Das Hexagon-Kartell
 
 Typo in the `dosbox.conf` for the game
 
-The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\DasHexag` of the collection can be fixed like that to pass generation:
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\DasHexag` of the collection can be fixed like that to pass generation:
 ```
 [autoexec]
 echo off
@@ -185,5 +185,41 @@ echo.
 pause
 cls
 @call HEXAGON
+exit
+```
+
+
+#### Orion Burger (1996) (Linux only)
+
+One of the paths in `dosbox.conf` of the game doesn't use the right case.  
+However, the converted game should run fine in DOSBox
+
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\burger` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+@mount c .\Games\BURGER
+imgmount d .\Games\burger\cd\DBURGER.cue -t cdrom
+@c:
+cd burger
+cls
+@call run
+exit
+```
+
+
+#### Panoplia: The Full Armor of God (1991) (Linux only)
+
+One of the paths in `dosbox.conf` of the game doesn't use the right case.  
+However, the converted game should run fine in DOSBox
+
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\panoplia` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+mount c .\Games\Panoplia
+imgmount a .\Games\panoplia\floppy\panoplia.ima -t floppy
+c:
+cd panoplia
+@cls
+@panoplia
 exit
 ```

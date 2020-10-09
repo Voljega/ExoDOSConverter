@@ -221,8 +221,8 @@ class CommandHandler:
                 #                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else:
-            if not os.path.exists(os.path.join(localGameOutputDir, game, path)):
-                self.logger.log("      <ERROR> path %s doesn't exist" % cdFileFullPath)
+            if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(path))):
+                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath))
             return path
 
     # Cleans cue files content to dos compatible 8 char name
