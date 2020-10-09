@@ -417,6 +417,7 @@ class ExoGUI:
         self.conversionTypeComboBox['state'] = 'disabled'
         self.exodosVersionComboBox['state'] = 'disabled'
         self.useGenreSubFolderCheckButton['state'] = 'disabled'
+        self.mapperComboBox['state'] = 'disabled'
         self.collectionEntry['state'] = 'disabled'
         self.outputEntry['state'] = 'disabled'
 
