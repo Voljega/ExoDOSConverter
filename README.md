@@ -206,6 +206,19 @@ cls
 exit
 ```
 
+#### Touchdown Football (1984) (Linux only)
+
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\burger` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+mount c .\Games\Touchdow
+c:
+cd Touchdow
+cls
+@boot "TPCJR.img" -l a
+exit
+```
+
 
 #### Panoplia: The Full Armor of God (1991) (Linux only)
 
