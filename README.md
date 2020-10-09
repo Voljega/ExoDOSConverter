@@ -164,3 +164,26 @@ For `Zombieville.Cd1Of2.cue` : `FILE "Zombieville.Cd1Of2.bin" BINARY`
 For `Zombieville.Cd2Of2.cue` : `FILE "Zombieville.Cd2Of2.bin" BINARY`
 
 Then recompress folder `zombvill` and rename the zip as `Zombieville (1997).zip`
+
+
+### Das Hexagon-Kartell
+
+Typo in the `dosbox.conf` for the game
+
+The `[autoexec]` part of `dosbox.cfg` file in the `eXoDOS\Games\!dos\DasHexag` of the collection can be fixed like that to pass generation:
+```
+[autoexec]
+echo off
+mount c .\Games\DasHexag
+imgmount d ".\Games\DasHexag\CD\HEXAGON_CD1.iso" ".\Games\DasHexag\CD\HEXAGON_CD2.iso" -t cdrom
+c:
+@cd HEXAGON
+cls
+echo.
+echo This game spans 2 CDs. Press Ctrl+F4 when prompted to switch to the next disc.
+echo.
+pause
+cls
+@call HEXAGON
+exit
+```
