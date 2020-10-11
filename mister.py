@@ -21,6 +21,8 @@ def launchAndMounts(game, outputDir, localGameOutputDir, logger):
             elif line.startswith("boot"):
                 launchBat.write(
                     convertBoot(line, game, outputDir, localGameOutputDir, logger))
+            elif line.lower() in ['d:','f:','g:','h:','i:','j:','k:']:
+                launchBat.write('e:\n')
             else:
                 launchBat.write(line+'\n')
     # Change imgmount iso command to imgset ide10 cdgames/gamefolder/game.iso
@@ -54,7 +56,7 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
     path = params[pathPos].replace('"', '')
     if params[0] in ['imgmount','mount']:
         if params[-1].rstrip('\n\r ') == 'cdrom':
-            return convertCD(path, game, outputDir, localGameOutputDir, logger)
+            return convertCD(path, game, params[0], outputDir, localGameOutputDir, logger)
         elif params[-1].rstrip('\n\r ') == 'floppy':
             return convertFloppy(path, game, outputDir, localGameOutputDir, outputDir, logger)
         else:  # Treat default version as cd
@@ -64,22 +66,43 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
 
 
 # Convert cds file
-def convertCD(path, game, outputDir, localGameOutputDir, logger):
+def convertCD(path, game, command, outputDir, localGameOutputDir, logger):
     # Locate CDs files
-    localPath = util.localOutputPath(os.path.join(localGameOutputDir,path))
-    if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(localGameOutputDir,game, path))
-    # Move cds file
-    if not os.path.exists(os.path.join(outputDir, 'cd')) or not os.path.exists(os.path.join(outputDir, 'cd', game)):
-        os.makedirs(os.path.join(outputDir, 'cd', game))
-    imgmountDir = os.path.dirname(localPath)
+    if command == "imgmount":
+        localPath = util.localOutputPath(os.path.join(localGameOutputDir,path))
+        if not os.path.exists(localPath):
+            localPath = util.localOutputPath(os.path.join(localGameOutputDir, game, path))
+    else:
+        localPath = util.localOutputPath(os.path.join(outputDir,path))
+        if not os.path.exists(localPath):
+            localPath = util.localOutputPath(os.path.join(outputDir, game, path))
 
-    cdFiles = [file for file in os.listdir(imgmountDir) if os.path.splitext(file)[-1].lower() in ['.ccd', '.sub','.cue', '.iso', '.img', '.bin']]
-    for cdFile in cdFiles:
-        logger.log("      move %s to %s folder" % (cdFile, 'cd'))
-        shutil.move(os.path.join(imgmountDir,cdFile),os.path.join(outputDir,'cd',game))
-    # Modify and return command line
-    return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"'
+    # Move cds file
+    if not os.path.exists(os.path.join(outputDir, 'cd')):
+        os.mkdir(os.path.join(outputDir, 'cd'))
+
+    if platform.system() == 'Windows':
+        localPath = localPath.replace('/','\\')
+
+    if os.path.isdir(localPath):
+        if localPath.endswith('\\'):
+            localPath = localPath[:-1]
+        logger.log("      subst folder %s as e:" % ntpath.basename(localPath))
+        # TODO if the mount letter was D this is not gonna work ....
+        return 'subst /d e:\nsubst e: ' + ntpath.basename(localPath)
+    else:
+        # Move cds file
+        if not os.path.exists(os.path.join(outputDir, 'cd', game)):
+            os.mkdir(os.path.join(outputDir, 'cd', game))
+
+        imgmountDir = os.path.dirname(localPath)
+
+        cdFiles = [file for file in os.listdir(imgmountDir) if os.path.splitext(file)[-1].lower() in ['.ccd', '.sub','.cue', '.iso', '.img', '.bin']]
+        for cdFile in cdFiles:
+            logger.log("      move %s to %s folder" % (cdFile, 'cd'))
+            shutil.move(os.path.join(imgmountDir,cdFile),os.path.join(outputDir,'cd',game))
+        # Modify and return command line
+        return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"'
 
 
 # Convert floppy file
@@ -96,6 +119,8 @@ def convertFloppy(path, game, outputDir, localGameOutputDir, rootFloppyPath, log
         localPath = localPath.replace('/','\\')
 
     if os.path.isdir(localPath):
+        if localPath.endswith('\\'):
+            localPath = localPath[:-1]
         logger.log("      subst folder %s as a:" % ntpath.basename(localPath))
         return 'subst /d a:\nsubst a: ' + ntpath.basename(localPath)
     else:
@@ -111,7 +136,6 @@ def convertFloppy(path, game, outputDir, localGameOutputDir, rootFloppyPath, log
 def createSetupBat(localGameOutputDir, game):
     setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w')
     setupBat.write('@echo off\n')
-    # TODO same path here than in launch.bat
     setupBat.write('cd %s\n' % game)
     setupBat.write('\n')
     setupBat.write('IF EXIST setsound.exe goto :sound1\n')
