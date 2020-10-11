@@ -2,6 +2,7 @@ import os
 import util
 import shutil
 import ntpath
+import platform
 
 
 # Creates launch.bat and handles mount and imgmount paths
@@ -28,6 +29,7 @@ def launchAndMounts(game, outputDir, localGameOutputDir, logger):
     launchBat.close()
     dosboxBat.close()
     createSetupBat(localGameOutputDir, game)
+    createEditBat(localGameOutputDir, game)
     os.remove(os.path.join(localGameOutputDir, 'dosbox.bat'))
 
 
@@ -38,7 +40,7 @@ def convertImgMount(line, game, outputDir, localGameOutputDir, logger):
 
 # Convert mount command for MiSTeR
 def convertMount(line, game, outputDir, localGameOutputDir, logger):
-    return handlesFileType(line, 1, game, outputDir, localGameOutputDir, logger)
+    return handlesFileType(line, 2, game, outputDir, localGameOutputDir, logger)
 
 
 # Convert boot command for MiSTeR
@@ -54,18 +56,18 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
         if params[-1].rstrip('\n\r ') == 'cdrom':
             return convertCD(path, game, outputDir, localGameOutputDir, logger)
         elif params[-1].rstrip('\n\r ') == 'floppy':
-            return convertFloppy(path, game, outputDir, localGameOutputDir, logger)
-        else : # Treat default version as cd
+            return convertFloppy(path, game, outputDir, localGameOutputDir, outputDir, logger)
+        else:  # Treat default version as cd
             return convertCD(path, game, outputDir, localGameOutputDir, logger)
     else: # Boot command
-        return convertFloppy(path, game, outputDir, localGameOutputDir, logger)
+        return convertFloppy(path, game, outputDir, localGameOutputDir, localGameOutputDir, logger)
 
 
 # Convert cds file
 def convertCD(path, game, outputDir, localGameOutputDir, logger):
     # Locate CDs files
     localPath = util.localOutputPath(os.path.join(localGameOutputDir,path))
-    if not os.path.exists(localPath) :
+    if not os.path.exists(localPath):
         localPath = util.localOutputPath(os.path.join(localGameOutputDir,game, path))
     # Move cds file
     if not os.path.exists(os.path.join(outputDir, 'cd')) or not os.path.exists(os.path.join(outputDir, 'cd', game)):
@@ -81,19 +83,28 @@ def convertCD(path, game, outputDir, localGameOutputDir, logger):
 
 
 # Convert floppy file
-def convertFloppy(path, game, outputDir, localGameOutputDir, logger):
+def convertFloppy(path, game, outputDir, localGameOutputDir, rootFloppyPath, logger):
     # Locate floppy file
-    localPath = util.localOutputPath(os.path.join(localGameOutputDir, path))
+    localPath = util.localOutputPath(os.path.join(rootFloppyPath, path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(localGameOutputDir, game, path))
+        localPath = util.localOutputPath(os.path.join(rootFloppyPath, game, path))
     # Move bootable file
-    if not os.path.exists(os.path.join(outputDir, 'floppy')) or not os.path.exists(
-            os.path.join(outputDir, 'floppy', game)):
-        os.makedirs(os.path.join(outputDir, 'floppy', game))
-    logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'floppy'))
-    shutil.move(localPath, os.path.join(outputDir, 'floppy', game))
-    # Modify and return command line
-    return 'imgset fdd0 "/floppy/' + game + '/' + ntpath.basename(localPath) + '"'
+    if not os.path.exists(os.path.join(outputDir, 'floppy')):
+        os.mkdir(os.path.join(outputDir, 'floppy'))
+
+    if platform.system() == 'Windows':
+        localPath = localPath.replace('/','\\')
+
+    if os.path.isdir(localPath):
+        logger.log("      subst folder %s as a:" % ntpath.basename(localPath))
+        return 'subst /d a:\nsubst a: ' + ntpath.basename(localPath)
+    else:
+        if not os.path.exists(os.path.join(outputDir, 'floppy', game)):
+            os.mkdir(os.path.join(outputDir, 'floppy', game))
+        logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'floppy'))
+        shutil.move(localPath, os.path.join(outputDir, 'floppy', game))
+        # Modify and return command line
+        return 'imgset fdd0 "/floppy/' + game + '/' + ntpath.basename(localPath) + '"'
 
 
 # Create Setup.bat file
@@ -101,7 +112,7 @@ def createSetupBat(localGameOutputDir, game):
     setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w')
     setupBat.write('@echo off\n')
     # TODO same path here than in launch.bat
-    setupBat.write('cd %s\n' %game)
+    setupBat.write('cd %s\n' % game)
     setupBat.write('\n')
     setupBat.write('IF EXIST setsound.exe goto :sound1\n')
     setupBat.write('IF EXIST sound.exe goto :sound2\n')
@@ -147,3 +158,10 @@ def createSetupBat(localGameOutputDir, game):
     setupBat.write(':END\n')
     setupBat.write('CLS\n')
     setupBat.close()
+
+
+# Create Edit.bat file
+def createEditBat(localGameOutputDir, game):
+    editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w')
+    editBat.write('@echo off\nedit 1_Start.bat\n')
+    editBat.close()
