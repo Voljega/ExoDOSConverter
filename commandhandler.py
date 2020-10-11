@@ -162,6 +162,9 @@ class CommandHandler:
         gameString = "/" + genre + "/" + game + ".pc" if useGenreSubFolders else "/" + game + ".pc"
         prString = util.getRomsFolderPrefix(conversionType) + gameString + prString.strip()
         prString = ' "' + prString.replace("\\", "/") + '"'
+        # Needs windows absolute path for retrobat
+        if conversionType == util.retrobat:
+            prString = prString.replace("/","\\")
 
         fullString = " ".join(command[0:startIndex + 1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    mount path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))

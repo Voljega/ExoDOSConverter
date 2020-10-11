@@ -1,5 +1,6 @@
 import os
 import shutil
+import mister
 import subprocess
 import sys
 import traceback
@@ -162,20 +163,9 @@ class ExoDOSConverter:
         self.logger.log("  MiSTer post-conversion")
         # Remove any C: from dosbox.bat, rename to launch.bat, remove dosbox.cfg
         os.remove(os.path.join(localGameOutputDir, 'dosbox.cfg'))
-        dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')
-        launchBat = open(os.path.join(localGameOutputDir, "launch.bat"), 'w')
-        lines = dosboxBat.readlines()
-        for line in lines:
-            if line.lower().rstrip(' \n\r') != 'c:':
-                launchBat.write(line)
-        launchBat.close()
-        dosboxBat.close()
-        os.remove(os.path.join(localGameOutputDir, 'dosbox.bat'))
+        # Move CDs to cdgames/gamefolder and rename commands
+        mister.launchAndMounts(game, self.outputDir, localGameOutputDir, self.logger)
         shutil.move(os.path.join(localGameOutputDir,util.getCleanGameID(metadata, '.txt')),os.path.join(localGameOutputDir,'about.txt'))
-        # Move CDs to cdgames/gamefolder
-        # Change imgmount iso command to imgset ide10 cdgames/gamefolder/game.iso
-        # Include imgset in the outputDir ?
-        # Convert imgmount or mount of floppy to imgset fdd0 /floppy/filename.img
         # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
         # Zip internal game dir to longgamename.zip
         shutil.make_archive(os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '')), 'zip', localGameOutputDir)

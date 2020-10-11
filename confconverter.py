@@ -1,5 +1,6 @@
 import os
 from commandhandler import CommandHandler
+import util
 
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
@@ -29,11 +30,18 @@ class ConfConverter:
             if cmdline.startswith("fullscreen"):
                 retroDosboxCfg.write("fullscreen=true\n")
             elif cmdline.startswith("fullresolution"):
-                retroDosboxCfg.write("fullresolution=desktop\n")
+                if self.conversionType == util.retrobat:
+                    retroDosboxCfg.write(cmdline)
+                else :
+                    retroDosboxCfg.write("fullresolution=desktop\n")
             elif cmdline.startswith("output"):
-                retroDosboxCfg.write("output=texture\n")
+                if self.conversionType == util.retrobat:
+                    retroDosboxCfg.write(cmdline)
+                else :
+                    retroDosboxCfg.write("output=texture\n")
                 retroDosboxCfg.write("renderer = auto\n")
                 retroDosboxCfg.write("vsync=false\n")
+            # Always write these
             elif cmdline.startswith("aspect"):
                 retroDosboxCfg.write("aspect=true\n")
             elif cmdline.startswith("buttonwrap"):
