@@ -437,7 +437,7 @@ class ExoGUI:
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir):
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)
         else:
-            exoDOSConverter = ExoDOSConverter(games, self.cache, collectionDir, gamesDosDir, outputDir, conversionType,
+            exoDOSConverter = ExoDOSConverter(games, self.cache, self.scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
                                               useGenreSubFolders, self.logger)
             _thread.start_new(exoDOSConverter.convertGames, ())
 

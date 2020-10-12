@@ -13,9 +13,10 @@ from zipfile import ZipFile, ZIP_DEFLATED
 # Main Converter
 class ExoDOSConverter:
 
-    def __init__(self, games, cache, collectionDir, gamesDosDir, outputDir, conversionType, useGenreSubFolders, logger):
+    def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType, useGenreSubFolders, logger):
         self.games = games
         self.cache = cache
+        self.scriptDir = scriptDir
         self.exoDosDir = os.path.join(collectionDir, 'eXoDOS')
         self.logger = logger
         self.gamesDosDir = gamesDosDir
@@ -157,6 +158,18 @@ class ExoDOSConverter:
             self.postConversionForOpenDingux(game, genre, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType == util.mister:
             self.postConversionForMister(game, genre, localGameOutputDir, localParentOutputDir, metadata)
+        elif self.conversionType == util.recalbox:
+            self.postConversionForRecalbox(game, genre, localGameOutputDir, localParentOutputDir, metadata, )
+
+    # Post-conversion for Recalbox for a given game
+    def postConversionForRecalbox(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
+        self.logger.log("  Recalbox post-conversion")
+        p2kTemplate = open(os.path.join(self.scriptDir,'data','P2K.template.txt'),'r')
+        p2kFile = open(os.path.join(localParentOutputDir,game+'.pc.p2k.cfg'),'w')
+        for line in p2kTemplate.readlines():
+            p2kFile.write(line.replace('{GameID}', metadata.name))
+        p2kFile.close()
+        p2kTemplate.close()
 
     # Post-conversion for MiSTeR for a given game
     def postConversionForMister(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):

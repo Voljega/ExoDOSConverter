@@ -1,0 +1,75 @@
+# Recalbox's Pad-to-Keyboard configuration
+#{GameID}
+#DOS
+ 
+# dpad to arrow keys
+0:up = up
+0:down = down
+0:right = right
+0:left = left
+0:j1up = up
+0:j1down = down
+0:j1right = right
+0:j1left = left
+
+# Start c'est Enter
+0:start = enter ;; Entree
+# Select c'est Escape
+0:select = esc ;; Retour
+
+# X c'est ctrl
+0:b = leftctrl ;; Fire
+# O c'est '
+0:a = S07 ;; Next Weapon
+# /\ c'est espace
+0:x = space
+# [] c'est Alt
+0:y = leftalt ;; Strafe
+
+#L1 c'est PageUp
+0:l1 = home ;; Aim up
+#L2 c'est PageDown
+0:l2 = end ;; Aim down
+
+#R1 c'est Q
+0:r1 = a ;; Jump
+#R2 c'est C
+0:r2 = z ;; Crouch
+#L3 c'est N
+0:l3 = n ;; No (N)
+#R3 c'est Y
+0:r3 = y ;; Yes (Y)
+
+#hotkey c'est quitter
+0:hotkey = F9 ;; Hotkey du Reset pour quitter
+
+#Format a Respecter : 
+#n°PAD (0 par defaut):ACTION = KEYBOARD KEY
+#https://gblobscdn.gitbook.com/assets%2F-LdKWTKrrUvJVmGP83hw%2F-M6aDDoaznN3j6JMGFqb%2F-M6aDPL6keVccv58ghs5%2FP2K-layout-v2.png?alt=media&token=e1f7524c-9ada-4083-a854-b66410d5a74e
+
+#Actions Joystick : 
+#up			Digital PAD, direction haute
+#down		Digital PAD, direction basse
+#left		Digital PAD, direction gauche
+#right		Digital PAD, direction droite
+#j1up		Joystick #1 (gauche), direction haute
+#j1down		Joystick #1 (gauche), direction basse
+#j1left		Joystick #1 (gauche), direction gauche
+#j1right	Joystick #1 (gauche), direction droite
+#a			Bouton A
+#b			Bouton B
+#x			Bouton X
+#y			Bouton Y
+#start		Bouton START
+#select		Bouton SELECT
+#l1			Bouton L1
+#l2			Bouton L2
+#r1			Bouton R1
+#r2			Bouton R2
+#l3			Bouton L3
+#r3			Bouton R3
+#hotkey		Bouton HOTKEY
+#j2up		Joystick #2 (droite), direction haute
+#j2down		Joystick #2 (droite), direction basse
+#j2left		Joystick #2 (droite), direction gauche
+#j2right	Joystick #2 (droite), direction droite
