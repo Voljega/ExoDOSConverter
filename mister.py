@@ -18,7 +18,9 @@ def launchAndMounts(game, outputDir, localGameOutputDir, logger):
             elif line.startswith("mount"):
                 launchBat.write(convertMount(line, game, outputDir, localGameOutputDir, logger))
             elif line.startswith("boot"):
-                if line != 'boot -l c' and line != 'boot':
+                if line == 'boot -l c':
+                    launchBat.write('imgset r\n')
+                elif line != 'boot':
                     launchBat.write(convertBoot(line, game, outputDir, localGameOutputDir, logger))
                 else:
                     logger.log('      <ERROR> Impossible to convert %s command' % line)
@@ -66,7 +68,10 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
             return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
         else:  # Treat default version as cd
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            return convertCD(localPath, game, outputDir, localGameOutputDir, logger)
+            if params[1].rstrip('\n\r ') == 'c':
+                return convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger)
+            else:
+                return convertCD(localPath, game, outputDir, localGameOutputDir, logger)
     else:  # Boot command
         localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
         return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
@@ -107,7 +112,7 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger):
             logger.log("      move %s to %s folder" % (cdFile, 'cd'))
             shutil.move(os.path.join(imgmountDir,cdFile),os.path.join(outputDir,'cd',game))
         # Modify and return command line
-        return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"'
+        return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
 
 
 # Convert floppy file
@@ -124,7 +129,24 @@ def convertFloppy(localPath, game, outputDir, localGameOutputDir, logger):
         logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'floppy'))
         shutil.move(localPath, os.path.join(outputDir, 'floppy', game))
         # Modify and return command line
-        return 'imgset fdd0 "/floppy/' + game + '/' + ntpath.basename(localPath) + '"'
+        return 'imgset fdd0 "/floppy/' + game + '/' + ntpath.basename(localPath) + '"\n'
+
+
+# Convert bootdisk file
+def convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger):
+    # Move bootable file
+    if not os.path.exists(os.path.join(outputDir, 'bootdisk')):
+        os.mkdir(os.path.join(outputDir, 'bootdisk'))
+
+    if os.path.isdir(localPath):
+        return convertMountedFolder('c', localPath, game, outputDir, localGameOutputDir, logger)
+    else:
+        if not os.path.exists(os.path.join(outputDir, 'bootdisk', game)):
+            os.mkdir(os.path.join(outputDir, 'bootdisk', game))
+        logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'bootdisk'))
+        shutil.move(localPath, os.path.join(outputDir, 'bootdisk', game, os.path.splitext(ntpath.basename(localPath))[0]+'.vhd'))
+        # Modify and return command line
+        return 'imgset ide00 "/bootdisk/' + game + '/' + os.path.splitext(ntpath.basename(localPath))[0]+'.vhd' + '"\n'
 
 
 # Convert mounted or imgmounted folder
