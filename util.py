@@ -16,7 +16,8 @@ mister = 'MiSTer'
 simplemenu = 'OpenDingux/SimpleMenu'
 esoteric = 'OpenDingux/Esoteric'
 retrobat = 'Retrobat'
-conversionTypes = [batocera, recalbox, retropie, retrobat, simplemenu, esoteric, mister]
+emuelec = 'Emuelec'
+conversionTypes = [batocera, recalbox, retropie, retrobat, emuelec, simplemenu, esoteric, mister]
 
 exodosVersions = ['v4', 'v5']
 
@@ -85,6 +86,8 @@ def getRomsFolderPrefix(conversionType):
         return "/home/pi/RetroPie/roms/pc"
     elif conversionType == retrobat:
         return r"..\\..\\roms\\dos"
+    elif conversionType == emuelec :
+        return "/storage/roms/pcdata"
     else:
         return "."
 

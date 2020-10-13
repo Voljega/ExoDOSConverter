@@ -63,6 +63,19 @@ class ExoDOSConverter:
                 os.remove(os.path.join(self.outputDir, 'gamelist.xml'))
             if os.path.exists(os.path.join(self.outputDir, 'downloaded_images')):
                 shutil.rmtree(os.path.join(self.outputDir, 'downloaded_images'))
+        elif self.conversionType == util.emuelec:
+            self.logger.log('Post cleaning for ' + self.conversionType)
+            # move gamelist downloaded_images, manuals
+            if os.path.exists(os.path.join(self.outputDir, 'gamelist.xml')):
+                shutil.move(os.path.join(self.outputDir, 'gamelist.xml'), os.path.join(self.outputDir, 'pc'))
+            if os.path.exists(os.path.join(self.outputDir, 'manuals')):
+                shutil.move(os.path.join(self.outputDir, 'manuals'), os.path.join(self.outputDir, 'pc'))
+            if os.path.exists(os.path.join(self.outputDir, 'downloaded_images')):
+                shutil.move(os.path.join(self.outputDir, 'downloaded_images'), os.path.join(self.outputDir, 'pc'))
+            # delete empty genres dir
+            dirs = [file for file in os.listdir(self.outputDir) if os.path.isdir(os.path.join(self.outputDir,file)) and file not in ['pc','pcdata']]
+            for genreDir in dirs:
+                shutil.rmtree(os.path.join(self.outputDir,genreDir))
 
         self.logger.log('\n<--------- Finished Process --------->')
 
@@ -159,7 +172,46 @@ class ExoDOSConverter:
         elif self.conversionType == util.mister:
             self.postConversionForMister(game, genre, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType == util.recalbox:
-            self.postConversionForRecalbox(game, genre, localGameOutputDir, localParentOutputDir, metadata, )
+            self.postConversionForRecalbox(game, genre, localGameOutputDir, localParentOutputDir, metadata )
+        elif self.conversionType == util.emuelec:
+            self.postConversionForEmuelec(game, genre, localGameOutputDir, localParentOutputDir, self. outputDir, metadata)
+
+    # Post-conversion for Emuelec for a given game
+    def postConversionForEmuelec(self, game, genre, localGameOutputDir, localParentOutputDir, outputDir, metadata):
+        self.logger.log("  Emuelec post-conversion")
+        # create pcdata and pc subfolders in outputdir
+        if not os.path.exists(os.path.join(outputDir,'pcdata')):
+            os.mkdir(os.path.join(outputDir,'pcdata'))
+        if not os.path.exists(os.path.join(outputDir,'pc')):
+            os.mkdir(os.path.join(outputDir,'pc'))
+        # move *.pc folder to pcdata folder
+        shutil.move(os.path.join(localParentOutputDir,game + '.pc'),os.path.join(outputDir,'pcdata'))
+        os.rename(os.path.join(outputDir,'pcdata',game+'.pc'),os.path.join(outputDir,'pcdata',game))
+        # move *.bat *.map and *.cfg to pc/*.pc folder and rename *.cfg to dosbox-SDL2.conf
+        emuelecConfOutputDir = os.path.join(outputDir,'pc',genre, game+".pc") if self.useGenreSubFolders else os.path.join(outputDir,'pc',game+".pc")
+        if not os.path.exists(emuelecConfOutputDir) :
+            os.makedirs(emuelecConfOutputDir)
+        shutil.move(os.path.join(outputDir,'pcdata',game,'dosbox.bat'),emuelecConfOutputDir)
+        shutil.move(os.path.join(outputDir, 'pcdata', game, 'dosbox.cfg'), os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'))
+        shutil.copy2(os.path.join(outputDir, 'pcdata', game, util.getCleanGameID(metadata,'.txt')), emuelecConfOutputDir)
+        if os.path.exists(os.path.join(outputDir, 'pcdata', game, 'mapper.map')):
+            shutil.move(os.path.join(outputDir, 'pcdata', game, 'mapper.map'), emuelecConfOutputDir)
+        # modify dosbox-SDL2.conf to add mount c /storage/roms/pcdata/game at the beginning of autoexec.bat
+        dosboxCfg = open(os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'), 'a')
+        # add mount c at end of dosbox.cfg
+        romsFolder = util.getRomsFolderPrefix(self.conversionType)
+        emuelecGameDir = romsFolder + "/" + genre + "/" + game if self.useGenreSubFolders else romsFolder + "/" + game
+        dosboxCfg.write("mount c " + emuelecGameDir + "\n")
+        dosboxCfg.write("c:\n")
+        # copy all instructions from dosbox.bat to end of dosbox.cfg
+        dosboxBat = open(os.path.join(emuelecConfOutputDir, "dosbox.bat"), 'r')  # retroarch dosbox.bat
+        for cmdLine in dosboxBat.readlines():
+            dosboxCfg.write(cmdLine)
+        # delete dosbox.bat
+        dosboxCfg.close()
+        dosboxBat.close()
+        # delete dosbox.bat
+        os.remove(os.path.join(emuelecConfOutputDir,"dosbox.bat"))
 
     # Post-conversion for Recalbox for a given game
     def postConversionForRecalbox(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
