@@ -177,7 +177,7 @@ class ExoDOSConverter:
         # Remove any C: from dosbox.bat, rename to launch.bat, remove dosbox.cfg
         os.remove(os.path.join(localGameOutputDir, 'dosbox.cfg'))
         # Move CDs to cdgames/gamefolder and rename commands
-        mister.launchAndMounts(game, self.outputDir, localGameOutputDir, self.logger)
+        mister.batsAndMounts(game, self.outputDir, localGameOutputDir, self.logger)
         shutil.move(os.path.join(localGameOutputDir,util.getCleanGameID(metadata, '.txt')),os.path.join(localGameOutputDir,'2_About.txt'))
         # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
         # Zip internal game dir to longgamename.zip

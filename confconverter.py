@@ -67,7 +67,6 @@ class ConfConverter:
 
     # Creates dosbox.bat from dosbox.conf [autoexec] part
     def createDosboxBat(self, cmdlines, retroDosboxBat, retroDosboxCfg, game, localGameOutputDir, genre):
-        gameDir = os.path.join(self.exoDosDir, "Games", game)
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
 
         for cmdline in cmdlines:
@@ -84,7 +83,7 @@ class ConfConverter:
                     # remove cd to gamedir as it is already done, but keep others cd
                 elif cmdline.lower().startswith("cd "):
                     path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '), game)
-                    if path.lower() == game.lower() and not os.path.exists(os.path.join(gameDir, path)):
+                    if path.lower() == game.lower() and not os.path.exists(os.path.join(localGameOutputDir, game, path)):
                         self.logger.log(
                             "    cd command: '%s' -> path is game name and no existing subpath, removed" % cmdline.rstrip(
                                 '\n\r '))

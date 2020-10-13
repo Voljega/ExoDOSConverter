@@ -6,7 +6,7 @@ import platform
 
 
 # Creates launch.bat and handles mount and imgmount paths
-def launchAndMounts(game, outputDir, localGameOutputDir, logger):
+def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')
     launchBat = open(os.path.join(localGameOutputDir, "1_Start.bat"), 'w')
     lines = dosboxBat.readlines()
