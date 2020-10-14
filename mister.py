@@ -23,7 +23,7 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
                 elif line != 'boot':
                     launchBat.write(convertBoot(line, game, outputDir, localGameOutputDir, logger))
                 else:
-                    logger.log('      <ERROR> Impossible to convert %s command' % line)
+                    logger.log('      <ERROR> Impossible to convert %s command' % line, logger.WARNING)
                     launchBat.write(line + '\n')
             elif line.lower() in ['d:','f:','g:','h:','i:','j:','k:']:
                 launchBat.write('e:\n')

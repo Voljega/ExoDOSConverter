@@ -47,7 +47,7 @@ class ExoDOSConverter:
             try:
                 self.convertGame(game, gamelist, total, count)
             except:
-                self.logger.log('Error %s while converting game %s' % (sys.exc_info()[0], game))
+                self.logger.log('  Error %s while converting game %s' % (sys.exc_info()[0], game), self.logger.WARNING)
                 excInfo = traceback.format_exc()
                 errors[game] = excInfo
 
@@ -80,9 +80,9 @@ class ExoDOSConverter:
         self.logger.log('\n<--------- Finished Process --------->')
 
         if len(errors.keys()) > 0:
-            self.logger.log('\n<--------- Errors rundown --------->')
-            self.logger.log('%i errors were found during process' % len(errors.keys()))
-            self.logger.log('See error log in your outputDir')
+            self.logger.log('\n<--------- Errors rundown --------->', self.logger.WARNING)
+            self.logger.log('%i errors were found during process' % len(errors.keys()), self.logger.WARNING)
+            self.logger.log('See error log in your outputDir for more info', self.logger.WARNING)
             logFile = open(os.path.join(self.outputDir, 'error_log.txt'), 'w')
             for key in list(errors.keys()):
                 logFile.write("Found error when processing %s" % key + " :\n")
@@ -146,7 +146,7 @@ class ExoDOSConverter:
                 self.logger.log("  fixing extracted dir %s to !dos name %s" % (unzippedDirs[0], game))
                 os.rename(os.path.join(localGameOutputDir, unzippedDirs[0]), os.path.join(localGameOutputDir, game))
         else:
-            self.logger.log("  ERROR no zip file found in " + gameInstallBat)
+            self.logger.log("  ERROR no zip file found in " + gameInstallBat, self.logger.WARNING)
 
     # Copy game files and game dosbox.conf to output dir
     def copyGameFiles(self, game, localGameOutputDir, metadata):

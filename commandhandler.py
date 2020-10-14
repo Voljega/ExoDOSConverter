@@ -123,7 +123,7 @@ class CommandHandler:
                     chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
                     if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
                         if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
-                            self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)))
+                            self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)), self.logger.WARNING)
                 cleanedPath.append(path)
 
             bootPath = " ".join(cleanedPath)
@@ -150,7 +150,7 @@ class CommandHandler:
                 path = self.reducePath(paths[0].replace('"', ""), game)
                 prString = prString + " " + path
             else:
-                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE")
+                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE", self.logger.WARNING)
                 self.logger.logList("    paths", paths)
                 for path in paths:
                     path = self.reducePath(path.replace('"', ""), game)
@@ -225,7 +225,7 @@ class CommandHandler:
                 return cleanedPath
         else:
             if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(path))):
-                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath))
+                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath), self.logger.WARNING)
             return path
 
     # Cleans cue files content to dos compatible 8 char name

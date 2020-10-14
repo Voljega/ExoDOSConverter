@@ -449,6 +449,8 @@ class ExoGUI:
         self.logTest = Tk.Text(self.consoleFrame, height=25, state='disabled', wrap='word', background='black',
                                foreground='yellow')
         self.logTest.grid(column=0, row=0, sticky="EW")
+        self.logTest.tag_config('WARNING', background='black', foreground='red')
+        self.logTest.tag_config('INFO', background='black', foreground='yellow')
         self.scrollbar = Tk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL, command=self.logTest.yview)
         self.scrollbar.grid(column=1, row=0, sticky=(Tk.N, Tk.S))
         self.logTest['yscrollcommand'] = self.scrollbar.set
@@ -470,6 +472,6 @@ class ExoGUI:
             self.logTest.delete(1.0, 2.0)
         if self.logTest.index('end-1c') != '1.0':
             self.logTest.insert('end', '\n')
-        self.logTest.insert('end', msg)
+        self.logTest.insert('end', msg[1], msg[0])
         self.logTest.see(Tk.END)
         self.logTest['state'] = 'disabled'
