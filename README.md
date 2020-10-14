@@ -218,7 +218,7 @@ exit
 
 #### Touchdown Football (1984) (Linux only)
 
-The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\burger` of the collection can be fixed like that to pass generation:
+The `[autoexec]` part of `dosbox.conf` file in the `eXoDOS\Games\!dos\Touchdow` of the collection can be fixed like that to pass generation:
 ```
 [autoexec]
 mount c .\Games\Touchdow
