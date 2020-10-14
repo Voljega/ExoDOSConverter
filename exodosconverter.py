@@ -217,7 +217,7 @@ class ExoDOSConverter:
     def postConversionForRecalbox(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
         self.logger.log("  Recalbox post-conversion")
         p2kTemplate = open(os.path.join(self.scriptDir,'data','P2K.template.txt'),'r')
-        p2kFile = open(os.path.join(localParentOutputDir,game+'.pc.p2k.cfg'),'w')
+        p2kFile = open(os.path.join(localParentOutputDir,game+'.pc.p2k.cfg'),'w',encoding='utf-8')
         for line in p2kTemplate.readlines():
             p2kFile.write(line.replace('{GameID}', metadata.name))
         p2kFile.close()
