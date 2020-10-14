@@ -15,15 +15,15 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
         if line.lower() != 'c:':
             if line.startswith("imgmount"):
                 launchBat.write(convertImgMount(line, game, outputDir, localGameOutputDir, logger))
-            elif line.startswith("mount"):
+            elif line.startswith("mount") and not line.lower().startswith('mountain'):
                 launchBat.write(convertMount(line, game, outputDir, localGameOutputDir, logger))
-            elif line.startswith("boot"):
+            elif line.startswith("boot") and line != 'boots':
                 if line == 'boot -l c':
                     launchBat.write('imgset r\n')
-                elif line != 'boot':
+                elif line != 'boot' and line != 'boot -l a':
                     launchBat.write(convertBoot(line, game, outputDir, localGameOutputDir, logger))
                 else:
-                    logger.log('      <ERROR> Impossible to convert %s command' % line, logger.WARNING)
+                    logger.log('      <ERROR> Impossible to convert "%s" command' % line, logger.WARNING)
                     launchBat.write(line + '\n')
             elif line.lower() in ['d:','f:','g:','h:','i:','j:','k:']:
                 launchBat.write('e:\n')
@@ -60,9 +60,9 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
     # TODO Boot command without parameter will crash here, needs to be parsed properly
     path = params[pathPos].replace('"', '')
     if params[0] in ['imgmount','mount']:
-        if params[-1].rstrip('\n\r ') == 'cdrom':
+        if params[-1].rstrip('\n\r ') == 'cdrom' or params[-1].rstrip('\n\r ') == 'iso':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            return convertCD(localPath, game, outputDir, localGameOutputDir, logger)
+            return convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
         elif params[-1].rstrip('\n\r ') == 'floppy':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
             return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
@@ -88,12 +88,14 @@ def locateMountedFiles(path, command, game, outputDir, localGameOutputDir):
     if not os.path.exists(localPath):
         localPath = util.localOutputPath(os.path.join(outputDir, path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(outputDir, game, path))
+        localPath = util.localOutputPath(os.path.join(outputDir, game + '.pc', path))
+    if not os.path.exists(localPath):
+        localPath = util.localOutputPath(os.path.join(outputDir, game + '.pc', game, path))
     return localPath
 
 
 # Convert cds file
-def convertCD(localPath, game, outputDir, localGameOutputDir, logger):
+def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'):
     # Move cds file
     if not os.path.exists(os.path.join(outputDir, 'cd')):
         os.mkdir(os.path.join(outputDir, 'cd'))
@@ -107,12 +109,17 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger):
 
         imgmountDir = os.path.dirname(localPath)
 
-        cdFiles = [file for file in os.listdir(imgmountDir) if os.path.splitext(file)[-1].lower() in ['.ccd', '.sub', '.cue', '.iso', '.img', '.bin']]
+        cdFiles = [file for file in os.listdir(imgmountDir) if
+                   os.path.splitext(ntpath.basename(localPath))[0] == os.path.splitext(file)[0]
+                   and os.path.splitext(file)[-1].lower() in ['.ccd', '.sub', '.cue', '.iso', '.img', '.bin']]
         for cdFile in cdFiles:
             logger.log("      move %s to %s folder" % (cdFile, 'cd'))
-            shutil.move(os.path.join(imgmountDir,cdFile),os.path.join(outputDir,'cd',game))
+            shutil.move(os.path.join(imgmountDir, cdFile), os.path.join(outputDir, 'cd', game))
         # Modify and return command line
-        return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
+        if letter == 'd':
+            return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
+        else:
+            return 'imgset ide11 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
 
 
 # Convert floppy file
