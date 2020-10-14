@@ -36,11 +36,11 @@ This might evolve is some workaround are found to fully exploit this on Linux on
 For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
 This will be corrected when possible
 
-Fully supported distributions are Batocera, Recalbox, Retropie and OpenDingux.
+Fully supported distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat and OpenDingux.
 
-Next step is to add MiSTer compatibility
+MiSTer compatibility is beeing worked one at the moment
 
-### LINUX INSTALLATION AND EXECUTION :
+### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)
 - first install Tkinter for python3 if needed : `sudo apt-get install python3-tk`
 - directly download sources or clone the repo with :
@@ -59,6 +59,16 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 >Unzip `!DOSmetadata.zip` to the home dir of the collection, this should create a `eXoDOS/Games/!dos folder`
 
 - launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
+
+### Windows installation and execution :
+
+Either use the latest release or you can build your own version using one of these two options :
+- @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
+- read the `build.txt` 
+
+### MiSTeR
+
+The MiSTeR is intended to be used with MiSTeR AO486 core and TotalBox Launcher, the subject is covered in depth in @flynnsbit [video](https://www.youtube.com/watch?v=PVBkEm0lGsI)
 
 ## RG350
 
