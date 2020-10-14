@@ -110,6 +110,14 @@ def fullnameToGameDir(scriptDir):
 
 
 # Finds pic for a game in the three pics caches
+def findPics(name, cache):
+    frontPic = findPic(name, cache, '.jpg')
+    frontPic = frontPic if frontPic is not None else findPic(name, cache, '.png')
+    frontPic = frontPic if frontPic is not None else findPic(name, cache, '.gif')
+    return frontPic
+
+
+# Finds pic with ext for a game in the three pics caches
 def findPic(gameName, cache, ext):
     frontPicCache, titlePicCache, gameplayPicCache = cache
     imgName = (gameName + '-01' + ext).replace(':', '_').replace("'", '_')

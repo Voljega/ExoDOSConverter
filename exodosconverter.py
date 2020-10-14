@@ -232,6 +232,8 @@ class ExoDOSConverter:
         mister.batsAndMounts(game, self.outputDir, localGameOutputDir, self.logger)
         shutil.move(os.path.join(localGameOutputDir,util.getCleanGameID(metadata, '.txt')),os.path.join(localGameOutputDir,'2_About.txt'))
         # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
+        if metadata.frontPic is not None:
+            shutil.move(os.path.join(self.outputDir, 'downloaded_images', metadata.frontPic), os.path.join(localGameOutputDir, '5_About'+os.path.splitext(metadata.frontPic)[-1]))
         # Zip internal game dir to longgamename.zip
         shutil.make_archive(os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '')), 'zip', localGameOutputDir)
         # Delete everything unrelated
