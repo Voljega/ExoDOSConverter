@@ -1,7 +1,7 @@
 import os
 import stat
 import util
-
+import ntpath
 
 # Converts dosbox commands to desired format and paths, at the moment Batocera/ Recalbox linux flavor
 class CommandHandler:
@@ -114,17 +114,28 @@ class CommandHandler:
             cleanedPath = []
             if paths[0].startswith('"') and (paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
                 paths = [" ".join(paths)]
-                #TODO needs renaming in that case (spaces inside image name)
-            for path in paths:
-                if path not in ['-l', 'a', 'a:']:
-                    path = self.reducePath(path.replace('"', ""), game)
-                    # Verify path
-                    postfix = path.find('-l')
-                    chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
-                    if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
-                        if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
-                            self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)), self.logger.WARNING)
+                path = paths[0].replace('"','')
+                path = self.reducePath(path, game)
+                imgPath = os.path.dirname(path)
+                imgFullLocalPath = os.path.join(localGameOutputDir, util.localOutputPath(imgPath))
+                imgFile = ntpath.basename(path)
+                oldImgFilename = os.path.splitext(imgFile)[0]
+                imgFileExt = os.path.splitext(imgFile)[-1]
+                newImgFilename = self.dosRename(imgFullLocalPath, imgFile, oldImgFilename, imgFileExt, None)
+                self.logger.log("      renamed %s to %s" % (imgFile, newImgFilename + imgFileExt))
+                path = '"' + imgPath + '\\' + newImgFilename + imgFileExt + '"'
                 cleanedPath.append(path)
+            else:
+                for path in paths:
+                    if path not in ['-l', 'a', 'a:']:
+                        path = self.reducePath(path.replace('"', ""), game)
+                        # Verify path
+                        postfix = path.find('-l')
+                        chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
+                        if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
+                            if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
+                                self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)), self.logger.WARNING)
+                    cleanedPath.append(path)
 
             bootPath = " ".join(cleanedPath)
 
