@@ -5,6 +5,13 @@ conversionType;Conversion Type;Choose your conversion type
 exodosVersion;eXoDOS version;Your exoDOS collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
+debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
+expertMode;Expert mode;Allows overriding of generated configuration
+mountPrefix;Mount prefix; Mount command prefix
+fullresolutionCfg;fulllResolution;DOSBox fullresolution parameter
+rendererCfg;renderer;DOSBox renderer parameter
+outputCfg;output;DOSBox output parameter
+vsyncCfg;vsync;DOSBox vsync parameter
 filter;Filter games;Filter games
 selectall;Select all;Add all games to your selection
 unselectall;Unselect all;Remove all games from your selection
