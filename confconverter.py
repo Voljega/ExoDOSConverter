@@ -6,14 +6,22 @@ import util
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
 
-    def __init__(self, games, exoDosDir, outputDir, useGenreSubFolders, conversionType, logger):
+    def __init__(self, games, exoDosDir, outputDir, useGenreSubFolders, conversionType, conversionConf, logger):
         self.games = games
         self.logger = logger
         self.exoDosDir = exoDosDir
         self.outputDir = outputDir
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionType = conversionType
+        self.conversionConf = conversionConf
         self.commandHandler = CommandHandler(self.outputDir, self.logger)
+
+    # Handle Parameter in ExpertMod
+    def getExpertParam(self, parameter,defaultValue):
+        if self.conversionConf['useExpertMode']:
+            return self.conversionConf[parameter]
+        else:
+            return defaultValue
 
     # Converts exoDos dosbox.conf to dosbox.cfg and dosbox.bat
     def process(self, game, localGameOutputDir, genre):
@@ -24,23 +32,25 @@ class ConfConverter:
 
         count = 0
         lines = exoDosboxConf.readlines()
-        # TODO modify exoDos dosbox.conf to custom dosbox.cfg (including commenting [autoexec] part),
-        #  might need to be put in a function and reworked
         for cmdline in lines:
             if cmdline.startswith("fullscreen"):
                 retroDosboxCfg.write("fullscreen=true\n")
             elif cmdline.startswith("fullresolution"):
                 if self.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
-                else :
-                    retroDosboxCfg.write("fullresolution=desktop\n")
+                else:
+                    retroDosboxCfg.write("fullresolution=" + self.getExpertParam("fullresolutionCfg","desktop") + "\n")
             elif cmdline.startswith("output"):
                 if self.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
-                else :
-                    retroDosboxCfg.write("output=texture\n")
-                retroDosboxCfg.write("renderer = auto\n")
-                retroDosboxCfg.write("vsync=false\n")
+                else:
+                    retroDosboxCfg.write("output=" + self.getExpertParam("outputCfg","texture") + "\n")
+                retroDosboxCfg.write("renderer=" + self.getExpertParam("rendererCfg","auto") + "\n")
+                if self.conversionConf['vsyncCfg']:
+                    retroDosboxCfg.write("vsync=true\n")
+                else:
+                    retroDosboxCfg.write("vsync=false\n")
+
             # Always write these
             elif cmdline.startswith("aspect"):
                 retroDosboxCfg.write("aspect=true\n")
@@ -71,7 +81,8 @@ class ConfConverter:
 
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
-            retroDosboxCfg.write("# " + cmdline)
+            if self.conversionConf['useDebugMode']:
+                retroDosboxCfg.write("# " + cmdline)
             # always remove @
             cmdline = cmdline.lstrip('@ ')
 
@@ -92,11 +103,17 @@ class ConfConverter:
                         retroDosboxBat.write(cmdline)
                 elif cmdline.lower().startswith("imgmount "):
                     retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir))
-                    retroDosboxBat.write("\npause\n")
+                    if self.conversionConf['useDebugMode']:
+                        retroDosboxBat.write("\npause\n")
+                    else:
+                        retroDosboxBat.write("\n")
                 elif cmdline.lower().startswith("mount "):
                     retroDosboxBat.write(self.commandHandler.handleMount(cmdline, game, localGameOutputDir, genre,
-                                                                         self.useGenreSubFolders, self.conversionType))
-                    retroDosboxBat.write("\npause\n")
+                                                                         self.useGenreSubFolders, self.conversionType, self.conversionConf))
+                    if self.conversionConf['useDebugMode']:
+                        retroDosboxBat.write("\npause\n")
+                    else:
+                        retroDosboxBat.write("\n")
                 elif cmdline.lower().startswith("boot "):
                     retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, genre,
                                                                          self.useGenreSubFolders, self.conversionType))

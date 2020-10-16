@@ -144,7 +144,7 @@ class CommandHandler:
         return fullString
 
     # Converts mount command line
-    def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
+    def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType, conversionConf):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens=['a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
                                                                           endTokens=['-t'])
 
@@ -171,7 +171,7 @@ class CommandHandler:
         if prString.strip().startswith('.'):
             prString = prString.strip()[1:]
         gameString = "/" + genre + "/" + game + ".pc" if useGenreSubFolders else "/" + game + ".pc"
-        prString = util.getRomsFolderPrefix(conversionType) + gameString + prString.strip()
+        prString = util.getRomsFolderPrefix(conversionType, conversionConf) + gameString + prString.strip()
         prString = ' "' + prString.replace("\\", "/") + '"'
         # Needs windows absolute path for retrobat
         if conversionType == util.retrobat:

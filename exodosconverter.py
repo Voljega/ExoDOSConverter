@@ -13,7 +13,7 @@ import ntpath
 # Main Converter
 class ExoDOSConverter:
 
-    def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType, useGenreSubFolders, logger):
+    def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType, useGenreSubFolders, conversionConf, logger):
         self.games = games
         self.cache = cache
         self.scriptDir = scriptDir
@@ -23,9 +23,10 @@ class ExoDOSConverter:
         self.outputDir = outputDir
         self.conversionType = conversionType
         self.useGenreSubFolders = useGenreSubFolders
+        self.conversionConf = conversionConf
         self.metadataHandler = MetadataHandler(collectionDir, self.cache, self.logger)
         self.confConverter = ConfConverter(self.games, self.exoDosDir, self.outputDir, self.useGenreSubFolders,
-                                           self.conversionType, self.logger)
+                                           self.conversionType, self.conversionConf, self.logger)
 
     # Loops on all games to convert them
     def convertGames(self):

@@ -230,7 +230,6 @@ class ExoGUI:
     def checkExpertMode(self):
         if self.guiVars['expertMode'].get() != 1:
             self.mountPrefixEntry['state'] = 'disabled'
-            self.vsyncCfgCheckButton['state'] = 'disabled'
             self.fullResolutionCfgEntry['state'] = 'disabled'
             self.rendererCfgEntry['state'] = 'disabled'
             self.outputCfgEntry['state'] = 'disabled'
@@ -238,11 +237,11 @@ class ExoGUI:
             self.logger.log('Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information', self.logger.WARNING)
             if not self.loading :
                 messagebox.showwarning('Are you sure ?', 'Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information')
-            self.mountPrefixEntry['state'] = 'normal'
             self.vsyncCfgCheckButton['state'] = 'normal'
             self.fullResolutionCfgEntry['state'] = 'normal'
             self.rendererCfgEntry['state'] = 'normal'
             self.outputCfgEntry['state'] = 'normal'
+            self.mountPrefixEntry['state'] = 'normal'
 
     # Listener for collection path modifications
     def handleCollectionFolder(self, *args):
@@ -564,7 +563,7 @@ class ExoGUI:
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)
         else:
             exoDOSConverter = ExoDOSConverter(games, self.cache, self.scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
-                                              useGenreSubFolders, self.logger)
+                                              useGenreSubFolders, conversionConf, self.logger)
             _thread.start_new(exoDOSConverter.convertGames, ())
 
     # Console Frame    

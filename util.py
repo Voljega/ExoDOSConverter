@@ -76,9 +76,11 @@ def getCleanGameID(metadata, ext):
     return cleanGameName + ' (' + str(metadata.year) + ')' + ext
 
 
-# Returns distrib roms directory prefix
-def getRomsFolderPrefix(conversionType):
-    if conversionType == batocera:
+# Returns distrib roms directory prefix for mount command
+def getRomsFolderPrefix(conversionType, conversionConf):
+    if conversionConf['useExpertMode']:
+        return conversionConf['mountPrefix']
+    elif conversionType == batocera:
         return "/userdata/roms/dos"
     elif conversionType == recalbox:
         return "/recalbox/share/roms/dos"
