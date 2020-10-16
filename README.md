@@ -80,5 +80,5 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 
 ## Know issues
 
-A few games in eXoDOS v4 have some conversion issues with this tool.
+A few games in eXoDOS v4 have some conversion issues with this tool.  
 see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues)

@@ -62,7 +62,18 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
     if params[0] in ['imgmount','mount']:
         if params[-1].rstrip('\n\r ') == 'cdrom' or params[-1].rstrip('\n\r ') == 'iso':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            return convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+            misterCommand = convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+            # TODO Handle params[3] to -t to move cds to cd folder (case where multiple cds are mounted)
+            # params size > 5 ?
+            if len(params) > 5:
+                i = 3
+                while i < (len(params) - 2):
+                    print(params[i])
+                    localPath = locateMountedFiles(params[i].replace('"', ''), params[0], game, outputDir, localGameOutputDir)
+                    # Only move the other CDs
+                    convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+                    i = i + 1
+            return misterCommand
         elif params[-1].rstrip('\n\r ') == 'floppy':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
             return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
