@@ -3,8 +3,12 @@ from tkinter import ttk, messagebox
 from operator import attrgetter
 import tkinter.font as Font
 import wckToolTips
-import conf, util
-import os, shutil, platform
+import conf
+import util
+import os
+import shutil
+import platform
+from datetime import datetime
 from exodosconverter import ExoDOSConverter
 import _thread
 
@@ -299,6 +303,22 @@ class ExoGUI:
         self.filterEntry.grid(column=0, row=0, sticky='W')
         wckToolTips.register(self.filterEntry, self.guiStrings['filter'].help)
 
+        # Custom Selection
+        self.customSelectionFrame = Tk.Frame(self.selectionFrame, borderwidth=1)
+        self.customSelectionFrame.grid(column=2, row=0, sticky='W')
+
+        label = Tk.Label(self.customSelectionFrame, text=self.guiStrings['selectionPath'].label)
+        wckToolTips.register(label, self.guiStrings['selectionPath'].help)
+        label.grid(column=0, row=0, sticky="W")
+
+        self.guiVars['selectionPath'] = Tk.StringVar()
+        self.guiVars['selectionPath'].set(self.configuration['selectionPath'])
+        # self.guiVars['selectionPath'].trace_add("write", self.filterGamesList)
+        self.selectionPathEntry = Tk.Entry(self.customSelectionFrame, textvariable=self.guiVars['selectionPath'], width=55)
+        self.selectionPathEntry.grid(column=1, row=0, padx=5, sticky='W')
+        wckToolTips.register(self.selectionPathEntry, self.guiStrings['selectionPath'].help)
+
+        # Left List
         self.leftFrame = Tk.Frame(self.selectionFrame)
         self.leftFrame.grid(column=0, row=1, sticky="W", pady=5)
         self.leftFrame.grid_columnconfigure(0, weight=3)
@@ -335,6 +355,7 @@ class ExoGUI:
         scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S),)
         self.exodosGamesListbox['yscrollcommand'] = scrollbarLeft.set
 
+        # Selection Buttons Frame
         self.buttonsColumnFrame = Tk.Frame(self.selectionFrame, padx=10)
         self.buttonsColumnFrame.grid(column=1, row=1, pady=5)
         self.buttonsColumnFrame.grid_columnconfigure(1, weight=1)
@@ -351,6 +372,7 @@ class ExoGUI:
         emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
         emptyFrame.grid(column=0, row=8, pady=5)
 
+        # Right List
         self.rightFrame = Tk.Frame(self.selectionFrame)
         self.rightFrame.grid(column=2, row=1, sticky="E", pady=5)
         self.rightFrame.grid_columnconfigure(2, weight=3)
@@ -364,7 +386,7 @@ class ExoGUI:
         wckToolTips.register(label, self.guiStrings['rightList'].help)
         label.grid(column=0, row=0, sticky="W")
 
-        emptyFrame = Tk.Frame(hatRightFrame, width=10)
+        emptyFrame = Tk.Frame(hatRightFrame, width=20)
         emptyFrame.grid(column=1, row=0, sticky='W')
 
         self.unselectAllGamesButton = Tk.Button(hatRightFrame, text=self.guiStrings['unselectall'].label,
@@ -372,6 +394,15 @@ class ExoGUI:
         wckToolTips.register(self.unselectAllGamesButton, self.guiStrings['unselectall'].help)
         self.unselectAllGamesButton.grid(column=2, row=0, sticky='E')
 
+        loadSaveFrame = Tk.Frame(hatRightFrame)
+        loadSaveFrame.grid(column=0, row=0, sticky='E')
+        # TODO Finish this
+        self.loadCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['loadCustom'].label, command=self.loadCustom)
+        wckToolTips.register(self.loadCustomButton, self.guiStrings['loadCustom'].help)
+        self.loadCustomButton.grid(column=0, row=0, padx=5, sticky='E')
+        self.saveCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['saveCustom'].label, command=self.saveCustom)
+        wckToolTips.register(self.saveCustomButton, self.guiStrings['saveCustom'].help)
+        self.saveCustomButton.grid(column=1, row=0, padx=5, sticky='E')
 
         self.selectedGamesValues = Tk.Variable(value=[])
         self.selectedGamesListbox = Tk.Listbox(self.rightFrame, listvariable=self.selectedGamesValues,
@@ -384,6 +415,34 @@ class ExoGUI:
         self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
 
         self.handleCollectionFolder()
+
+    # Listener to save custom selection
+    def saveCustom(self):
+        customSelectionFile = self.selectionPathEntry.get()
+        if not os.path.exists(os.path.dirname(customSelectionFile)):
+            self.logger.log('Parent dir "%s" for Selection File "%s" does not exist' %(os.path.dirname(customSelectionFile),customSelectionFile), self.logger.WARNING)
+        else:
+            if os.path.exists(customSelectionFile) :
+                shutil.move(customSelectionFile, customSelectionFile+'-'+datetime.now().strftime("%d-%m-%Y-%H-%M-%S"))
+            file = open(customSelectionFile,'w',encoding='utf-8')
+            for selectedGame in self.selectedGamesValues.get():
+                file.write(selectedGame+'\n')
+            file.close()
+
+    # Listener to load custom collection
+    def loadCustom(self):
+        customSelectionFile = self.selectionPathEntry.get()
+        if not os.path.exists(customSelectionFile):
+            self.logger.log('Selection File "%s" does not exist' % customSelectionFile, self.logger.WARNING)
+        else:
+            file = open(customSelectionFile, 'r', encoding='utf-8')
+            selectedGames = []
+            for line in file.readlines():
+                selectedGames.append(line.rstrip(' \n\r'))
+            file.close()
+            self.selectedGamesValues.set(sorted(selectedGames))
+            self.rightListLabel.set(
+                self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Listener to remove game from selection    
     def clickLeft(self):
@@ -467,7 +526,7 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'filter', 'selectall', 'unselectall']:
+                              'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom']:
                 if key.help:
                     confFile.write('# ' + key.help.replace('#n', '\n# ') + '\n')
                 if key.id == 'images':
@@ -486,7 +545,7 @@ class ExoGUI:
     def saveConfInMem(self):
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
-            if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList', 'selectall', 'unselectall']:
+            if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList', 'selectall', 'unselectall', 'loadCustom', 'saveCustom']:
                 if key.id == 'images':
                     imagesValue = self.guiVars[self.guiStrings['images'].label + ' #1'].get()
                     if self.guiStrings['images'].label + ' #2' in self.guiVars:
@@ -536,6 +595,9 @@ class ExoGUI:
         self.outputCfgEntry['state'] = 'disabled'
         self.debugModeCheckButton['state'] = 'disabled'
         self.expertModeCheckButton['state'] = 'disabled'
+        self.loadCustomButton['state'] = 'disabled'
+        self.saveCustomButton['state'] = 'disabled'
+        self.selectionPathEntry['state'] = 'disabled'
 
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         # TODO see if there's a way to have more simpler parameters passed to converter and logging here, better simplify code in converter

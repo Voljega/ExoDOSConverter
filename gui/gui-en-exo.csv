@@ -1,6 +1,9 @@
 id;label;help
 outputDir;Output directory;Path where your set will be created (exodos collection will be left untouched)
 collectionDir;Collection folder;Path to your eXoDOs collection
+selectionPath;Custom Selection; Path to your custom selection file
+loadCustom;Load;Load your custom selection from file
+saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
 exodosVersion;eXoDOS version;Your exoDOS collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
