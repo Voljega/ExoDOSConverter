@@ -224,6 +224,11 @@ def createSetupBat(localGameOutputDir, game):
     setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w')
     setupBat.write('@echo off\n')
     setupBat.write('cd %s\n' % game)
+    setupFiles = [file.lower() for file in os.listdir(os.path.join(localGameOutputDir,game)) if file.lower() in
+                  [game.lower(),'setsound.exe','sound.exe','sound.com','install.exe','install.com',
+                   'setup.exe', 'setup.com']]
+    if len(setupFiles) <= 1 and os.path.exists(os.path.join(localGameOutputDir,game, game)):
+        setupBat.write('cd %s\n' % game)
     setupBat.write('\n')
     setupBat.write('IF EXIST setsound.exe goto :sound1\n')
     setupBat.write('IF EXIST sound.exe goto :sound2\n')
