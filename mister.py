@@ -167,6 +167,17 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
         for cdFile in cdFiles:
             logger.log("      move %s to %s folder" % (cdFile, 'cd'))
             shutil.move(os.path.join(imgmountDir, cdFile), os.path.join(outputDir, 'cd', game))
+        # Move all music files except FLAC an FLA
+        musicFiles = [file for file in os.listdir(imgmountDir)
+                      if os.path.splitext(file)[-1].lower() in ['.ogg', '.mp3', '.wav']]
+        for musicFile in musicFiles:
+            logger.log("      move %s to %s folder" % (musicFile, 'cd'))
+            shutil.move(os.path.join(imgmountDir, musicFile), os.path.join(outputDir, 'cd', game))
+        # Delete all FLAC and FLA files
+        flacFiles = [file for file in os.listdir(imgmountDir)
+                      if os.path.splitext(file)[-1].lower() in ['.flac', '.fla']]
+        for flacFile in flacFiles:
+            os.remove(os.path.join(imgmountDir, flacFile))
         # Modify and return command line
         if letter == 'd':
             return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
