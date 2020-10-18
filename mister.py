@@ -12,7 +12,7 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     lines = dosboxBat.readlines()
     for line in lines:
         line = line.lstrip('@ ').rstrip(' \n\r')
-        if line.lower() != 'c:':
+        if line.lower() != 'c:' and not line.lower().startswith('path=') and not line.lower().startswith('path ='):
             if line.startswith("imgmount"):
                 launchBat.write(convertImgMount(line, game, outputDir, localGameOutputDir, logger))
             elif line.startswith("mount") and not line.lower().startswith('mountain'):
