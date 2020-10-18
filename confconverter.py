@@ -1,7 +1,6 @@
 import os
 from commandhandler import CommandHandler
 import util
-import shutil
 
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
@@ -146,9 +145,9 @@ class ConfConverter:
                     'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom',
                 'imgmount d ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" -t cdrom \n':
                     'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom',
-                'imgmount d ".\games\comconra\cd\Red Alert Aftermath CD4.iso" ".\games\comconra\cd\Red Alert CD1.iso" ".\games\comconra\cd\Red Alert CD2.iso" ".\games\comconra\cd\Red Alert Counterstrike CD3.iso" -t cdrom \n':
+                'imgmount d ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" -t cdrom \n':
                     'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom',
-                'imgmount d ".\games\comconra\cd\Red Alert Counterstrike CD3.iso" ".\games\comconra\cd\Red Alert CD1.iso" ".\games\comconra\cd\Red Alert CD2.iso" ".\games\comconra\cd\Red Alert Aftermath CD4.iso" -t cdrom \n':
+                'imgmount d ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" -t cdrom \n':
                     'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom',
                 'imgmount -u d\n': '\n'
             }

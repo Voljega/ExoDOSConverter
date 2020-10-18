@@ -41,9 +41,9 @@ def getGuiStringsFilename(setKey):
 
 
 # Loads UI Strings
-def loadUIStrings(scriptDir, guiStringsFilename):
+def loadUIStrings(scriptDir, guiStringsFile):
     guiStrings = dict()
-    file = open(os.path.join(scriptDir, 'gui', guiStringsFilename), 'r', encoding="utf-8")
+    file = open(os.path.join(scriptDir, 'gui', guiStringsFile), 'r', encoding="utf-8")
     order = 0
     for line in file.readlines()[1:]:
         confLine = line.split(";")
@@ -53,12 +53,14 @@ def loadUIStrings(scriptDir, guiStringsFilename):
     file.close()
     return guiStrings
 
+
 # Handle os escaping of path in local output dir
 def localOutputPath(path):
     if platform.system() == 'Windows':
         return path
     else:
         return path.replace('\\', '/')
+
 
 # Resize image for opendingux
 def resize(imgPath):
@@ -88,7 +90,7 @@ def getRomsFolderPrefix(conversionType, conversionConf):
         return "/home/pi/RetroPie/roms/pc"
     elif conversionType == retrobat:
         return r"..\\..\\roms\\dos"
-    elif conversionType == emuelec :
+    elif conversionType == emuelec:
         return "/storage/roms/pcdata"
     else:
         return "."

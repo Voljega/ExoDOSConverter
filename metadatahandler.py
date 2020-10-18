@@ -12,7 +12,7 @@ DosGame = collections.namedtuple('DosGame',
 
 
 # Metadata exporting
-class MetadataHandler():
+class MetadataHandler:
 
     def __init__(self, exoDosDir, cache, logger):
         self.exoDosDir = exoDosDir
@@ -23,7 +23,7 @@ class MetadataHandler():
     # Reads a given node    
     def get(self, i, e):
         ll = i.find(e)
-        return ll.text if ll != None else None
+        return ll.text if ll is not None else None
 
     # Inits in-memory gamelist xml either by opening the file or creating it
     def initXml(self, outputDir):
@@ -45,7 +45,7 @@ class MetadataHandler():
     # Parse exoDos metadata file    
     def parseXmlMetadata(self):
         xmlPath = os.path.join(self.exoDosDir, 'xml', 'MS-DOS.xml')
-        metadatas = dict();
+        metadatas = dict()
         if os.path.exists(xmlPath):
             parser = etree.XMLParser(encoding="utf-8")
             games = etree.parse(xmlPath, parser=parser).findall(".//Game")
@@ -103,16 +103,15 @@ class MetadataHandler():
         if platform.system() == 'Windows':
             frontPic = './downloaded_images/' + dosGame.frontPic.split('\\')[-1] if dosGame.frontPic is not None else ''
             manual = './manuals/' + dosGame.manual.split('\\')[-1] if dosGame.manual is not None else ''
-        else :
+        else:
             frontPic = './downloaded_images/' + dosGame.frontPic.split('/')[-1] if dosGame.frontPic is not None else ''
             manual = './manuals/' + dosGame.manual.split('/')[-1] if dosGame.manual is not None else ''
 
         year = dosGame.year + "0101T000000" if dosGame.year is not None else ''
 
         if conversionType == util.retropie:
-            path = "./" + genre + "/" + util.getCleanGameID(dosGame,
-                                                            '.conf') if useGenreSubFolders else "./" + util.getCleanGameID(
-                dosGame, '.conf')
+            path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.conf') if useGenreSubFolders \
+                else "./" + util.getCleanGameID(dosGame, '.conf')
         else:
             path = "./" + genre + "/" + self.cleanXmlString(
                 game) + ".pc" if useGenreSubFolders else "./" + self.cleanXmlString(game) + ".pc"
@@ -152,7 +151,7 @@ class MetadataHandler():
                 return 'Gun-FPS'
             elif 'Fighting' in dosGame.genres:
                 return 'BeatEmUp'
-            elif 'Strategy' in dosGame.genres and not "Puzzle" in dosGame.genres:
+            elif 'Strategy' in dosGame.genres and "Puzzle" not in dosGame.genres:
                 return 'Strategy-Gestion'
             elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres:
                 return 'RPG'

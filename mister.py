@@ -40,7 +40,7 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     launchBat.close()
     dosboxBat.close()
     createSetupBat(localGameOutputDir, game)
-    createEditBat(localGameOutputDir, game)
+    createEditBat(localGameOutputDir)
     os.remove(os.path.join(localGameOutputDir, 'dosbox.bat'))
 
 
@@ -52,10 +52,8 @@ def handleRunBat(game, localGameOutputDir, outputDir, logger):
         runFileClone = open(runBat + '1', 'w')
         # Clone run.bat and only modify imgmount lines
         # Add some hardcoded lines which are impossible to handle
-        handled = {'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom':
-                       'imgset ide10 "/cd/comcon/comma2.iso"',
-                   'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom':
-                       'imgset ide10 "/cd/comcon/cover3.cue"',
+        handled = {'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom': 'imgset ide10 "/cd/comcon/comma2.iso"',
+                   'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom': 'imgset ide10 "/cd/comcon/cover3.cue"',
                    'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
                        'imgset ide10 "/cd/comcon/redal2.iso"',
                    'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
@@ -175,7 +173,7 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
             shutil.move(os.path.join(imgmountDir, musicFile), os.path.join(outputDir, 'cd', game))
         # Delete all FLAC and FLA files
         flacFiles = [file for file in os.listdir(imgmountDir)
-                      if os.path.splitext(file)[-1].lower() in ['.flac', '.fla']]
+                     if os.path.splitext(file)[-1].lower() in ['.flac', '.fla']]
         for flacFile in flacFiles:
             os.remove(os.path.join(imgmountDir, flacFile))
         # Modify and return command line
@@ -235,10 +233,10 @@ def createSetupBat(localGameOutputDir, game):
     setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w')
     setupBat.write('@echo off\n')
     setupBat.write('cd %s\n' % game)
-    setupFiles = [file.lower() for file in os.listdir(os.path.join(localGameOutputDir,game)) if file.lower() in
-                  [game.lower(),'setsound.exe','sound.exe','sound.com','install.exe','install.com',
+    setupFiles = [file.lower() for file in os.listdir(os.path.join(localGameOutputDir, game)) if file.lower() in
+                  [game.lower(), 'setsound.exe', 'sound.exe', 'sound.com', 'install.exe', 'install.com',
                    'setup.exe', 'setup.com']]
-    if len(setupFiles) <= 1 and os.path.exists(os.path.join(localGameOutputDir,game, game)):
+    if len(setupFiles) <= 1 and os.path.exists(os.path.join(localGameOutputDir, game, game)):
         setupBat.write('cd %s\n' % game)
     setupBat.write('\n')
     setupBat.write('IF EXIST setsound.exe goto :sound1\n')
@@ -288,7 +286,7 @@ def createSetupBat(localGameOutputDir, game):
 
 
 # Create Edit.bat file
-def createEditBat(localGameOutputDir, game):
+def createEditBat(localGameOutputDir):
     editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w')
     editBat.write('@echo off\nedit 1_Start.bat\n')
     editBat.close()
