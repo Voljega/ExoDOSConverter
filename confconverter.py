@@ -122,10 +122,10 @@ class ConfConverter:
             elif cmdline.lower().startswith("boot "):
                 retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, genre,
                                                                     self.useGenreSubFolders, self.conversionType))
-            elif cmdline.lower().rstrip(' \n\r') == 'call run':
+            elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
-                if game in ['Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'LewLeon', 'MechW2', 'Resurrec',
-                            'stjudgec']:
+                if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
+                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
                     self.handleRunBat(game, localGameOutputDir)
                 retroDosboxBat.write(cmdline)
             else:
@@ -149,7 +149,8 @@ class ConfConverter:
                 'imgmount d ".\games\comconra\cd\Red Alert Aftermath CD4.iso" ".\games\comconra\cd\Red Alert CD1.iso" ".\games\comconra\cd\Red Alert CD2.iso" ".\games\comconra\cd\Red Alert Counterstrike CD3.iso" -t cdrom \n':
                     'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom',
                 'imgmount d ".\games\comconra\cd\Red Alert Counterstrike CD3.iso" ".\games\comconra\cd\Red Alert CD1.iso" ".\games\comconra\cd\Red Alert CD2.iso" ".\games\comconra\cd\Red Alert Aftermath CD4.iso" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom'
+                    'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom',
+                'imgmount -u d\n': '\n'
             }
             for cmdline in runFile.readlines():
                 # always remove @

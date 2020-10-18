@@ -27,9 +27,9 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
                     launchBat.write(line + '\n')
             elif line.lower() in ['d:', 'f:', 'g:', 'h:', 'i:', 'j:', 'k:']:
                 launchBat.write('e:\n')
-            elif line.lower() == 'call run':
-                if game in ['Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'LewLeon', 'MechW2', 'Resurrec',
-                            'stjudgec']:
+            elif line.lower() == 'call run' or line.lower() == 'call run.bat':
+                if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
+                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
                     handleRunBat(game, localGameOutputDir, outputDir, logger)
                 launchBat.write(line)
             else:
