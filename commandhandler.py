@@ -3,6 +3,7 @@ import stat
 import util
 import ntpath
 
+
 # Converts dosbox commands to desired format and paths, at the moment Batocera/ Recalbox linux flavor
 class CommandHandler:
 
@@ -11,21 +12,25 @@ class CommandHandler:
         self.logger = logger
 
     # Checks if a command line should be kept or not    
-    def useLine(self, l, cLines):
+    def useLine(self, line, cLines):
         for cL in cLines:
-            if l.strip().lower().startswith(cL):
+            if line.strip().lower().startswith(cL):
                 return False
         return True
 
     # Removes games parts from exoDos paths
-    def reducePath(self, path, game):
+    def reducePath(self, path, game, inside=False):
         #        self.logger.log("    PATH CONVERT: %s" %path)
-        if path.lower().startswith(".\games") or path.lower().startswith("\games") or path.lower().startswith("games"):
+        if path.lower().startswith(".\\games") or path.lower().startswith("\\games") \
+                or path.lower().startswith("games"):
             pathList = path.split('\\')
             if pathList[0] == '.':
                 pathList = pathList[1:]
             if len(pathList) > 1 and pathList[0].lower() == 'games':  # and pathList[1].lower()==game.lower() :
-                path = ".\\" + "\\".join(pathList[1:])
+                if not inside:
+                    path = ".\\" + "\\".join(pathList[1:])
+                else:
+                    path = ".\\" + "\\".join(pathList[2:])
         #        self.logger.log("    TO: %s" %path)
         return path
 
@@ -48,16 +53,17 @@ class CommandHandler:
         return command[startIndex + 1:endIndex], command, startIndex, endIndex
 
     # Converts imgmount command line    
-    def handleImgmount(self, line, game, localGameOutputDir):
+    def handleImgmount(self, line, game, localGameOutputDir, inside=False):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
-                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'y', '0', '2'],
+                                                                          startTokens=['a', 'b', 'c', 'd', 'e', 'f',
+                                                                                       'g', 'h', 'i', 'y', '0', '2'],
                                                                           endTokens=['-t', '-size'])
 
         prString = ""
         if len(paths) == 1:
-            path = self.reducePath(paths[0].replace('"', ""), game)
+            path = self.reducePath(paths[0].replace('"', ""), game,inside)
             self.logger.log("    clean single imgmount")
-            path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir, game)
+            path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir, game, None, inside)
             prString = prString + " " + path
         else:
             # See if path contains ""
@@ -66,9 +72,9 @@ class CommandHandler:
             if countChar == 2:
                 # Single path with space
                 # TESTCASE: Take Back / CSS
-                path = self.reducePath(redoPath.replace('"', ""), game)
+                path = self.reducePath(redoPath.replace('"', ""), game, inside)
                 self.logger.log("    clean single imgmount")
-                path = self.cleanCDname(path, localGameOutputDir, game)
+                path = self.cleanCDname(path, localGameOutputDir, game, None, inside)
                 prString = prString + " " + path
             else:
                 # several paths (multi cds)
@@ -96,8 +102,8 @@ class CommandHandler:
 
                 cdCount = 1
                 for path in paths:
-                    path = self.reducePath(path.replace('"', ""), game)
-                    path = self.cleanCDname(path, localGameOutputDir, game, cdCount)
+                    path = self.reducePath(path.replace('"', ""), game, inside)
+                    path = self.cleanCDname(path, localGameOutputDir, game, cdCount, inside)
                     prString = prString + " " + '"' + path + '"'
                     cdCount = cdCount + 1
 
@@ -107,14 +113,15 @@ class CommandHandler:
 
     # Converts mount command line
     def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
-        bootPath = line.replace('boot ','').replace('BOOT ','').rstrip(' \n\r')
+        bootPath = line.replace('boot ', '').replace('BOOT ', '').rstrip(' \n\r')
         if bootPath != '-l c' and bootPath != '-l c>null':
             # reduce except for boot -l c
             paths = bootPath.split(' ')
             cleanedPath = []
-            if paths[0].startswith('"') and (paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
+            if paths[0].startswith('"') and (
+                    paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
                 paths = [" ".join(paths)]
-                path = paths[0].replace('"','')
+                path = paths[0].replace('"', '')
                 path = self.reducePath(path, game)
                 imgPath = os.path.dirname(path)
                 imgFullLocalPath = os.path.join(localGameOutputDir, util.localOutputPath(imgPath))
@@ -133,8 +140,11 @@ class CommandHandler:
                         postfix = path.find('-l')
                         chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
                         if not os.path.exists(os.path.join(localGameOutputDir, util.localOutputPath(chkPath))):
-                            if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
-                                self.logger.log("      <ERROR> path %s doesn't exist" % os.path.join(localGameOutputDir, util.localOutputPath(chkPath)), self.logger.WARNING)
+                            if not os.path.exists(
+                                    os.path.join(localGameOutputDir, game, util.localOutputPath(chkPath))):
+                                self.logger.log("      <ERROR> path %s doesn't exist"
+                                                % os.path.join(localGameOutputDir,util.localOutputPath(chkPath)),
+                                                self.logger.ERROR)
                     cleanedPath.append(path)
 
             bootPath = " ".join(cleanedPath)
@@ -145,7 +155,9 @@ class CommandHandler:
 
     # Converts mount command line
     def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType, conversionConf):
-        paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens=['a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
+        paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
+                                                                          startTokens=['a', 'b', 'd', 'e', 'f', 'g',
+                                                                                       'h', 'i', 'j', 'k'],
                                                                           endTokens=['-t'])
 
         prString = ""
@@ -161,7 +173,7 @@ class CommandHandler:
                 path = self.reducePath(paths[0].replace('"', ""), game)
                 prString = prString + " " + path
             else:
-                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE", self.logger.WARNING)
+                self.logger.log("    <ERROR> MULTIPATH/MULTISPACE", self.logger.ERROR)
                 self.logger.logList("    paths", paths)
                 for path in paths:
                     path = self.reducePath(path.replace('"', ""), game)
@@ -175,7 +187,7 @@ class CommandHandler:
         prString = ' "' + prString.replace("\\", "/") + '"'
         # Needs windows absolute path for retrobat
         if conversionType == util.retrobat:
-            prString = prString.replace("/","\\")
+            prString = prString.replace("/", "\\")
 
         fullString = " ".join(command[0:startIndex + 1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    mount path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
@@ -190,8 +202,9 @@ class CommandHandler:
             else:
                 fileName = fileName[0:5] + str(cdCount)
         # TESTCASE : Ripper (1996) / ripper shouldn't enter here
-        if os.path.exists(os.path.join(path, fileName + fileExt)) and (fileName+fileExt) != originalFile.lower() and cdCount is None:
-            fileName = fileName = fileName[0:6] + "1"
+        if os.path.exists(os.path.join(path, fileName + fileExt)) and (
+                fileName + fileExt) != originalFile.lower() and cdCount is None:
+            fileName = fileName[0:6] + "1"
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path, originalFile)
         targetTemp = os.path.join(path, fileName + "1" + fileExt)
@@ -201,8 +214,8 @@ class CommandHandler:
         return fileName
 
     # Cleans cd names to a dos compatible 8 char name
-    def cleanCDname(self, path, localGameOutputDir, game, cdCount=None):
-        cdFileFullPath = os.path.join(localGameOutputDir, path)
+    def cleanCDname(self, path, localGameOutputDir, game, cdCount=None, inside=False):
+        cdFileFullPath = os.path.join(localGameOutputDir, path) if not inside else os.path.join(localGameOutputDir, game, path)
         if os.path.exists(util.localOutputPath(cdFileFullPath)):
             if os.path.isdir(util.localOutputPath(cdFileFullPath)):
                 return path
@@ -236,7 +249,8 @@ class CommandHandler:
                 return cleanedPath
         else:
             if not os.path.exists(os.path.join(localGameOutputDir, game, util.localOutputPath(path))):
-                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath), self.logger.WARNING)
+                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath),
+                                self.logger.ERROR)
             return path
 
     # Cleans cue files content to dos compatible 8 char name
@@ -263,5 +277,5 @@ class CommandHandler:
         # Remove readonly attribute if present before deleting
         os.chmod(os.path.join(util.localOutputPath(path), fileName + ".cue"), stat.S_IWRITE)
         os.remove(os.path.join(util.localOutputPath(path), fileName + ".cue"))
-        os.rename(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"), os.path.join(util.localOutputPath(path), fileName + ".cue"))
-
+        os.rename(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"),
+                  os.path.join(util.localOutputPath(path), fileName + ".cue"))

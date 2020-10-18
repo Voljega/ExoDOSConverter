@@ -4,6 +4,7 @@ import queue
 
 
 class Logger:
+    ERROR = 'ERROR'
     WARNING = 'WARNING'
     INFO = 'INFO'
 

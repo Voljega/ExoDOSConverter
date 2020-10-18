@@ -23,12 +23,17 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
                 elif line != 'boot' and line != 'boot -l a':
                     launchBat.write(convertBoot(line, game, outputDir, localGameOutputDir, logger))
                 else:
-                    logger.log('      <ERROR> Impossible to convert "%s" command' % line, logger.WARNING)
+                    logger.log('      <ERROR> Impossible to convert "%s" command' % line, logger.ERROR)
                     launchBat.write(line + '\n')
-            elif line.lower() in ['d:','f:','g:','h:','i:','j:','k:']:
+            elif line.lower() in ['d:', 'f:', 'g:', 'h:', 'i:', 'j:', 'k:']:
                 launchBat.write('e:\n')
+            elif line.lower() == 'call run':
+                if game in ['Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'LewLeon', 'MechW2', 'Resurrec',
+                            'stjudgec']:
+                    handleRunBat(game, localGameOutputDir, outputDir, logger)
+                launchBat.write(line)
             else:
-                launchBat.write(line+'\n')
+                launchBat.write(line + '\n')
     # Change imgmount iso command to imgset ide10 cdgames/gamefolder/game.iso
     # Include imgset in the outputDir ?
     # Convert imgmount or mount of floppy to imgset fdd0 /floppy/filename.img
@@ -37,6 +42,41 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     createSetupBat(localGameOutputDir, game)
     createEditBat(localGameOutputDir, game)
     os.remove(os.path.join(localGameOutputDir, 'dosbox.bat'))
+
+
+# Treat run.bat command inside game directory
+def handleRunBat(game, localGameOutputDir, outputDir, logger):
+    runBat = os.path.join(localGameOutputDir, game, 'run.bat')
+    if os.path.exists(runBat):
+        runFile = open(runBat, 'r')
+        runFileClone = open(runBat + '1', 'w')
+        # Clone run.bat and only modify imgmount lines
+        # Add some hardcoded lines which are impossible to handle
+        handled = {'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom':
+                       'imgset ide10 "/cd/comcon/comma2.iso"',
+                   'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom':
+                       'imgset ide10 "/cd/comcon/cover3.cue"',
+                   'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
+                       'imgset ide10 "/cd/comcon/redal2.iso"',
+                   'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
+                       'imgset ide10 "/cd/comcon/redal4.iso"',
+                   'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom':
+                       'imgset ide10 "/cd/comcon/redal3.iso"'}
+        for cmdline in runFile.readlines():
+            cmdline = cmdline.lstrip('@ ').rstrip(' \n\r')
+            if cmdline.lower().startswith("imgmount "):
+                if cmdline not in handled:
+                    handled[cmdline] = convertImgMount(cmdline, game, outputDir, localGameOutputDir, logger)
+                runFileClone.write(handled[cmdline] + '\n')
+            else:
+                runFileClone.write(cmdline + '\n')
+        runFileClone.close()
+        runFile.close()
+        # Delete runbat and rename runbat clone to runbat
+        os.remove(os.path.join(localGameOutputDir, game, 'run.bat'))
+        os.rename(os.path.join(localGameOutputDir, game, 'run.bat1'), os.path.join(localGameOutputDir, game, 'run.bat'))
+    else:
+        logger.log('    <ERROR> run.bat not found', logger.ERROR)
 
 
 # Convert imgmount command for MiSTeR
@@ -59,7 +99,7 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
     params = line.split(' ')
     # TODO Boot command without parameter will crash here, needs to be parsed properly
     path = params[pathPos].replace('"', '')
-    if params[0] in ['imgmount','mount']:
+    if params[0] in ['imgmount', 'mount']:
         if params[-1].rstrip('\n\r ') == 'cdrom' or params[-1].rstrip('\n\r ') == 'iso':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
             misterCommand = convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
@@ -69,7 +109,8 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
                 i = 3
                 while i < (len(params) - 2):
                     print(params[i])
-                    localPath = locateMountedFiles(params[i].replace('"', ''), params[0], game, outputDir, localGameOutputDir)
+                    localPath = locateMountedFiles(params[i].replace('"', ''), params[0], game, outputDir,
+                                                   localGameOutputDir)
                     # Only move the other CDs
                     convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
                     i = i + 1
@@ -91,7 +132,7 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
 # Locate mounted files
 def locateMountedFiles(path, command, game, outputDir, localGameOutputDir):
     if platform.system() == 'Windows':
-        path = path.replace('/','\\')
+        path = path.replace('/', '\\')
 
     localPath = util.localOutputPath(os.path.join(localGameOutputDir, path))
     if not os.path.exists(localPath):
@@ -162,9 +203,11 @@ def convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger):
         if not os.path.exists(os.path.join(outputDir, 'bootdisk', game)):
             os.mkdir(os.path.join(outputDir, 'bootdisk', game))
         logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'bootdisk'))
-        shutil.move(localPath, os.path.join(outputDir, 'bootdisk', game, os.path.splitext(ntpath.basename(localPath))[0]+'.vhd'))
+        shutil.move(localPath,
+                    os.path.join(outputDir, 'bootdisk', game, os.path.splitext(ntpath.basename(localPath))[0] + '.vhd'))
         # Modify and return command line
-        return 'imgset ide00 "/bootdisk/' + game + '/' + os.path.splitext(ntpath.basename(localPath))[0]+'.vhd' + '"\n'
+        return 'imgset ide00 "/bootdisk/' + game + '/' + os.path.splitext(ntpath.basename(localPath))[
+            0] + '.vhd' + '"\n'
 
 
 # Convert mounted or imgmounted folder

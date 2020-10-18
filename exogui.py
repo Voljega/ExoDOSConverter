@@ -238,7 +238,7 @@ class ExoGUI:
             self.rendererCfgEntry['state'] = 'disabled'
             self.outputCfgEntry['state'] = 'disabled'
         else:
-            self.logger.log('Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information', self.logger.WARNING)
+            self.logger.log('Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information', self.logger.ERROR)
             if not self.loading :
                 messagebox.showwarning('Are you sure ?', 'Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information')
             self.vsyncCfgCheckButton['state'] = 'normal'
@@ -420,7 +420,7 @@ class ExoGUI:
     def saveCustom(self):
         customSelectionFile = self.selectionPathEntry.get()
         if not os.path.exists(os.path.dirname(customSelectionFile)):
-            self.logger.log('Parent dir "%s" for Selection File "%s" does not exist' %(os.path.dirname(customSelectionFile),customSelectionFile), self.logger.WARNING)
+            self.logger.log('Parent dir "%s" for Selection File "%s" does not exist' % (os.path.dirname(customSelectionFile),customSelectionFile), self.logger.ERROR)
         else:
             if os.path.exists(customSelectionFile) :
                 shutil.move(customSelectionFile, customSelectionFile+'-'+datetime.now().strftime("%d-%m-%Y-%H-%M-%S"))
@@ -433,7 +433,7 @@ class ExoGUI:
     def loadCustom(self):
         customSelectionFile = self.selectionPathEntry.get()
         if not os.path.exists(customSelectionFile):
-            self.logger.log('Selection File "%s" does not exist' % customSelectionFile, self.logger.WARNING)
+            self.logger.log('Selection File "%s" does not exist' % customSelectionFile, self.logger.ERROR)
         else:
             file = open(customSelectionFile, 'r', encoding='utf-8')
             selectedGames = []
@@ -636,7 +636,8 @@ class ExoGUI:
         self.logTest = Tk.Text(self.consoleFrame, height=25, state='disabled', wrap='word', background='black',
                                foreground='yellow')
         self.logTest.grid(column=0, row=0, sticky="EW")
-        self.logTest.tag_config('WARNING', background='black', foreground='red')
+        self.logTest.tag_config('ERROR', background='black', foreground='red')
+        self.logTest.tag_config('WARNING', background='black', foreground='orange')
         self.logTest.tag_config('INFO', background='black', foreground='yellow')
         self.scrollbar = Tk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL, command=self.logTest.yview)
         self.scrollbar.grid(column=1, row=0, sticky=(Tk.N, Tk.S))
