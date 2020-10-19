@@ -12,7 +12,9 @@ def removeUnusedCds(game, localGameOutputDir, logger):
         'VirtSqua': '.\\cd\\V_SQUAD.CUE',
         'SSN21Se': '.\\cd\\SEAWOLF___.cue',
         'FIFAInte': '.\\CD\\FIFA.International.Soccer.cue',
-        'vengexca': '..\\spirexc\\CD\\SPIRIT.cue'
+        'vengexca': '..\\spirexc\\CD\\SPIRIT.cue',
+        'whalvoy2': '..\\whalvoy1\\cd\\whalvoy1.cue',
+        'WC2DLX': '..\\WC\\cd\\WC.cue'
     }
     if game in unusedCds:
         cue = os.path.join(localGameOutputDir,game,unusedCds[game])
