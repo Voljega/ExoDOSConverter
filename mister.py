@@ -17,7 +17,7 @@ def removeUnusedCds(game, localGameOutputDir, logger):
         'WC2DLX': '..\\WC\\cd\\WC.cue'
     }
     if game in unusedCds:
-        cue = os.path.join(localGameOutputDir,game,unusedCds[game])
+        cue = os.path.join(localGameOutputDir, game, util.localOutputPath(unusedCds[game]))
         cueDir = os.path.dirname(cue)
         cdFiles = [file for file in os.listdir(cueDir) if
                    os.path.splitext(ntpath.basename(cue))[0] == os.path.splitext(file)[0]
