@@ -11,7 +11,8 @@ def removeUnusedCds(game, localGameOutputDir, logger):
         'heromm2d': '.\\CD\\Heroes of Might and Magic 2.cue',
         'VirtSqua': '.\\cd\\V_SQUAD.CUE',
         'SSN21Se': '.\\cd\\SEAWOLF___.cue',
-        'FIFAInte': '.\\CD\\FIFA.International.Soccer.cue'
+        'FIFAInte': '.\\CD\\FIFA.International.Soccer.cue',
+        'vengexca': '..\\spirexc\\CD\\SPIRIT.cue'
     }
     if game in unusedCds:
         cue = os.path.join(localGameOutputDir,game,unusedCds[game])
@@ -134,7 +135,7 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
             return misterCommand
         elif params[-1].rstrip('\n\r ') == 'floppy':
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
+            return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, params[1])
         else:  # Treat default version as cd
             localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
             if params[1].rstrip('\n\r ') == 'c':
@@ -143,7 +144,7 @@ def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
                 return convertCD(localPath, game, outputDir, localGameOutputDir, logger)
     else:  # Boot command
         localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-        return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger)
+        return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, 'a')
 
 
 # Locate mounted files
@@ -203,13 +204,13 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
 
 
 # Convert floppy file
-def convertFloppy(localPath, game, outputDir, localGameOutputDir, logger):
+def convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, letter):
     # Move bootable file
     if not os.path.exists(os.path.join(outputDir, 'floppy')):
         os.mkdir(os.path.join(outputDir, 'floppy'))
 
     if os.path.isdir(localPath):
-        return convertMountedFolder('a', localPath, game, outputDir, localGameOutputDir, logger)
+        return convertMountedFolder(letter, localPath, game, outputDir, localGameOutputDir, logger)
     else:
         if not os.path.exists(os.path.join(outputDir, 'floppy', game)):
             os.mkdir(os.path.join(outputDir, 'floppy', game))

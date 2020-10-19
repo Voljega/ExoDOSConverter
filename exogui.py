@@ -625,7 +625,7 @@ class ExoGUI:
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)
         else:
             exoDOSConverter = ExoDOSConverter(games, self.cache, self.scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
-                                              useGenreSubFolders, conversionConf, self.logger)
+                                              useGenreSubFolders, conversionConf, self.fullnameToGameDir, self.logger)
             _thread.start_new(exoDOSConverter.convertGames, ())
 
     # Console Frame    

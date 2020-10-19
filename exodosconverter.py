@@ -14,7 +14,7 @@ import ntpath
 class ExoDOSConverter:
 
     def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
-                 useGenreSubFolders, conversionConf, logger):
+                 useGenreSubFolders, conversionConf, fullnameToGameDir, logger):
         self.games = games
         self.cache = cache
         self.scriptDir = scriptDir
@@ -28,6 +28,7 @@ class ExoDOSConverter:
         self.metadataHandler = MetadataHandler(collectionDir, self.cache, self.logger)
         self.confConverter = ConfConverter(self.games, self.exoDosDir, self.outputDir, self.useGenreSubFolders,
                                            self.conversionType, self.conversionConf, self.logger)
+        self.fullnameToGameDir = fullnameToGameDir
 
     # Loops on all games to convert them
     def convertGames(self):
@@ -49,7 +50,7 @@ class ExoDOSConverter:
             try:
                 self.convertGame(game, gamelist, total, count)
             except:
-                self.logger.log('  Error %s while converting game %s' % (sys.exc_info()[0], game), self.logger.ERROR)
+                self.logger.log('  Error %s while converting game %s\n' % (sys.exc_info()[0], game), self.logger.ERROR)
                 excInfo = traceback.format_exc()
                 errors[game] = excInfo
 
@@ -173,6 +174,29 @@ class ExoDOSConverter:
         f = open(os.path.join(localGameOutputDir, util.getCleanGameID(metadata, '.txt')), 'w', encoding='utf8')
         f.write(metadata.desc)
         f.close()
+        # Handle first-game-of-a-serie dependencies
+        needsFirstGame = {
+            'roadware': ['Roadwar 2000 (1987).zip'],  # @mount a .\Games\roadwar -t floppy
+            'eob2': ['Eye of the Beholder (1991).zip'],  # mount a .\Games\eob1\ -t floppy
+            'bardtal2': ["Bard's Tale 1, The - Tales Of The Unknown (1987).zip"],  # mount a .\Games\bardtal1 -t floppy
+            'bardtal3': ["Bard's Tale 1, The - Tales Of The Unknown (1987).zip",  # mount a .\Games\bardtal1 -t floppy
+                         "Bard's Tale 2, The - The Destiny Knight (1988).zip"],  # @mount b .\Games\bardtal2 -t floppy
+            'MM2': ['Might and Magic - Book 1 (1986).zip'],  # mount a .\Games\MM1\ -t floppy
+            'vengexca': ['Spirit of Excalibur (1990).zip'],  # @mount a .\Games\spirexc -t floppy
+            'WC2DLX': ['Wing Commander (1990).zip'],  # mount a .\Games\WC\WING\GAMEDAT\
+            'darkdes2': ['Dark Designs I - Grelminars Staff (1990).zip'],  # mount a .\Games\darkdes1 -t floppy
+            'whalvoy2': ["Whale's Voyage (1993).zip"]  # @mount e .\Games\whalvoy1\WVCD
+        }
+        if game in needsFirstGame:
+            for previousGameZip in needsFirstGame[game]:
+                # unzip game dependency
+                with ZipFile(os.path.join(self.exoDosDir, "Games", previousGameZip), 'r') as zipFile:
+                    # Extract all the contents of zip file in current directory
+                    self.logger.log("  unzipping previous game" + previousGameZip)
+                    zipFile.extractall(path=os.path.join(self.exoDosDir, "Games"))
+                # copy its directory or directory part to the inside of the second game dir
+                shutil.move(os.path.join(self.exoDosDir, "Games", self.fullnameToGameDir.get(os.path.splitext(previousGameZip)[0])),
+                            os.path.join(localGameOutputDir))
 
     # Post-conversion operations for a given game for various conversion types
     def postConversion(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
@@ -255,6 +279,7 @@ class ExoDOSConverter:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
                         os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
         # Zip internal game dir to longgamename.zip
+        self.logger.log('    Rezipping game to %s' % util.getCleanGameID(metadata, '.zip'))
         shutil.make_archive(os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '')), 'zip',
                             localGameOutputDir)
         # Delete everything unrelated
