@@ -5,6 +5,25 @@ import ntpath
 import platform
 
 
+# Removed unused CDs
+def removeUnusedCds(game, localGameOutputDir, logger):
+    unusedCds = {
+        'heromm2d': '.\\CD\\Heroes of Might and Magic 2.cue',
+        'VirtSqua': '.\\cd\\V_SQUAD.CUE',
+        'SSN21Se': '.\\cd\\SEAWOLF___.cue',
+        'FIFAInte': '.\\CD\\FIFA.International.Soccer.cue'
+    }
+    if game in unusedCds:
+        cue = os.path.join(localGameOutputDir,game,unusedCds[game])
+        cueDir = os.path.dirname(cue)
+        cdFiles = [file for file in os.listdir(cueDir) if
+                   os.path.splitext(ntpath.basename(cue))[0] == os.path.splitext(file)[0]
+                   and os.path.splitext(file)[-1].lower() in ['.ccd', '.sub', '.cue', '.iso', '.img', '.bin']]
+        for cdFile in cdFiles:
+            logger.log("      remove unused cd file %s" % cdFile)
+            os.remove(os.path.join(cueDir, cdFile))
+
+
 # Creates launch.bat and handles mount and imgmount paths
 def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')

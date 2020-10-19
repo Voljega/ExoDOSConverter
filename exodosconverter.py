@@ -248,6 +248,8 @@ class ExoDOSConverter:
         mister.batsAndMounts(game, self.outputDir, localGameOutputDir, self.logger)
         shutil.move(os.path.join(localGameOutputDir, util.getCleanGameID(metadata, '.txt')),
                     os.path.join(localGameOutputDir, '2_About.txt'))
+        # Remove unused CDs
+        mister.removeUnusedCds(game, localGameOutputDir, self.logger)
         # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
         if metadata.frontPic is not None:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
