@@ -70,7 +70,7 @@ class ExoDOSConverter:
                 # delete empty genres dir
                 dirs = [file for file in os.listdir(self.outputDir) if
                         os.path.isdir(os.path.join(self.outputDir, file))
-                        and file not in ['games', 'cd', 'floppy', 'manuals']]
+                        and file not in ['games', 'cd', 'floppy', 'manuals', 'bootdisk']]
                 for genreDir in dirs:
                     shutil.rmtree(os.path.join(self.outputDir, genreDir))
         elif self.conversionType == util.emuelec:
