@@ -279,15 +279,16 @@ class ExoDOSConverter:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
                         os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
         # Zip internal game dir to longgamename.zip
-        self.logger.log('    Rezipping game to %s' % util.getCleanGameID(metadata, '.zip'))
-        shutil.make_archive(os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '')), 'zip',
+        misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','').replace('¿','')
+        self.logger.log('    Rezipping game to %s.zip' % misterCleanName)
+        shutil.make_archive(os.path.join(localParentOutputDir, misterCleanName), 'zip',
                             localGameOutputDir)
         # Delete everything unrelated
         shutil.rmtree(os.path.join(localParentOutputDir, game + '.pc'))
         # Move archive to games folder
         if not os.path.exists(os.path.join(self.outputDir, 'games')):
             os.mkdir(os.path.join(self.outputDir, 'games'))
-        shutil.move(os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '.zip')),
+        shutil.move(os.path.join(localParentOutputDir, misterCleanName+'.zip'),
                     os.path.join(self.outputDir, 'games'))
 
     # Post-conversion for openDingux for a given game
