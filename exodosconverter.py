@@ -279,7 +279,9 @@ class ExoDOSConverter:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
                         os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
         # Zip internal game dir to longgamename.zip
-        misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','').replace('¿','')
+        misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','mu').replace('¿','')\
+            .replace('é','e').replace('á','').replace('ō','o').replace('#','').replace('½','').replace('$','').replace('à','a')\
+            .replace('&','and').replace(',','')
         self.logger.log('    Rezipping game to %s.zip' % misterCleanName)
         shutil.make_archive(os.path.join(localParentOutputDir, misterCleanName), 'zip',
                             localGameOutputDir)
