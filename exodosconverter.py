@@ -274,6 +274,12 @@ class ExoDOSConverter:
                     os.path.join(localGameOutputDir, '2_About.txt'))
         # Remove unused CDs
         mister.removeUnusedCds(game, localGameOutputDir, self.logger)
+        # Remove any COMMAND.COM and CHOICE.EXE files, as they are not compatible with MiSTeR
+        tobeRemoved = [file for file in os.listdir(os.path.join(localGameOutputDir,game)) if
+                       file.lower() in ['command.com', 'choice.exe']]
+        for fileToRemove in tobeRemoved:
+            self.logger.log("    remove non-compatible file %s" % fileToRemove)
+            os.remove(os.path.join(localGameOutputDir,game, fileToRemove))
         # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
         if metadata.frontPic is not None:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
