@@ -284,6 +284,10 @@ class ExoDOSConverter:
         if metadata.frontPic is not None:
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
                         os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
+            # TODO write About.png
+            aboutTxt = open(os.path.join(localGameOutputDir, '2_About.txt'), 'r', encoding='utf-8')
+            mister.text2png(aboutTxt.read(), os.path.join(localGameOutputDir, '2_About.png'), fontfullpath="font.ttf")
+            aboutTxt.close()
         # Zip internal game dir to longgamename.zip
         misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','mu').replace('¿','')\
             .replace('é','e').replace('á','').replace('ō','o').replace('#','').replace('½','').replace('$','').replace('à','a')\

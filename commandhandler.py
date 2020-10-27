@@ -1,4 +1,5 @@
 import os
+import shutil
 import stat
 import util
 import ntpath
@@ -259,17 +260,28 @@ class CommandHandler:
         newFile = open(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"), 'w')
         modifiedFirstLine = False
         for line in oldFile.readlines():
-            if line.startswith("FILE") and not modifiedFirstLine:
-                params = line.split('"')
-                isobin = os.path.splitext(params[1].lower())
-                fixedIsoBinName = self.dosRename(path, params[1], isobin[0], isobin[1], cdCount)
-                self.logger.log("      renamed %s to %s" % (params[1], fixedIsoBinName + isobin[1]))
-                # TESTCASE: Pinball Arcade (1994) / PBArc94:
-                params[1] = fixedIsoBinName + isobin[-1]
-                line = '"'.join(params)
-                self.logger.log("      convert cue content -> " + line.rstrip('\n\r '))
-                # Only do it for the first Line
-                modifiedFirstLine = True
+            if line.startswith("FILE"):
+                if not modifiedFirstLine:  # Handle first line: img, iso, bin, etc
+                    params = line.split('"')
+                    isobin = os.path.splitext(params[1].lower())
+                    fixedIsoBinName = self.dosRename(path, params[1], isobin[0], isobin[1], cdCount)
+                    self.logger.log("      renamed %s to %s" % (params[1], fixedIsoBinName + isobin[1]))
+                    # TESTCASE: Pinball Arcade (1994) / PBArc94:
+                    params[1] = fixedIsoBinName + isobin[-1]
+                    line = '"'.join(params)
+                    self.logger.log("      convert cue content -> " + line.rstrip('\n\r '))
+                    # Only do it for the first Line
+                    modifiedFirstLine = True
+                else:  # Move music files in subfolders to cd folder
+                    params = line.split('"')
+                    if '\\' in params[1]:
+                        musicParams = params[1].split('\\')  # Assume there are only two music file path components
+                        shutil.move(os.path.join(util.localOutputPath(path),musicParams[0],musicParams[1]),
+                                    os.path.join(util.localOutputPath(path),musicParams[1]))
+                        self.logger.log("      move music %s from %s to . -> " % (musicParams[1], musicParams[0]))
+                        params[1] = musicParams[1]
+                        line = '"'.join(params)
+                        self.logger.log("      convert cue content -> " + line.rstrip('\n\r '))
 
             newFile.write(line)
         oldFile.close()

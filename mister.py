@@ -3,6 +3,10 @@ import util
 import shutil
 import ntpath
 import platform
+import PIL
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
 
 
 # Removed unused CDs
@@ -74,14 +78,15 @@ def handleRunBat(game, localGameOutputDir, outputDir, logger):
         runFileClone = open(runBat + '1', 'w')
         # Clone run.bat and only modify imgmount lines
         # Add some hardcoded lines which are impossible to handle
-        handled = {'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom': 'imgset ide10 "/cd/comcon/comma2.iso"',
-                   'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom': 'imgset ide10 "/cd/comcon/cover3.cue"',
-                   'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
-                       'imgset ide10 "/cd/comcon/redal2.iso"',
-                   'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
-                       'imgset ide10 "/cd/comcon/redal4.iso"',
-                   'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom':
-                       'imgset ide10 "/cd/comcon/redal3.iso"'}
+        handled = {
+            'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom': 'imgset ide10 "/cd/comcon/comma2.iso"',
+            'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom': 'imgset ide10 "/cd/comcon/cover3.cue"',
+            'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
+                'imgset ide10 "/cd/comcon/redal2.iso"',
+            'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
+                'imgset ide10 "/cd/comcon/redal4.iso"',
+            'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom':
+                'imgset ide10 "/cd/comcon/redal3.iso"'}
         for cmdline in runFile.readlines():
             cmdline = cmdline.lstrip('@ ').rstrip(' \n\r')
             if cmdline.lower().startswith("imgmount "):
@@ -312,3 +317,42 @@ def createEditBat(localGameOutputDir):
     editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w')
     editBat.write('@echo off\nedit 1_Start.bat\n')
     editBat.close()
+
+
+# Create about.png
+def text2png(text, fullpath, color="#FFF", bgcolor="#000", fontfullpath=None, fontsize=13, leftpadding=3,
+             rightpadding=3, width=200):
+    REPLACEMENT_CHARACTER = u'\uFFFD'
+    NEWLINE_REPLACEMENT_STRING = ' ' + REPLACEMENT_CHARACTER + ' '
+    font = ImageFont.truetype('DejaVuSans.ttf', 12) #if fontfullpath is None else ImageFont.truetype(fontfullpath, fontsize)
+    text = text.replace('\n', NEWLINE_REPLACEMENT_STRING)
+
+    lines = []
+    line = u""
+    for word in text.split():
+        if word == REPLACEMENT_CHARACTER:  # give a blank line
+            lines.append(line[1:])  # slice the white space in the begining of the line
+            line = u""
+            lines.append(u"")  # the blank line
+        elif font.getsize(line + ' ' + word)[0] <= (width - rightpadding - leftpadding):
+            line += ' ' + word
+        else:  # start a new line
+            lines.append(line[1:])  # slice the white space in the begining of the line
+            line = u""
+            # TODO: handle too long words at this point
+            line += ' ' + word  # for now, assume no word alone can exceed the line width
+
+    if len(line) != 0:
+        lines.append(line[1:])  # add the last line
+
+    line_height = font.getsize(text)[1]
+    img_height = line_height * (len(lines) + 1)
+    img = Image.new("RGBA", (640, img_height), bgcolor)
+    draw = ImageDraw.Draw(img)
+
+    y = 0
+    for line in lines:
+        draw.text((leftpadding, y), line, color, font=font)
+        y += line_height
+
+    img.save(fullpath)
