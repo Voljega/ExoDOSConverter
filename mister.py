@@ -82,11 +82,11 @@ def handleRunBat(game, localGameOutputDir, outputDir, logger):
             'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom': 'imgset ide10 "/cd/comcon/comma2.iso"',
             'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom': 'imgset ide10 "/cd/comcon/cover3.cue"',
             'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
-                'imgset ide10 "/cd/comcon/redal2.iso"',
+                'imgset ide10 "/cd/comconra/redal2.iso"',
             'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
-                'imgset ide10 "/cd/comcon/redal4.iso"',
+                'imgset ide10 "/cd/comconra/redal4.iso"',
             'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom':
-                'imgset ide10 "/cd/comcon/redal3.iso"'}
+                'imgset ide10 "/cd/comconra/redal3.iso"'}
         for cmdline in runFile.readlines():
             cmdline = cmdline.lstrip('@ ').rstrip(' \n\r')
             if cmdline.lower().startswith("imgmount "):
@@ -324,7 +324,7 @@ def text2png(text, fullpath, color="#FFF", bgcolor="#000", fontfullpath=None, fo
              rightpadding=3, width=200):
     REPLACEMENT_CHARACTER = u'\uFFFD'
     NEWLINE_REPLACEMENT_STRING = ' ' + REPLACEMENT_CHARACTER + ' '
-    font = ImageFont.truetype('DejaVuSans.ttf', 12) #if fontfullpath is None else ImageFont.truetype(fontfullpath, fontsize)
+    font = ImageFont.truetype('DejaVuSans.ttf', 12)
     text = text.replace('\n', NEWLINE_REPLACEMENT_STRING)
 
     lines = []

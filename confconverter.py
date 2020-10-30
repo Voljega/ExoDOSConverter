@@ -88,12 +88,14 @@ class ConfConverter:
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
         # always remove @
         cmdline = cmdline.lstrip('@ ')
-
+        # TODO whereWeAt identifies where we are in the game tree based on instructions
+        whereWeAt = ['c:','.']
         if self.commandHandler.useLine(cmdline, cutLines):
             if cmdline.lower().startswith("c:"):
                 retroDosboxBat.write(cmdline)
                 # First add move into game subdir
                 retroDosboxBat.write("cd %s\n" % game)
+                whereWeAt.append('game')
                 # remove cd to gamedir as it is already done, but keep others cd
             elif cmdline.lower().startswith("cd "):
                 path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '), game)
@@ -104,6 +106,7 @@ class ConfConverter:
                 else:
                     self.logger.log("    cd command: '%s' -> kept" % cmdline.rstrip('\n\r '))
                     retroDosboxBat.write(cmdline)
+                    whereWeAt.append(path)
             elif cmdline.lower().startswith("imgmount "):
                 retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir))
                 if self.conversionConf['useDebugMode']:
@@ -126,9 +129,39 @@ class ConfConverter:
                 if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
                             'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
                     self.handleRunBat(game, localGameOutputDir)
+                self.handlePotentialSubFile(cmdline, game, localGameOutputDir)
                 retroDosboxBat.write(cmdline)
             else:
+                self.handlePotentialSubFile(cmdline,game, localGameOutputDir)
                 retroDosboxBat.write(cmdline)
+
+    # Handle potential sub files and problems in it
+    def handlePotentialSubFile(self, subPath, game, localGameOutputDir):
+        subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
+        subBat = os.path.join(localGameOutputDir, game, subPath.rstrip(' \n\r') + '.bat')
+        if os.path.exists(subBat) and not os.path.isdir(subBat):
+            self.logger.log('    Handle Bat File %s' % subBat, self.logger.WARNING)
+            subBatFile = open(subBat, 'r')
+            subBatFileClone = open(subBat + '1', 'w')
+            for cmdline in subBatFile.readlines():
+                # always remove @
+                cmdline = cmdline.lstrip('@ ')
+                if cmdline.lower().rstrip(' \n\r') == 'c:' and self.conversionType == util.mister:
+                    self.logger.log('      Remove c: for MiSTeR', self.logger.WARNING)
+                else:
+                    if 'c:\\' in cmdline.lower():
+                        if self.conversionType == util.mister:
+                            cmdline = cmdline.replace('c:', game).replace('C:', game)
+                        else :
+                            cmdline = cmdline.replace('c:','c:\\'+game).replace('C:','C:\\'+game)
+                    else:
+                        self.handlePotentialSubFile(cmdline, game, localGameOutputDir)
+                    subBatFileClone.write(cmdline)
+            subBatFileClone.close()
+            subBatFile.close()
+            # Delete runbat and rename runbat clone to runbat
+            os.remove(subBat)
+            os.rename(subBat + '1', subBat)
 
     # Treat run.bat command inside game directory
     def handleRunBat(self, game, localGameOutputDir):
