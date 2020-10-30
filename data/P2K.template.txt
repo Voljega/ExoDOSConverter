@@ -2,47 +2,77 @@
 #{GameID}
 #DOS
 
-# DPad and Joystick 1
+# DPad and LeftJoystick - Player 1
 0:up = up
 0:down = down
-0:right = right
 0:left = left
+0:right = right
 0:j1up = up
 0:j1down = down
 0:j1left = left
 0:j1right = right
+# DPad and LeftJoystick - Player 2 - Uncomment to apply
+#1:up = up
+#1:down = down
+#1:left = left
+#1:right = right
+#1:j1up = up
+#1:j1down = down
+#1:j1left = left
+#1:j1right = right
 
-#Joystick 2
-0:j2up = kp8 ;; Please Edit this with an Action
-0:j2down = kp2 ;; Please Edit this with an Action
-0:j2left = kp4 ;; Please Edit this with an Action
-0:j2right = kp6 ;; Please Edit this with an Action
+# RightJoystick - Player 1
+0:j2up = kp8 ;; Edit/Remove this with an Action
+0:j2down = kp2 ;; Edit/Remove this with an Action
+0:j2left = kp4 ;; Edit/Remove this with an Action
+0:j2right = kp6 ;; Edit/Remove this with an Action
+
+# RightJoystick - Player 2 - Uncomment to apply
+#1:j2up = kp8 ;; Edit/Remove this with an Action
+#1:j2down = kp2 ;; Edit/Remove this with an Action
+#1:j2left = kp4 ;; Edit/Remove this with an Action
+#1:j2right = kp6 ;; Edit/Remove this with an Action
 
 # Start and Select
 0:start = enter ;; Enter Key
 0:select = esc ;; Escape Key
+#1:start = enter ;; Enter Key
+#1:select = esc ;; Escape Key
 
-#PS Format of the right side controller
-# X
-0:b = space ;; Please Edit this with an Action
-# O
-0:a = leftctrl ;; Please Edit this with an Action
-# /\
-0:x = leftshift ;; Please Edit this with an Action
-# []
-0:y = leftalt ;; Please Edit this with an Action
+# Playstation Format for the Right Side of the Controller
+# X Cross
+0:b = space ;; Edit/Remove this with an Action
+#1:b = space ;; Edit/Remove this with an Action
 
-#L1 and L2
+# O Circle
+0:a = leftctrl ;; Edit/Remove this with an Action
+#1:a = leftctrl ;; Edit/Remove this with an Action
+
+# /\ Triangle
+0:x = leftshift ;; Edit/Remove this with an Action
+#1:x = leftshift ;; Edit/Remove this with an Action
+
+# [] Square
+0:y = leftalt ;; Edit/Remove this with an Action
+#1:y = leftalt ;; Edit/Remove this with an Action
+
+# Shoulder L's Buttons
 0:l1 = F1 ;; Help
-0:l2 = F2 ;; Please Edit this with an Action
+0:l2 = F2 ;; Edit/Remove this with an Action
+#1:l1 = F1 ;; Help
+#1:l2 = F2 ;; Edit/Remove this with an Action
 
-#R1 and R2
-0:r1 = F5 ;; Please Edit this with an Action
-0:r2 = b ;; Please Edit this with an Action
+# Shoulder R's Buttons
+0:r1 = F5 ;; Edit/Remove this with an Action
+0:r2 = b ;; Edit/Remove this with an Action
+#1:r1 = F5 ;; Edit/Remove this with an Action
+#1:r2 = b ;; Edit/Remove this with an Action
 
-#L3 and R3
+# L3 and R3
 0:l3 = n ;; (N)o
 0:r3 = y ;; (Y)es
+#1:l3 = n ;; (N)o
+#1:r3 = y ;; (Y)es
 
 #hotkey
 0:hotkey = F9 ;; Hotkey + Circle to Exit
