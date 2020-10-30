@@ -151,7 +151,7 @@ class ConfConverter:
                 else:
                     if 'c:\\' in cmdline.lower():
                         if self.conversionType == util.mister:
-                            cmdline = cmdline.replace('c:', game).replace('C:', game)
+                            cmdline = cmdline.replace('c:', 'E:\\GAMES\\' + game).replace('C:', 'E:\\GAMES\\' + game)
                         else :
                             cmdline = cmdline.replace('c:','c:\\'+game).replace('C:','C:\\'+game)
                     else:
