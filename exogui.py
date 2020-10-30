@@ -33,6 +33,7 @@ class ExoGUI:
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
+        self.window.geometry('+50+50')
         self.startFontSize = self.DEFAULT_FONT_SIZE
 
         if platform.system() == 'Windows':
