@@ -78,9 +78,26 @@ class ExoDOSConverter:
                 gamesDir = os.path.join(self.outputDir,'games')
                 shutil.copy2(os.path.join(self.scriptDir,'data','mister','-Manually Added Games.zip'), gamesDir)
                 shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilitites and System Files.zip'), gamesDir)
-                # Call Total DOS Launcher Indexer
+                # Call Total DOS Launcher Indexer, delete top level games folder after
                 self.logger.log('Total DOS Indexer for ' + self.conversionType)
-                TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'), self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
+                TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'),
+                                 self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
+                os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
+                if not self.conversionConf['useDebugMode']:
+                    os.mkdir(os.path.join(self.outputDir,'TDL_VHD','games'))
+                # shutil.rmtree(os.path.join(self.outputDir,'games'))
+                # move cd, floppy, boot disk into ao486 folder
+                if not os.path.exists(os.path.join(self.outputDir, "ao486")):
+                    os.mkdir(os.path.join(self.outputDir, "ao486"))
+                self.logger.log("  Copying cd folder, this might take a while ...")
+                if os.path.exists(os.path.join(self.outputDir, "cd")):
+                    shutil.move(os.path.join(self.outputDir, "cd"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                self.logger.log("  Copying floppy folder, this might take a while ...")
+                if os.path.exists(os.path.join(self.outputDir, "floppy")):
+                    shutil.move(os.path.join(self.outputDir, "floppy"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                self.logger.log("  Copying bootdisk folder, this might take a while ...")
+                if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
+                    shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals
