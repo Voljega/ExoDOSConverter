@@ -8,6 +8,7 @@ from metadatahandler import MetadataHandler
 import util
 from zipfile import ZipFile
 import ntpath
+import TDLindexer
 
 
 # Main Converter
@@ -73,6 +74,13 @@ class ExoDOSConverter:
                         and file not in ['games', 'cd', 'floppy', 'manuals', 'bootdisk']]
                 for genreDir in dirs:
                     shutil.rmtree(os.path.join(self.outputDir, genreDir))
+                # copy mister zips
+                gamesDir = os.path.join(self.outputDir,'games')
+                shutil.copy2(os.path.join(self.scriptDir,'data','mister','-Manually Added Games.zip'), gamesDir)
+                shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilitites and System Files.zip'), gamesDir)
+                # Call Total DOS Launcher Indexer
+                self.logger.log('Total DOS Indexer for ' + self.conversionType)
+                TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'), self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals

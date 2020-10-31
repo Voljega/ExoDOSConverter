@@ -62,7 +62,7 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 
 ### Windows installation and execution :
 
-Either use the latest release or you can build your own version using one of these two options :
+Either use the latest [release](https://github.com/Voljega/ExoDOSConverter/releases) or you can build your own version using one of these two options :
 - @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
 - read the `build.txt` 
 

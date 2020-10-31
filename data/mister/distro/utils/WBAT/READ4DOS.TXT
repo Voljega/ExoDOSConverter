@@ -1,0 +1,34 @@
+
+>>>>>   Read this if you use 4DOS or NDOS
+
+
+    Make WBAT batches 4DOS compatible
+    ---------------------------------
+
+1.  4DOS has an unexpected behaviour when parentheses are used in
+    the arguments of a CALL statement. A special 4DOS token in the
+    file W.BAT will fix this problem:
+
+    Please change (the first line of) the file W.BAT to: WBAT $W %&
+                                               -----     ----------
+
+2.  If WBAT is supposed to run under 4DOS as well as MS-DOS, modify
+    W.BAT as follows:
+
+    @if "%@eval[2+2]%" == "4" WBAT $W %&
+    @if not "%@eval[2+2]%" == "4" WBAT $W %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+    Note: These two lines will remain untouched, because WBAT will start
+    writing the SET instructions in the first line that does not begin
+    with an @-sign.
+
+
+3.  Remember known 4DOS issues: %+ and %=
+
+    Avoid a plus sign immediately following a variable, like: %pos%+1,
+    because "%+" seems to have higer priority under 4DOS.
+    Solution: insert blank space, e.g. %pos% +1 (MS-DOS compatible),
+    or ommit the second %-sign.
+
+    The same applies to "%=", e.g. SET %name%=something. Solution ??
+***

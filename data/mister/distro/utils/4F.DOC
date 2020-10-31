@@ -1,0 +1,1954 @@
+                          -------------------
+                     =====   4 - F I L E S   =====
+                          -------------------
+
+                     DOCUMENTATION  -  Version 3.0
+
+  --------------------------------------------------------------------
+  Shareware by Larry T. Edwards, Copyright 1990-93 All Rights Reserved.
+     Hand-Crafted Software   Box 6001   Sitka, Alaska   99835   USA
+
+ REGISTRATION: For a single user, send $30 ($34 overseas) to the above
+ address; price includes printed manual and free upgrades.  For credit
+ card orders, add $5 and call or send to: (1) PsL and specify program
+ #10574, 800-242-4775 or P.O. Box 35705 Houston, Tx 77235 USA; or (2)
+ CompuServe and specify program #912: !GO SWREG. Orders direct to
+ the author are preferred.  For multiple installations see 4F-SITE.TXT.
+
+ TECH SUPPORT:
+ <1> 907-747-8996; CompuServe 72037,3607; Internet:72037.3607@compuserve.com.
+ <2> MAS-BBS 718-444-5089 (8,N,1, 2400-14400 baud).  IMPORTANT: Select the
+     Customer Support Area, then the 4FILES Area (downloads on first call).
+
+        _______
+   ____|__     |
+--|       |    |-------------------  |  ASP wants to make sure the shareware
+  |   ____|__  |  Association of     |  principle works for you; its Ombuds-
+  |  |       |_|  Shareware          |  man can help resolve any dispute with
+  |__|   o   |    Professionals      |  an ASP member on a shareware related
+-----|   |   |---------------------  |  problem.  Details on page 3.
+(R)  |___|___|       MEMBER
+
+
+(Pages are formatted for 75 column, 12 Cpi, 6 Lpi printing)
+
+===========================================================================
+ CONTENTS OF MANUAL ...
+=======================   File & Note Modes .. 12   OS/2 & DESQview .... 26
+
+Overview of 4FILES .. 2   Using FILE MODE .... 12   Safety Features .... 27
+
+About 4DOS & NDOS ... 2   Sorting File Lists . 15   Hot Tips on 4FILES.. 29
+
+Shareware Notice .... 3   Utility Ports ... 15-18   Origin/Evolution ... 31
+
+QUICK START ......... 3   Using NOTE MODE .... 18   Detail Installation  32
+
+Special Keys ........ 5   Configuring 4FILES . 20   Agreement for Use .. 33
+
+Drive:Dir Navigation 10   EMS & XMS Swaps .... 20   Registration Benefit 33
+
+Seeking a File ..... 11   Video & Screens .... 24   Packing List ....... 34
+
+Mouse 11,16,21,22,24,25   MS-Windows ......... 24   Registration Form .. 35
+
+===========================================================================
+
+
+                                                                         2.
+AN OVERVIEW OF 4FILES
+=====================  4FILES is a multi-purpose file manager which also
+includes a full-featured editor for 4DOS & NDOS "file notes" and the
+ability to act as a "front-end" for your favorite utilities and applica-
+tions programs. A special effort has been made to make the interface clean
+and convenient. Command keystrokes are simple, to the point, and easy to
+remember.  A very efficient method of directory navigation is provided.  A
+built-in configuration routine makes on-the-fly changes of 4FILES'
+settings a simple matter, including changes to the "utility ports" (which
+are used to call your utilities and other programs), colors, and many
+custom setup choices.  International keyboards and character code pages
+are fully supported.
+
+The 4FILES screen shows the contents of the current directory with
+subdirectories at the top followed by files, each taking a full line. The
+list may be sorted any way you like, either on-the-fly or via command line
+switches. Except for sorts by file name (the default), the key field for
+the current sort is highlighted on-screen.  Any video mode of 80x25 or
+higher is supported.
+
+File and subdirectory names are displayed on the left half of the screen,
+one per line, with full statistics.  The right half is space for
+descriptive file notes.  If you are using 4DOS or NDOS (superior
+COMMAND.COM substitutes), a file note will remain associated with its
+file during copy, move and rename operations.  4FILES works fine with
+COMMAND.COM too, except that your notes will be lost during the above
+file operations.  The new 4DOS-4.0 description "extensions" are detected
+if present, but no programs are using them yet.
+
+Full file management facilities are provided via simple mnemonic key
+commands for single files and marked groups of files.  These include file
+copy,  move, rename, and rename; and create, remove, or rename
+directory.  There is  also support for ZIP, ARJ, LHA and other types of
+file archives.
+
+Any program file or batch file may be executed directly from the 4FILES
+screen, and any file or directory name can be quickly dropped into an
+editable DOS command line.  Also, "executable extensions" are supported,
+allowing you to select a data file and automatically load it into the
+appropriate application program, such as a word processor or database.  You
+can also drop back to DOS while leaving 4FILES loaded, and your place in
+4FILES will be saved.
+
+There is an internal routine for branding this copy (or later copies you
+might  obtain from bulletin boards or your vendor) with the serial number
+you will be  given when you register.  Branding deactivates the
+registration reminder  screen.
+
+
+AN ASIDE ABOUT 4DOS & NDOS
+==========================  4FILES is at its best when 4DOS or NDOS is used
+instead of COMMAND.COM; however, 4FILES is only one small reason to select
+one of these excellent command interpreters.  The ability they provide to
+annotate your files will revolutionize your computer use, and their powers
+go far beyond that, providing many time and frustration saving features
+which are missing in MSDOS.  I cannot recommend these award winning
+
+                                                                         3.
+
+products highly enough.  4DOS is shareware (NDOS is not), so it will cost
+you nothing more than download time or a handling charge to try it.  Since
+4DOS is a very long download, the shareware version is available from Hand-
+Crafted Software (maker of 4FILES), along with other shareware and public
+domain programs mentioned in this manual (see registration form).  Or you
+can get 4DOS directly from JP Software at 800-368-8777.
+
+For brevity, all following references to 4DOS refer to NDOS as well.
+
+
+SHAREWARE NOTICE
+================  4FILES is commercial, copyrighted software and is
+distributed as shareware.  The shareware is a marketing method allows you
+to evaluate a fully functional program before deciding whether you want to
+keep it.  If you decide to keep 4FILES, you must purchase it by sending in
+the registration form with full payment.  You may not continue use of
+4FILES beyond a period of 30-days from date of first use, unless the copy
+you are using has been properly registered for your use and your use
+complies with the agreement near the end of this manual.
+
+If you decide not to register, a frank critique or trouble report would
+be sincerely appreciated, via a collect phone call, E-mail, or a letter.
+
+Your distribution of 4FILES to others is highly encouraged, provided that
+the distribution complies with the agreement at the end of this manual.
+Permission for commercial distribution may be withdrawn at any time.
+
+Larry Edwards is a member of the Association of Shareware Professionals
+(ASP).  ASP wants to make sure the shareware principle works for you.  If
+you are unable to resolve a shareware-related dispute or problem with a
+member, ASP's Ombudsman may be able to help resolve it.  ASP does not
+however provide technical support for members' products.  ASP Ombudsman:
+545  Grover Rd, Muskegon, MI 49442-9427; FAX=616-788-2765; CIS Mail=ASP
+Ombudsman 70007,3536.
+
+
+QUICK START  Capacity: 799 records per directory.
+===========
+             Requires: DOS 3.0+ and 46-110K (depending on directory size).
+
+             SYNTAX:   4F [d:][\][subdir] [/+ /8 /L] [/D] [/E /S /C /N /U]
+
+                       Items in brackets are optional.
+                       The current directory is loaded by default.
+
+             MANY FEATURES WILL NOT WORK UNTIL 4FILES IS CONFIGURED.
+             <ALT-F10> BRINGS UP THE CONFIGURATION SCREEN.
+
+** Installation: Either copy all files into a subdirectory listed in your
+PATH or write a 4DOS alias to call 4FILES, preferably specifying the full
+pathspec to speed loading.  Either method allows you to start 4FILES by
+typing just its name or alias, regardless of which drive or directory you
+are logged onto at any time.  Also, you need to create a TEMP environment
+variable pointing to RAMdisk or harddisk directory. If you don't
+understand, please see the detailed instructions on page 31.
+
+                                                                         4.
+
+** 4FILES may also be installed under Windows, OS/2 or DESQview, and icons
+are provided for the first two.  See instructions in the sections below
+for these operating systems.
+
+
+** Symbols in menus and this manual:  "@" means the ALT key, "^" means the
+CTRL key, and "$" means the shift key.
+
+
+** Quitting: Under DOS, <@ESC> quits to the current directory, and <ESC> or
+<^ESC> quit to the original (startup) directory.  You may disable plain
+<ESC> via the configuration menu, and there are advantages to doing so.
+Under Windows, <$ESC> gives a total quit, and <@ESC> and <^ESC> have their
+normal Windows functions.
+
+
+** Configure 4FILES by typing <@F10>.  Screen colors & blinking, "utility
+ports" and many program options are on this menu.  Your utilities,
+especially a browse utility such as LIST or TV, must be configured here for
+some 4FILES features to work, including HELP.  A pathspec for a utility
+is unneeded if the utility is in the PATH, but will give best
+performance.  The extension MUST be given with the filename.  If the "
+utility" is a 4DOS alias, use the .ALS extension.
+
+
+** Laptop computers:  On the Configuration Options screen, select keyboard
+type "3".  This will substitute easier-to-use keys for several important
+functions.  The normal keys will not even work on some laptops.  See key
+mappings in the next section.
+
+
+** Replace your Old .CFG File:  The configuration file format was changed
+in version 2S.0.  If your .CFG file is from an earlier version, you must
+delete it and configure the new version from scratch.
+
+
+** Switches: /R /E /S /C /N and /U are command line switches for list
+sorting (see P.9): respectively, for sorts by Reverse order, Extension,
+Size, Chronology, Note characters, and actual DOS order.  Alphabetical
+sorting is the default.  /R may be used alone or with any of the other
+four.  If you are upgrading, note that the old /D switch is now /R, and /T
+is now /C.
+
+/8 is used to force an 80x25 display, in case you want to switch
+automatically while loading or in case of an incompatibility with the
+video mode  detection.  /+ must be used with HGC, MDA or CGA for over
+80x25.
+
+The /L (Lock) switch causes NumLock to be restored to "numeric" when
+4FILES exits, and is useful when using 4FILES with CAD and other number
+intensive programs.
+
+/M causes file marks from a previous session to used again rather than be
+discarded.  Marks are normally retained only for the current session.
+This may also be permanently set from the Configuration Options screen.
+
+
+                                                                          5.
+
+You may setup 4FILES to run with whatever switches you desire by calling it
+with a batch file or 4DOS alias.
+
+
+** Operation: Use the menu line for guidance, and go with the flow!
+Mnemonic keys are used for file management functions, and are shown on
+the following pages and the help screen.  <TAB> toggles between File & Note
+Modes.  Some keys work in both modes, but are shown only on the menu of one
+due to line length limits.  Navigate with the <G+> key (Grey-plus), <G->
+and <G*> if you have an AT keyboard.  Other keys will need to be used for
+PC and laptop keyboards (see below).  If 4FILES is properly configured,
+<F1> shows help and <^F1> shows this manual.  For a tour of a few
+features see #6 on page 32.  The tour assumes your bootup directory is
+the current directory, and that it has a \UTIL subdirectory.
+
+
+** 4FILES may be fully evaluated under COMMAND.COM, but for proper handling
+of file notes during file copy, move, rename and delete, COMSPEC must be
+setup to use 4DOS or NDOS as the secondary (if not also the primary)
+command interpreter, instead of COMMAND.COM.
+
+
+=========================
+DOCUMENTATION OF FEATURES
+=========================
+
+SPECIAL CONTROLS
+================  Most keys act as expected, and the others (below) are
+laid out logically.  A special keyboard handler allows nice, normally
+unavailable key assignments.
+
+NOTE:  Symbols:  ^ is the CTRL key, @ is the ALT key, $ is the shift key.
+
+Important Keys
+--------------
+
+    <@-F10>  -- Shows the configuration menu.
+    <TAB>    -- Toggles between FILE MODE and NOTE MODE.
+
+
+Function Keys
+-------------
+                               NORMAL
+                             ÚÄÄÄÄÂÄÄÄÄ¿
+                Help *       ³ F1 ³ F2 ³  Edit Current File *
+                             ÃÄÄÄÄÅÄÄÄÄ´
+                File Finder* ³ F3 ³ F4 ³  Unzip Current File *
+                             ÃÄÄÄÄÅÄÄÄÄ´
+                Mark File    ³ F5 ³ F6 ³  Unmark File
+                             ÃÄÄÄÄÅÄÄÄÄ´
+         Toggle Time/Attrib  ³ F7 ³ F8 ³  (Utility of your choice)*
+                             ÃÄÄÄÄÅÄÄÄÄ´
+        Execute Program, or  ³ F9 ³ F0 ³  Paste Text
+        Cut Text (note mode) ÀÄÄÄÄÁÄÄÄÄÙ
+
+
+                                                                         6.
+                               CONTROL
+                             ÚÄÄÄÄÂÄÄÄÄ¿
+           View this manual* ³ F1 ³ F2 ³  2nd Editor or Word Processor *
+                             ÃÄÄÄÄÅÄÄÄÄ´
+                             ³ F3 ³ F4 ³
+                             ÃÄÄÄÄÅÄÄÄÄ´
+           Mark All Files    ³ F5 ³ F6 ³  Unmark All Files
+                             ÃÄÄÄÄÅÄÄÄÄ´
+                             ³ F7 ³ F8 ³
+                             ÃÄÄÄÄÅÄÄÄÄ´
+          Cut Selected Text  ³ F9 ³ F0 ³
+                             ÀÄÄÄÄÁÄÄÄÄÙ
+
+
+                              ALTERNATE
+                             ÚÄÄÄÄÂÄÄÄÄ¿
+          Copy a Whole Note  ³ F9 ³ F0 ³  Reconfigure 4FILES.
+                             ÀÄÄÄÄÁÄÄÄÄÙ
+
+
+          "*" means 4FILES Utility Ports must be configured properly for
+          the feature to work.
+
+  NOTE:
+
+  1.  As adjuncts to <F5/F6>, <Space> toggles the current file mark and
+      <^Space> toggles all marks.  <^/> and <^\> duplicate <^F5> and <^F6>.
+
+  2.  ^X duplicates the function of <F9>.
+
+
+  HERE IS THE SAME KEY MAPPING SHOWN FOR THE HORIZONTAL FUNCTION KEY LAYOUT.
+
+      F1     F2     F3     F4     F5     F6     F7     F8     F9      F0
+   ÚÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄ¿
+Nrm³Show  ³Editor³ Any  ³Unzip ³ Mark ³UnMark³Show *³ Any  ³ EXEC/ ³Paste ³
+---³Help  ³#1    ³ Util ³      ³ File ³File  ³Attrib³ Util ³ COPY* ³Text  ³
+   ÃÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄ´
+Ctl³Show  ³Editor³      ³      ³ Mark ³Unmark³      ³      ³ Cut   ³      ³
+---³Manual³#2    ³      ³      ³ All  ³All   ³      ³      ³ Text  ³      ³
+   ÀÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄ´
+                                                       Alt ³ Copy  ³CONFIG³
+ * F9=Execute in File-Mode; Copy-text in Note-Mode.    --- ³ Note  ³4FILES³
+                                                           ÀÄÄÄÄÄÄÄÁÄÄÄÄÄÄÙ
+
+
+
+NAVIGATION KEYS FOR DRIVES, DIRECTORIES & LISTS
+-----------------------------------------------
+
+ One of 4FILES' strengths is its efficient and flexible mapping of
+ system  navigation features to the keyboard.  Three keys control
+ drive-changes and several ways of changing directories.  One of the keys
+ controls three features through a logical progression of single, double
+ or triple taps.  Another key has a dual function -- if the highlighted
+ record is a  directory it changes to the directory; if the record is a
+
+                                                                         7.
+
+ file or archive, its contents are viewed. The mapping and functions are
+ simple and easy to remember -- and the keys are handily close to the
+ arrow and page keys.
+
+ The navigation keymapping depends on the type of keyboard you are using.
+ 4FILES attempts to choose an AT or PC keyboard for you based on a test
+ of the keyboard BIOS, but this is not foolproof and may be overridden
+ from the Configuration Options screen.  The laptop keyboard cannot be
+ automatically detected, and must always be explicitly selected.  Here are
+ the active navigation keys:
+
+
+          AT KEYBOARD                                  PC KEYBOARD
+  ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»             ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»
+     ÄÄÄÄ¿ ÚÄÄÄÄ¿ ÚÄÄÄÄ¿  º                           ÚÄÄÄÄÄÄÄÄÄÄÄ¿  º
+         ³ ³ G* ³ ³ G- ³  º                           ³ Scl Lock  ³  º
+        ÄÙ ÀÄÄÄÄÙ ÀÄÄÄÄÙ  º                           ÀÄÄÄÄÄÄÄÄÄÄÄÙ  º
+       ÄÄ¿ ÚÄÄÄÄ¿ ÚÄÄÄÄ¿  º                           ÚÄÄÄÄ¿ ÚÄÄÄÄ¿  º
+         ³ ³    ³ ³    ³  º     ("G" means            ³    ³ ³ G- ³  º
+       ÄÄÙ ÀÄÄÄÄÙ ³ G+ ³  º       grey key.)          ÀÄÄÄÄÙ ÀÄÄÄÄÙ  º
+        Ä¿ ÚÄÄÄÄ¿ ³    ³  º                           ÚÄÄÄÄ¿ ÚÄÄÄÄ¿  º
+         ³ ³    ³ ³    ³  º                           ³    ³ ³    ³  º
+       ÄÄÙ ÀÄÄÄÄÙ ÀÄÄÄÄÙ  º                           ÀÄÄÄÄÙ ³ G+ ³  º
+        Ä¿ ÚÄÄÄÄ¿ ÚÄÄÄÄ¿  º                           ÚÄÄÄÄ¿ ³    ³  º
+                                                      ³    ³ ³    ³  º
+                                                      ÀÄÄÄÄÙ ÀÄÄÄÄÙ  º
+          (Choose your keyboard on the Config Menu.)
+
+                          ÚÄÄÄÄ¿ ÚÄÄÄÄ¿ÚÄÄÄÄÄ¿   º
+         Laptop Keyboard  ³ [  ³ ³  ] ³³     ³   º
+                          ÀÄÄÄÄÙ ÀÄÄÄÄÙ³     ³   º
+                                 ÚÄÄÄÄÄÙ     ³   º
+                                 ³   Enter   ³   º
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÙ   º
+                                                 º
+
+The <Scroll-Lock> and <[> keys have the same function as <G*> depending on
+the choice of keyboard type, and will always be referred to as <G*> in
+this manual.  Similarly, <]> will be included in all references to <G->
+and <Enter> as <G+>.
+
+AT KEYBOARDS (KB=1):
+
+ <G*>     Drive change via a single key.
+ <G**>    Directory change via an input field.
+ <G***>   Goto PREVIOUS drive\directory.
+
+ <G->     Goto PARENT directory.
+
+ <G+>     Goto HIGHLIGHTED directory.  <ENTER> may be configured as a
+          substitution in File Mode only.  (On a highlighted FILE, <G+>
+          will view the file or archive.)
+
+                                                                        8.
+
+PC KEYBOARDS (KB=2):
+
+ <Scrl-Lock>                        Drive change via a single key.
+ <Scrl-Lock><Scrl-Lock>             Directory change via an input field.
+ <Scrl-Lock><Scrl-Lock><Scrl-Lock>  Goto PREVIOUS drive\directory.
+
+ <G-> Goto PARENT directory.
+
+ <G+> Goto HIGHLIGHTED directory.  <ENTER> may be configured as a
+      substitution in File Mode only.  (On a highlighted FILE, <G+> will
+      view the file or archive.)
+
+
+LAPTOP KEYBOARDS (KB=3):
+
+ <[>      Drive change via a single key.
+ <[[>     Directory change via an input field.
+ <[[[>    Goto PREVIOUS drive\directory.
+
+ <]>      Goto PARENT directory.
+
+ <ENTER>  Goto HIGHLIGHTED directory. <ENTER> may be configured as a
+          substitution in File Mode only. (On a highlighted FILE, <G+>
+          will view the file or archive.)
+
+ <@-Char> -- Fast scroll to next record starting with the character.
+             <SCL-LK> or <Keypad-5> changes search direction (the former
+             for AT and laptop keyboards, the later for PC keyboards).
+
+
+NOTE MODE KEY COMMANDS:
+-----------------------
+
+  ^H          -- Destructive backspace (see also File Mode).
+
+  ^W          -- Write note edits to disk?  Choices given are (S)ave or
+                 (A)bandon unsaved edits.  This also works in File Mode.
+
+  ^Y          -- DELETE NOTE.
+  @^Y         -- Delete tail of note (from cursor to end).
+
+  <Ctrl-PgUp> -- Go to TOP of directory listing.
+  <Ctrl-PgDn> --  "  " END  "     "        "
+
+  <Ctrl-Up>   -- Go to TOP of page.
+  <Ctrl_Dn>   --  "  " END  "   "
+
+                                                                         9.
+
+  <Sh-Up>     -- Scroll display to show record ABOVE TOP of page.
+  <Sh-Dn>     --    "      "     "   "    "    BELOW END  "   "
+  <Ctrl-Lf>   -- Shift cursor ONE WORD LEFT.
+  <Ctrl-Rt>   --   "      "   ONE WORD RIGHT.
+
+  <Sh-Rt>     -- 1) Bump text to the right of the cursor to right margin.
+                 2) If no text to the right, enter Flush-Right (FLR) mode.
+  <Sh-Lf>     -- Exit FLR mode (or use <ESC>, <CR> or any bar movements).
+  <Sh-BS>     -- Destructive "Fore-space", available in FLR mode only.
+
+  <ESC>       -- Like <^ESC>. Can be disabled with a configuration switch.
+
+  <^ESC> or <@ESC> -- Quit to original or current directory, respectively,
+                      DOS only. (If you use NEWKEY, see page 16.)  Under
+                      Windows & OS/2 these keys have their normal meanings.
+
+  <Sh-ESC>    -- Terminate 4FILES.  Active in Windows and OS/2 only.
+
+
+FILE MODE KEYCOMMANDS:
+----------------------
+
+  <^E> or
+  <^E><^E> -- Presents a DOS command line with or without the current
+               file name.  Appending "++" to a command freezes the screen
+               temporarily after execution, or freezing can be permanently
+               set via the Configuration Options screen.  Executing a
+               blank command line shells to a secondary "real" DOS session.
+
+  <^H>      -- Shell to 4DOS & show the selectable command history window.
+               KEYSTACK.COM (a 4DOS TSR) must be loaded before 4FILES.
+
+  <^X>      -- Instantly executes records that are .COM, .EXE, .BAT or .BTM
+               files; also acts on data files with "executable extensions".
+
+ <F7> or
+ <NUM-LK>   -- Toggles between showing file attributes and file time.  The
+               works only on non-laptop keyboards; <F7> works on all.
+
+
+  FOR FILES
+  ---------
+  A / ^A  -- Change attributes of current file or all marked files.
+  C / ^C  -- Copy current file or all marked files.
+  D / ^D  -- Delete current file or all marked files.
+  M / ^M  -- Move file or all marked files.
+  R / ^R  -- Rename current or marked files.  (LCD 4.0B+ & ACD compatible.)
+  S       -- Resort the listed files with a new sort type or order.
+
+  FOR DIRECTORIES
+  ---------------
+  N       -- Create a "New" Directory.  LCD/ACD/NCD compatible.
+  K       -- "Kill" (remove) highlighted directory. LCD/ACD/NCD compatible.
+  R       -- Rename current directory.  Descriptive note, if any, will be
+             lost.  (LCD 4.0B+ and ACD compatible.)
+  <G**>   -- Change directory.  (See above for KB=2 or 3 substitutions.)
+
+                                                                        10.
+  FILE MARKING
+  ------------
+  <F5>  / <F6>   --  Mark and Unmark the CURRENT file.
+  <^F5> / <^F6>  --  Mark and Unmark ALL files.
+  <^/>  / <^\>   --    "   "    "     "    "
+  <Space>        --  Toggle mark on CURRENT file.
+  <^Space>       --  Toggle marks on ALL files.
+
+
+====================================
+DRIVE & DIRECTORY NAVIGATION DETAILS
+====================================
+
+After hitting <G*> (or one of the substitute keys for other keyboards) you
+will be prompted to enter a drive letter. A valid entry will cause an
+immediate change to the drive.  A second hit on <G*> (instead of typing a
+drive letter) presents an input field for specifying a new directory
+and/or drive.  <G***> makes an immediate change to the previous directory.
+
+The <G**> command is compatible with LCD, ACD or NCD (directory changing
+utilities) if 4FILES has been configured to use one of them, allowing you
+to enter fragmentary path names for directory changes.  This REALLY saves
+time.  The databases used by these programs are updated by 4FILES when
+directories are created, deleted or renamed.
+
+Hitting <G+> while the cursor is on a subdirectory record will cause 4FILES
+to change to that subdirectory.  If this is the ".." record, the change
+will be to the parent of the current directory.  <G-> is preferable
+though, since it will change to the parent directory from ANY record.
+
+When changing to a parent directory, the cursor will quick-scroll from the
+top of the listing down to the record of the subdirectory you just left.
+This is helpful when inspecting a succession of child directories, since
+you always return to your last place in the parent, rather than its first
+record.  The scrolling action gives a quick impression of your current
+location in the list.
+
+
+MOUSE NAVIGATION & OTHER USES
+=============================  The navigation key commands are mirrored
+in the mouse commands.  For three button mice you will see that commands
+for navigating the listing are also included.  Navigation functions are
+denoted here with AT-keyboard key symbols.
+
+
+   MOUSE BUTTONS: |  L--    M--    R--     L-R     LM-      -MR      LMR
+   ===============|========================================================
+   3 Button Mouse | <G+>   <G->   <ESC>   <TAB>   <PgUp>   <PgDn>   <F9>
+                  |
+   2 Button Mouse | <G+>          <ESC>   <G->
+
+   NOTE: (1) Mouse type is automatically detected.
+         (2) OS/2's Presentation Manager disables the middle mouse button!
+         (3) See the Mouse Use section for more information.
+
+                                                                         11.
+The mouse handler is setup so that no action is taken until all depressed
+buttons have been released.  To experiment, for a 'page-down' hold down
+the right button -- no rush -- and hit the middle button at your leisure.
+Then lift one finger -- again no rush -- and when the second finger is
+lifted the action is taken.
+
+To use the mouse when running under MS-Windows, the mouse driver must be
+loaded before loading Windows, otherwise the mouse will not function in
+Windows DOS sessions.
+
+The handler remains active in called utilities, giving mouse capability
+to utilities which have none.  The right-button (<ESC>) will quit the
+utility, but the hair-trigger may also terminate 4FILES accidentally.
+For this reason, <ESC> may be disabled as a means of terminating 4FILES.
+
+
+SEEKING A FILE ON THE LIST
+==========================  Scrolling to a file in a directory listing is
+easy: just hit an <@-char> key, where "char" is the alpha or numeric first
+character of the file or directory name.  You will be delivered to the next
+occurrence of a record starting with that character.  On AT and laptop
+keyboards <SCL-LK> toggles the search direction at any time, including in
+mid-search.  On PC keyboards, <Keypad-5> performs this function instead
+since <SCL-LK> is used for directory navigation.
+
+
+FILE MODE & NOTE MODE
+=====================  4FILES starts in FILE MODE, with the file management
+functions are enabled.  <TAB> toggles between File Mode and Note Mode.  You
+will notice that the menu changes with the mode, and you will find that
+while every command on each menu will work in its mode, some will also
+work in the other mode.  There is not a enough space on the single menu
+line to list all commands for each mode, but they are logical and you'll
+catch on.
+
+===============
+USING FILE MODE
+===============
+
+    The file mode commands are mnemonic keys:
+
+    <C>opy, <M>ove, <R>ename, <D>elete, and <A>ttributes for single files.
+
+    <^C>opy, <^M>ove, <^R>ename, <^D>elete, <^A>ttributes and <^Z>ip for
+    marked files.
+
+    <N>ew-directory, <K>ill-directory, <R>ename-directory for directories.
+
+    <^E>xecute-field, <^E^E>xecute DOS shell, e<^X>ecute-now, and
+    <^H>istory list execution.
+
+
+File Management
+---------------
+Copy, move and rename rely directly on 4DOS resources, and keep the file
+notes with their files.  The Z and ^Z (Zip) commands are for archiving
+files, and support ARJ and LHA archivers as well as PKZIP.  The archiver
+
+                                                                        12.
+is selected based on the extension given for the target file, and .ZIP is
+the default if none is given.  File notes remain associated with their
+files in ZIP archives, and this feature will also be added for ARJ files
+as soon as possible.  To unzip the comments 4FILES puts in an archive, you
+must port the shareware program 4UNZIP to the <F4> key.  (4FILES will soon
+have an internal function to completely replace the need for 4UNZIP, and
+will be able to provide the same service for ARJ files.)
+
+History lists are maintained separately for target file names for copy/
+move, archive (Z/^Z) and rename commands.  A common target path history
+list is maintained for those commands which use it.  The list capacities
+are all ten strings.  The input field is initially blank, but pressing the
+DownArrow key will display the current filename for editing.  The oldest
+filename is next in line.  UpArrow accesses (from blank input fields) the
+most recent list addition.
+
+A and ^A are mnemonic commands to change file attributes.  If plain A is
+hit, an editable image of the current file's actual attributes is displayed
+for modification.  If ^A is hit (operating on marked files), a template
+instead of an actual image is shown. In the template, each attribute letter
+is initially preceded by a "?" wildcard, indicating that the existing
+attribute will be unchanged.  Repeatedly typing an attribute character (R,
+A, S or H) toggles the action on that attribute through a cycle of, for
+example, ?R, +R, -R, and back to ?R.  + and - indicate the attribute will
+be forced "ON" or "OFF" for each file.
+
+Especially with the ^A command it is useful to be able to see the current
+attributes for all files at once, but the default is to not display them.
+The file creation time field may be toggled between showing time and file
+attributes via the <F7> or <Sh-NumLock> key, which are functional in both
+File and Note Modes.  <F7> is functional for all keyboards, and the other
+key only for non-laptop keyboards.
+
+D deletes the current file, and requires a double-tap of the "Y" key for
+confirmation.  The double tap is a safety feature, so that typing
+something like "dynamic" in File Mode when you think you are in Note Mode
+will not delete the current file.  ^D acts on all marked files, and has a
+simple yes/no confirmation.
+
+Note that for the marked file and archiving operations to work as fast as
+possible you should have a temporary directory, named TEMP, set up.  In
+AUTOEXEC.BAT you can put a statement like:  SET TEMP=d:\ where "d" is a
+RAMDISK or hard drive.  A directory may be added if desired.  4FILES
+deletes its temporary files when done with them.
+
+
+File Execution
+--------------
+^E presents a DOS command line loaded with the name of the current record
+name, and the line editor is forced into insert mode.  The cursor controls
+are identical to those for the note editor.  ^E^E provides a blank command
+line in which you may enter any command; just like the DOS command line.
+^Y deletes the command.  A history list with a capacity of ten strings is
+maintained for the ^E and ^E^E commands.
+
+                                                                        13.
+
+The typed-in command is executed, and when it finishes the return to 4FILES
+is automatic.  In many situations this is desirable, but in some cases (the
+DOS SET command is an example) the information you want to see flashes off
+the screen.  To prevent this there are two ways to cause 4FILES to delay
+clearing the screen until a key is hit.  One is to set the configuration
+switch named "Pause after ^E" to Yes (NO is the factory default).  The
+other is to append ++ to the ^E command line.  ++ is a 4FILES flag, and is
+not actually part of the command.  Either the <G+> or <Shift=> may be used
+to generate +.  If the switch is set to YES, a "- -" appendage will force
+an immediate return.
+
+If you wish to work directly from the real DOS prompt for a while, type
+^E^E <CR>.  Executing the blank command line will load a secondary DOS
+shell, and you will remain in the shell until you type EXIT to return to
+4FILES (see 4FILES Tip #5, below).  Back in 4FILES, you will be returned
+to the same drive:directory you were in before.
+
+The ^X or <F9> command will execute the current file immediately with no
+prompting if it is an executable file or is a data file for which you have
+set up an executable extension.  This command may be forced to pause after
+execution with the "Pause after ^X" configuration switch.  An executable
+extension may be set up with a statement such as this in your AUTOEXEC.BAT
+file:
+
+                       SET DOC=C:\WP\WP.EXE
+
+If you press ^X or <F9> on a file with a .DOC extension, 4FILES will then
+load it into Word Perfect for you.
+
+
+Directory Management
+--------------------
+<N>ew-directory and <K>ill-directory are commands to make and remove
+directories.  <R>ename works both for subdirectories and files.  These
+commands update ACD, LCD, and NCD databases, if 4FILES is configured to
+use one of these utilities.
+
+
+MARKING FILES
+-------------
+There are several ways to mark files.  <F5> & <F6> mark and unmark
+records for the above marked file operations.  <SPACE> toggles the mark
+of the current file.  <^F5> & <^F6> mark and unmark all records, and <^
+SPACE> toggles the marks of all files.  <^/> and <^\> duplicate the <^F5>
+and <^F6> keys for Windows compatibility.
+
+A count of marked files and marked bytes is shown on the second line in a
+special configurable color.  Marking may be done in both File & Note
+Modes.  Marked file operations automatically pass over subdirectories and
+hidden files, and marking of DESCRIPT.ION is expressly blocked.  Note
+however that UPON EXIT OR DURING THE NEXT DIRECTORY CHANGE, if no file
+notes remain, DESCRIPT.ION will be deleted for you automatically.  An
+empty DESCRIPT.ION may also be deleted via the "D" single file command.
+
+                                                                        14.
+
+When changing directories or calling a utility, any file marks are saved in
+a file named DEMARCAT.ION, kept in the current directory.  When entering or
+returning to a directory, if this file is found the marks are restored.
+The exception is that if the file was written during a previous 4FILES
+session it is instead deleted.  So, within a session all marks remain
+until they are unmarked, but they are usually not "sticky" between
+sessions.
+
+There are two ways to have "sticky" marks, if you wish.  One is via a
+Configuration Menu switch.  The other is the /M command line switch.  The
+later is particularly useful to reuse marks on the spur of the moment, if
+the menu switch is "off." The marks in the current directory would
+otherwise be lost when 4FILES loads, before you have a chance to change
+the menu switch.
+
+
+SORTING THE LIST OF FILES
+-------------------------
+While the subdirectory portion of the list is always alphabetically
+sorted, the files-portion may be sorted in various ways either on-the-fly
+or via command line switches.  The default sort is alphabetical, in
+ascending order.  To change the sort on-the-fly, type S while in DOS
+mode. After making a selection, which may involve making settings for
+both type of sort and for ascending or descending order, a second tap on
+the last key hit will exit the sort menu and cause the sort to be made.
+<CR> will exit also.
+
+    The command line sort switches are described below.  /D may be used by
+itself or in combination with other switches, and affects only the primary
+sort. The following sorts also apply to on-the-fly setting::
+
+        SWITCH          PRIMARY SORT          SECONDARY SORT
+        -------        -----------------     ------------------
+        DEFAULT         FILENAME               .EXT
+          /E            .EXT                   FILENAME
+          /S            File Size              FILENAME.EXT
+          /C            Chronological          FILENAME.EXT
+          /N            File Note              FILENAME.EXT
+
+          /U            Unsorted, DOS order    --
+          /D            Descending Order       Descending Order
+
+/D may be combined with any of the other switches.  Except when sorting by
+filename, the primary sort field is highlighted with a color that is set on
+the configuration menu.  For (U)nsorted, the filename field is highlighted.
+Only files, never subdirectories, are sorted.  International code pages are
+used for sorting as appropriate.  The "tips" section has more on sorting.
+
+                                                                        15.
+=============
+UTILITY PORTS    FILE BROWSING, EDITING, UNZIPPING, DUPLICATES, etc.
+=============    ---------------------------------------------------
+
+Some of 4FILES' most useful functions are performed by automatically
+executing other programs at the stroke of a key.  "Utility ports" are the
+means by which you associate such programs with their various 4FILES
+control keys and setup 4FILES to send the command line information
+(switches, filenames, etc.) they need to be fed.  These ports appear on
+the Configuration Utility Ports screen, and they allow you to easily
+customize 4FILES to use your favorite utilities or other programs.
+
+Several programs are recommended below for use in various ports.  If you
+don't have these utilities or equivalents, they may be downloaded free on
+your first call to my BBS, which is a subsystem of MAS-BBS in New York.
+The latest version of 4FILES and a collection of pertinent utilities are
+found there in separate directories. See page 1 for log-on instructions.
+Also, I can mail you a full set of useful shareware and public domain
+utilities (including 4DOS, which is not available on the BBS) -- see the
+registration form for details.
+
+
+BROWSING FILES
+--------------
+The <G+> key (or its substitute) is overloaded in a sensible way.  Not
+only will it allow you to "see" the contents of a subdirectory, if the
+highlighted record is a file, it will call up your favorite file browser
+or archive viewer with the file loaded.  In File Mode, <CR> may be
+configured to duplicate the function of <G+>, although this is not
+recommended unless you really need it.
+
+4FILES comes configured with the internal 4DOS LIST command as the browser,
+but any browser can be used.  Shelling to DOS to run this internal
+command is slow, but by using browse utilities like TV.COM, PC-Magazine'
+s free BROWSE.COM or Vern Buerg's LIST.COM, your file will be displayed
+in a literal eye-blink.
+
+The <G+> and <^G+> commands recognize archive files if they are
+self-extracting (.EXE) files or if they have one of these extensions: .ZIP,
+.ARC, .DWC, .LBR, .LZH, .PAK or .ZOO.  When an archive is detected an
+archive viewer is called.  There are various types of archive browsers
+available.  FV.COM shows a simple listing of the contents.  ZR, LR, AR and
+ZOR not only show a listing (of ZIP, LHZ, ARJ and ZOO file respectively),
+but can view the text of files inside the archive and extract selected
+files from the archive.  These four programs can be found on BBSs as
+XRAY.ZIP or XRAY???.ZIP.
+
+    4F-XRAY.BAT was provided with your copy of 4FILES to allow the most
+appropriate one of these five browsers to be called automatically via one
+4FILES utility port.  If you use this batch file, it is best mapped to
+the <G+> key, and it is handy to then have FV mapped independently to the
+<G+> key.  4FILES comes with the <G+> mapped to FV and <^G+> mapped to
+ZR.COM.
+
+While in browsers and other utilities, the mouse buttons work "as
+initialized" by 4FILES, and provides scrolling actions plus a quick return
+via the right button.  The combination of <left-button>=<G+> and
+
+                                                                        16.
+
+<right-button>=<ESC>, combined with movement of the 4FILES cursor bar by
+the mouse, allows one handed "rapid-fire" inspection of multiple files.
+(Note: if you load 4FILES via SHROOM or call a utility with SWAPDOS, the
+mouse will be automatically disabled, temporarily.  This is necessary since
+the mouse handler gets overwritten.)
+
+In the midst of your rapid firing though, you will sometimes inadvertently
+exit from 4FILES (even without the mouse).  To avoid this, you can
+reconfigure to disable quitting via the <ESC> key.  The <^ESC> and <@ESC>
+keys still function, and allow you to quit to the original or current
+directory respectively.  Improper <ESC> use will then display a menu of the
+proper keys.  If you use NEWKEY, to enable 4FILES to use the <^ESC> key,
+run NEWKEYSP.EXE, pick "I" on the menu, and make an entry for <^ESC>.
+
+
+EDITING FILES
+-------------
+<F2> calls your editor, loading it with the filename of the current
+record.  As supplied, editor access to .COM .EXE .BIN .OBJ .SYS .LIB .WKS
+.DB & .OVL extensions and the seven above archive extensions is denied.
+The denied extensions may be reconfigured.  Denials protect the integrity
+of non-text files.  A second editor or word processor (or any utility,
+such as a .GIF viewer) may be mapped to <^F2>.  The denied extensions
+apply to this key as well.  If a disk is write-protected, <F2> will give
+an error message.  If you have no editor, pick up PC-Mag's free TED.COM.
+
+Note that an "R" switch is provided in the configuration listing for each
+utility port.  It forces reloading the current directory upon return from
+the utility, and should be "ON" for any editor or other utility which can
+change file size or directory contents.  "W" (wait before redisplaying)
+should be off, since you will want to return immediately to 4FILES from an
+editor.
+
+To create a NEW file, hit <F2> while on a NON-FILE RECORD.  This will not
+work if the "R" switch is off.  You will be prompted for names for the new
+files, but may hit <CR> on the blank field blank if you wish.  Some editors
+may not be able to utilize more than one filename from the command line.
+
+
+FINDING DUPLICATE FILES
+-----------------------
+<F3> is initially set up to call a file finder utility called WHERE.EXE,
+loaded with the current file name.  Bruce Gavin's utility FIND.EXE is a
+good one to use here.  A utility of any type may be mapped to this key.
+
+
+UNZIPPING FILES
+---------------
+<F4> is used to call 4UNZIP, a shareware utility which in turn calls
+PKUNZIP.  A list is shown of the files archived in a .ZIP file, and files
+can be unzipped singly or in marked groups.  4UNZIP is important here
+since it will recover the file notes 4FILES archived with their files.
+Note: the current 4UNZIP version causes a crash (immediately or a soon
+after use, with or without 4FILES) if certain keyboard buffer-expanders
+are used.  Test your setup!
+
+                                                                        17.
+
+4FILES will soon have a built-in routine which will replace 4UNZIP
+completely, and which will work on both ARJ and ZIP files (4UNZIP works
+only on ZIPs.  Some 4FILES users setup <F4> or <^G+>-Zip to call SHEZ, a
+comprehensive archiving tool (it's shareware).
+
+
+====================
+UTILITY PORTS IN USE
+====================
+
+One potential difficulty which 4FILES avoids is that some utilities and
+editors you might like to call allow you to delete/rename files or change
+drives/directories.  When the utility is exited, 4FILES by default
+explicitly changes back to its last drive/directory and rereads the
+directory list.  The bar is returned to the last record it was on, or if
+deleted, to the nearest record number possible.  This process takes a
+little longer than assuming that the directory structure is unchanged,
+and also destroys the "+/-" note-modified indicators and any file marks,
+but is SAFE.
+
+Alternatively, you may tell 4FILES not to reload the directory by setting
+the "R" switch for the port to "N".  Use the "N" setting ONLY if you know
+the subject utility is not capable of the operations mentioned in the
+previous paragraph.
+
+Note that the switch for the browser is also operative when displaying Help
+or this manual with <F1> or <^F1>, since the browser is used to display
+these files.  Two help files are provided: 4F.HLP and 4F.KEY.  The file
+4FILES will call is 4F.HLP, so if you wish to use the other, rename both.
+
+
+===============
+USING NOTE MODE
+===============
+
+ANNOTATING FILES
+================  4FILES supports file notes (or "descriptions" in 4DOS
+parlance) up to 40-characters long, and each directory with annotated files
+will contain a hidden file named DESCRIPT.ION, containing the note data for
+all files in the directory.
+
+Beginning with release 4.01, 4DOS can handle file notes up to
+120-characters long, but 4FILES will not be able to use the extra
+capacity until a later release.  For now though, 4FILES does detect notes
+of over 40-characters and will warn you of the situation.  To limit
+creation of notes by 4DOS or other utilities to 40 characters, be sure
+that in your 4DOS.INI file the directive DescriptionMax=040 is set, which
+is the default setting.
+
+File copying, moving, or renaming will however always work properly
+regardless of description length since 4FILES relies directly on 4DOS
+resources for these functions.  The only caveat is, again, that if a note
+has been edited, 4FILES will eventually rewrite DESCRIPT.ION, and only the
+first 40 characters of each note will be then be written.
+
+                                                                        18.
+
+To put the "*" character in a note, the SHIFT-8 key must be used since <G*>
+has a special function.
+
+Great attention has been devoted to making 4FILES a true power tool for
+creating or modifying one or a multitude of notes.  These are the features:
+
+
+CUT & PASTE & NOTE DELETES
+==========================  <F9> initiates the text-copying mode.
+Highlight the desired text by moving the cursor horizontally, and then hit
+<CR> to put it in the paste buffer.  <^F9> cuts  (rather than copying) the
+text to the buffer, and <@F9> copies the whole note.
+
+<F10> pastes text in the buffer at the cursor position.  If a PASTE
+causes an overflow of the 40-character note space, the note is moved to
+an 80-character space at the bottom of the screen.  This expanded field
+is fully editable ( see following).  Captured text stays in the buffer
+when changing drives or directories.  <F10> is inactive in FLR mode.
+
+^Y deletes the entire line.  In earlier versions it cut the line to the
+cut- buffer, but now the buffer is loaded only via the various <F9> keys.
+
+^Y is functional in notes and all text input fields and command lines.
+
+In Note Mode, ^D will delete the notes of all marked files.  As with file
+deletion, a double-tap of the "Y" key is required to affirm the deletion.
+The message is put on a different part of the screen than for file
+deletion, to be sure you realize that you are deleting notes, not files.
+
+
+EXPANDED EDIT FIELD
+===================  Expanded Field Mode is triggered whenever typing or
+pasting causes the length of the current note to exceed 40 characters, and
+allows editing over a full 80-character field.  The note is moved to a
+highlighted 80- character field at the bottom of the screen and the
+40-character field is blotted out.  Two "eyebrows" of contrasting "blot"
+characters, each 40-characters long, are placed above this field, and act
+as a guide for where the over-long note will be truncated when <CR> or
+<ESC> is hit. The effect of the blotted out 40- character field, eyebrows,
+and highlighted bottom row is to draw your eyes down to the expanded field.
+
+To return to the 40-character field, hit <ESC> or <CR>.  <ESC> will return
+to the current record and <CR> moves the cursor to the next record.  In
+both cases the note is truncated after the 40th character.  4FILES will
+not accept more than 80 characters under any circumstances, and will block
+any pasting or typing which would exceed that size.  A 40-character long
+cut string can be pasted into a full 40-character note, since the expanded
+field will be used for the overflow.
+
+
+FLUSH RIGHT (FLR) MODE
+======================  To create notes which are easy to scan by eye, it
+is sometimes useful to make part of a note left justified and part of it
+right justified.  Hitting <Sh-Rt-Arrow> provides right justified text in
+either of two ways:
+
+                                                                        19.
+
+1. If there is text to the right of the cursor, it is bumped over to the
+right margin.  The cursor is not moved, and 4FILES remains in its normal,
+left justified editing mode.
+
+2. If there is no text to the right of the cursor, 4FILES enters Flush-
+Right Mode (FLR).  The cursor is moved to the right margin, and highlighted
+indicators are set-up to show the part of the note field which is available
+for FLR text entry.  Text will grow leftward from the cursor, which is
+initially outside the field.  Editing is forced into insert mode.  All
+horizontal cursor movement keys are active.  ^Left & ^Right behave slightly
+different than in normal mode, putting the cursor between words, and
+Shft-BS is enabled.  Collision of new FLR text with any left-justified text
+is prevented.  Cut and paste are not allowed.
+
+
+QUITTING FLR MODE
+=================  There are three ways to leave FLR mode, with differing
+effects on the text cursor and the cursor bar.  In all cases, the
+pre-existing insert or overwrite mode will be restored.  The choices:
+
+        <ESC>            Leaves the cursor where it is.
+        <Sh-Left>        Sends the cursor home.
+        (Record-change)  (All vertical cursor keys act normally.)
+
+
+INSERT / OVERWRITE MODES
+========================  The INSERT mode default may be changed from the
+configuration menu.  The active mode may be toggled with <INS>.
+
+
+==============================
+INTERNAL CONFIGURATION ROUTINE
+==============================
+
+CUSTOMIZING 4FILES
+==================  You can change 4FILES' on-screen appearance, the
+INSERT / OVERWRITE default, "utility port" setups, and a number of other
+features.  <Alt-F10> displays the Main Configuration Menu, which offers
+four Configuration Screen for action and <ESC> to quit.  If you edit the
+configuration you will instead be given different quit options: (S)ession
+only changes or (P)ermanent changes, which are saved to disk in a .CFG
+file.  If you rename 4FILES, 4FILES will detect its new name and will
+recognize only a .CFG file of the same name.  On exit from configuration,
+new and old data are compared, and you are prompted to save the
+configuration only if there is a difference.  When quitting 4FILES, you
+will have an opportunity to save session-only configuration changes if you
+like them.
+
+
+"Utility Ports" Configuration Screen
+====================================
+Each utility port shown has a Key/Function name which indicates the key to
+access the utility and the recommended use for the port.  The first field
+of each line is the "utility field", and is for an alias name, file name,
+(filespecs) or a complete pathspec for a utility or application.  A
+
+                                                                        20.
+
+complete pathspec may speed loading, but is not necessary if the program
+is in your PATH.  (DOS must know where to find the program, either from
+the pathspec or by searching each directory listed in your system's PATH.)
+A complete filespec can dramatically speed loading the utility, and is
+recommended.  In all cases, a file extension MUST be given.  Valid
+extensions include .BAT, .BTM and .ALS.  ".ALS" must be appended to
+aliases or DOS internal commands.  .ALS is a flag for 4FILES, and is not
+included in the actual call.  All commands without extensions will fail to
+execute.
+
+If you wish to swap 4FILES to EMS or XMS memory or a hard disk before
+executing a utility or application, SWAPDOS.COM can be used.  Enter SWAPDOS
+in the utility field.  The name of the program to be called then goes in
+the tail ("T=") field, preceded by any command line switches for SWAPDOS
+and followed by any of its own switches.
+
+Another swap program which can be used for this is SHROOM.  4FILES rather
+than the utility is loaded via SHROOM, so SHROOM should not be placed in a
+port's configuration.  With SWAPDOS, swapping only occurs for the selected
+utilities, while SHROOM will swap for all utilities and when shelling to
+DOS.  On the other hand, SHROOM does fast executions via the DOS EXEC
+function, while SWAPDOS makes a slower shell to DOS.  On any utility or
+DOS calls in which SHROOM or SWAPDOS is active, the 4FILES mouse and
+keyboard handlers are necessarily disabled during the call.
+
+Errors in calling .COM and .EXE programs from 4FILES (e.g. file not found)
+are shown as "configuration incorrect", but execution errors for batch
+files and aliases are not trapped.  If execution is a quick flash on the
+screen, you need to repeat the operation with a "screen pause" to see what
+is happening. There are two ways to do this; one global and one specific to
+the utility.  To pause after execution of all utilities and the DOS shell
+(^E commands), set the "Pause after ^E" configuration switch to "Y".  To
+cause a particular utility to pause after execution, set its  "H=" (hold
+screen) switch to "Y".  There is also a "Pause after ^X" switch.
+
+Displaying Help and this manual with <F1> and <^F1> (respectively) will
+work only if the <G+> BROWSE key is configured correctly.
+
+The next field in the utility-port block is the command line tail.  This
+sends filenames, command line switches or other parameters to the utility.
+"$F" inserts the current filename with extension, and may be placed where
+needed among the parameters.  No spaces are needed before or after $F,
+saving space. $P causes the full pathspec and filename to be inserted, and
+is a good choice if you use Windows.  $N inserts the filename without its
+extension.
+
+The "H" field is a YES/NO field which determines whether or not 4FILES
+waits for a keyhit after the utility has finished executing.  Set it to "Y"
+for utilities which run straight through and exit without any user input.
+
+The "R" field is also a YES/NO field which determines whether 4FILES
+reloads the directory list and DESCRIPT.ION file after the utility exits.
+It must be set to "Y" if the utility is capable of managing files or
+changing drives and directories.  It should for example be "Y" for an
+editor or word processor.
+
+                                                                        21.
+"Configuration Options" Screen
+==============================
+This screen provides switches, grouped into sections, for the following:
+
+
+KEYBOARD/MOUSE SWITCHES:
+------------------------
+Keyboard Code  -- Two letter DOS keyboard-country-code.  LEAVE THIS BLANK
+                  UNLESS YOU HAVE A PROBLEM.  Takes effect next session.
+
+Keyboard Type  -- "1" = AT keyboard, <G*>, <G->, <G+> keys active.
+                  "2" = PC keyboard, substitutes <Scl-Lock> for <G*>.
+                  "3" = Laptop.  Substitutes <[>, <]>, and <ENTER> for above
+                        and <F7> to toggle file-time/file-attributes display.
+
+Overtype Default -- The INSERT mode default can be changed to OVERTYPE.
+
+Disable <ESC>  -- To avoid inadvertent exits via <ESC> set this to "Y"
+                  and exit with <^ESC> or <@ESC>.  If you use NEWKEY, see
+                  P.10. In MS-Windows and OS/2 setting this switch allows
+                  task switching to occur.
+
+<CR> for <G+>  -- "Y" substitutes the <Enter> (<CR>) key for the <G+> key,
+                  in File Mode only.  <CR> retains its text writing
+                  meaning in Note Mode.
+
+Enable Mouse   -- "N" leaves the mouse set up as-received by 4FILES.  "Y"
+                  causes 4FILES to install its own mouse handler.
+
+
+VIDEO SWITCHES:
+---------------
+Retain Colors  -- "Y" leaves the screen set to the 4FILES text color at
+                   exit; otherwise the DOS color is restored.
+
+Enable Blinking-- 4FILES disables blinking to allow all color choices.
+                  To restore blinking on exit and during utility calls,
+                  set this to "Y"; otherwise blinking is left off.
+
+Snow Prevention - Set to "Y" if your CGA monitor has a snow problem.
+
+
+SOUND:
+------
+Beep OK?       -- The beep is on by default, and may be turned off.
+
+
+SHELLING OPTIONS:
+-----------------
+Use Copy/Move Alias? -- "N" is the default.  Use __CAUTION__ if you change
+                  this.  "Y" disables 4FILES' protection against trashing
+                  a file if you specify a non-existent directory during
+                  a marked files copy/move.  If set to "Y" your aliases
+                  for both Copy and Move must provide this protection.
+
+                                                                        22.
+
+Full Screen Copy -- For best appearance, set this to "Y" and see if your
+                  video system will work properly with the smaller window
+                  provided.  4FILES sets up the window and DOS then runs
+                  within it.  "Y" works for most systems.
+
+Full Screen Archiving -- Similar to the above, providing separate control
+                  for windowing of file archiving operations.
+
+Pause After ^E -- If the result of an (^E)xecute flashes off screen, set
+                   this to "Y", or alternatively enter "++" at the end of
+                   the ^E command input line.  Both await a keyhit.
+
+Pause After ^X -- This prevents the result of an immediate execution from
+                  flashing off screen, as above.
+
+
+OTHER OPTION SWITCHES:
+----------------------
+Keep File Marks? -- File marks from previous sessions are normally
+                  disregarded.  This configuration switch or the /M
+                  command line switch may be used to utilize old marks.
+
+Show File Attributes -- Normally 4FILES starts up with the file time shown
+                  field displayed.  This switch causes file attributes to
+                  be shown instead.  (<F7> toggles the display during a
+                  4FILES session.)
+
+
+Further note on the "Use Copy/Move Alias?" Switch
+-------------------------------------------------
+Use of this switch is not recommended, but is provided for power
+users.  It should normally be set to "N".  It determines whether an
+existing 4DOS command or user alias named COPY, MOVE or RENAME will be
+unaliased before sending the command.  NOTE THAT ENABLING ALIASES DISABLES
+THE SAFETY IN 4FILES WHICH PREVENTS MARKED FILES FROM OVERWRITING ONE
+ANOTHER IF THE TARGET DIRECTORY DOES NOT EXIST.  You MUST incorporate this
+safety yourself into BOTH the copy and move aliases you use, for example
+by including the 4DOS /D switch.  The 4FILES switch is provided to
+support users who have aliases which complete a path fragment (given for a
+copy/move operation) into a full path.  If 4FILES were totally safe for
+both switch settings, such aliases would be pre-empted by the prompt to
+create the non-existent target directory, which is what a path fragment
+appears to be.  The switch is completely safe if set to "N."  If set to
+"Y," you must take the above precautions.  Also, if set to "Y" your
+aliases must be able to handle (either using or discarding) both the /R
+and /P switches.
+
+
+"Configure Colors & Highlights" Screen
+======================================
+
+The screen itself does not truly portray the 4FILES colors (so that the
+location of input fields can be clearly shown), so a sample screen is
+shown at the bottom of the screen.  Just follow the instructions on the
+screen.  Since 4FILES turns screen blinking off, monochrome highlights
+
+                                                                        23.
+
+and background colors not normally available (i.e. dark grey) may be
+used.  If dark grey is used, you will probably want to set the "Enable
+Blinking" switch to "N."
+
+Some color combinations may not work with some "ported utilities".  For
+example, if a utility automatically sets up a black on white cursor bar
+without clearing the screen to white on black text first, AND if you have
+4FILES text set to black on white, you won't see the cursor bar.   This
+occurs with 4UNZIP & VDE.COM.  The only solution is to pick text colors for
+4FILES which avoid the conflict.  Please write to authors of such programs
+and request a "smarter" set up of screen attributes in the next version.
+Please notify me as well, and I will contact them too.
+
+
+================
+DISPLAY FEATURES
+================
+
+4FILES works with any video text mode of 80x25 or higher. Except for HGC,
+MDA and CGA video cards, if a higher mode is used it will be automatically
+implemented.  For HGC, MDA and CGA running higher modes (such as with
+UltraVision), the /+ command line switch must be used. The reason is that
+not all cards in this class are 100% BIOS compatible, in some cases
+defeating the automatic detection, and this arrangement assures that all
+systems will run " out of the box" in 80x25 mode.  When calling 4FILES
+from an application running a higher mode, 80x25 mode may be forced with
+the /8 switch.  When calling utilities or shelling, the screen may look
+its best (depending on your color choice) if ANSI.SYS is not loaded.
+
+If a CGA video card is detected, a no-snow video writing method is used by
+default.  For faster displays, this method may be configured "off".
+
+"T" and "E" indicators near the top and bottom of the screen indicate that
+the top or end of the listing is shown on screen.  Used disk bytes are
+shown in File Mode, and the 4FILES version number is shown in Note Mode.  A
+file count is displayed at all times.  An "S" indicator with an up arrow
+symbol on the top row means the file search direction is upward; if there
+is no symbol shown the direction is downward.  "PROTECTED" and "ROOT FULL"
+messages indicate that the full range of file management and note editing
+features are not available for the current disk.  "Protected" means the
+disk is write protected.
+
+Records with altered notes are flagged with a "+/-" character at mid-line.
+A different character is shown for unaltered notes.  A "delta" character
+next to a filename means the file is marked for group file management.
+
+
+===================================
+OPERATING WITH SPECIAL ENVIRONMENTS
+===================================
+
+RUNNING UNDER MS-WINDOWS
+========================  4FILES runs well as a non-Windows application.
+Windows is detected automatically, and regardless of the 4FILES
+configuration setting for the ESC key, the CTRL-ESC and ALT-ESC keys will
+
+                                                                        24.
+
+serve their Windows functions.  In Windows, <ESC> or <Shift-ESC> are used
+to terminate 4FILES.
+
+Note that the mouse will work in 4FILES only when 4FILES is in a full
+screen window -- when the program is in a window, the Windows mouse
+handler is operative.  As you should know, you may toggle between windowed
+and full screen with the Windows <Alt><Enter> key.  The 4F.PIF file
+provided will cause 4FILES to startup in a window, but you may change this
+behavior.
+
+This is the recommended way to install 4FILES in Windows:
+
+1) It is best to have two 4FILES installations; one in the Startup Group
+which will always be loaded automatically into a minimized-icon or window
+whenever you load Windows, and one in whichever Group is normally
+showing on your desktop.  This will give one example of how to do this.
+Your DOS installation of 4FILES should be completed before proceeding.
+Be sure 4F-I-WIN.ICO and 4F-P-WIN.PIF are in the same directory as the
+program, or alternately put copies of them in your Windows directory.
+
+2)  Open the Startup Group.  From the Program Manager menu line select
+"File," then "New" and "OK" with "Program Item" selected.  You are now in
+the Program Properties dialog box.  Type in 4FILES as the description,
+then <TAB> to the next field and use the mouse to select the "Browse"
+button.  Use the directory tree to find your way to the copy of 4FILES
+installed for DOS, and select 4F.COM.
+
+3)  The selection takes you back to Program Properties.  <TAB> to the
+Working Directory field and type in the drive and directory you want
+4FILES to list when it starts up.  <TAB> to the next field and type the
+hot-key combination you wish to use to reopen the 4FILES window.  Finally,
+if you do not wish 4FILES to load immediately (remember, this is the
+Startup Group) and prefer to have it appear instead as an icon at the
+bottom of the screen, set the "Run Minimized" box.  Open the dialog box
+menu (upper left corner button), save your setup and then exit.
+
+4)  Now open the Windows PIF Editor.  Open its menu, and cascade through
+the "File" and "Open" choices.  Use the tree to find the directory with the
+copy of 4FILES that you are installing, and select 4F-WIN.PIF.  You are
+returned to the previous dialog box, and the fields have been filled from
+the .PIF file.  The "Startup Directory" field here will be over-ridden by
+the "Working Directory" entry you made earlier from Program Properties.
+Make the Display Usage choice to determine whether 4FILES will start up
+full-screen (with 4FILES mouse operational) or in a window (with mouse
+Windows mouse operational).  Remember, you can toggle between the display
+types and type of mouse operation with <Alt><Enter> at any time.  Save
+your work, and exit from PIF Editor.
+
+If you ever create your own .PIF, set the KB Required to 128K.  Although
+4FILES is a .COM file, it needs memory for 64K of data in addition to its
+own code and buffers, which is also approaching 64K.  Set KB_Desired to
+640K, to leave room for utilities called from 4FILES.
+
+                                                                        25.
+
+5)  It is recommended that you do a duplicate installation in the Windows
+Group you will normally have showing on your desktop.  This way, if you
+terminate 4FILES you will have another icon at hand for loading again
+without the bother of opening the Startup Group to find it.
+
+Using 4FILES in Windows
+-----------------------
+For regular 4FILES use (except during evaluation under COMMAND.COM) be sure
+your COMSPEC environment variable specifies 4DOS or NDOS.  To use the mouse
+in 4FILES, your mouse driver MUST be loaded prior to loading Windows.
+Although Windows does not need a pre-loaded driver, 4FILES does.  The
+mouse will have its 4FILES functions when 4FILES is running full screen,
+and will have its Windows functions when 4FILES is in a window.  You may
+toggle 4FILES between full screen and window displays with <Alt><Enter>.
+
+<Alt><ESC> will swap out of 4FILES to other tasks.  When the swap cycle
+comes back to 4FILES, if 4FILES is running full screen, you will come
+back to the 4FILES icon and will have to reopen it.  If it is running in
+a window though, you will come back to your place on the 4FILES screen, or
+the screen of a utility you may have called from 4FILES and been in when
+you swapped tasks.  4F-WIN.PIF sets the Windows short-cut to Alt+CAPSLOCK;
+this may be changed on the PIF-Editor "Advanced" screen.
+
+One handy use of 4FILES is to have it in a background window that has an
+edge or corner showing.  Suppose you are in a Windows application, for
+example PageMaker, and you are looking at a directory list, trying to
+decide which file to load.  The Windows directory display does not show
+file notes or allow you to view a file, and it can be hard to figure out
+which file you want.  Just click on the 4FILES window to bring it to the
+foreground, change to the same directory, and read your notes.  Then click
+on the window for your application, and you are ready to go.  Of course,
+with the 4FILES window handy in the background it is also easy to update
+your file notes after creating or editing a file with another application.
+
+
+RUNNING UNDER OS/2
+==================  Users report that 4FILES runs well in an OS/2 2.0 VDM.
+The author does not yet have OS/2, and has not fine-tuned 4FILES for oper-
+ation under it, other than using Alt-ESC & Ctrl-ESC as above.  Suggestions
+for use under OS/2 are welcome.  An OS/2 icon is provided.  In Presentation
+Manager, OS/2 converts 3-button mice to 2-button action, unfortunately.
+
+
+RUNNING UNDER DESQVIEW
+======================  4FILES is now DESQview (DV) aware, and may be
+used in  small or full windows.  Note that even though 4FILES is fully
+DV-aware, " Writes directly to screen" must be set to "yes" since
+utilities you call from 4FILES may not be DV-aware.  DV's Transfer and
+Learn functions are fully functional, even though 4FILES does employ its
+own keyboard handler. 4FILES' time slice will be released while 4FILES
+is idling.
+
+                                                                        26.
+
+Sufficient memory must be allotted to 4FILES for itself plus the largest
+utility (or the DOS secondary shell) which will be called from within it.
+You may wish to have "Open" menu entries for a few copies of 4FILES, each
+with a different name and its own .CFG file.  For example, one copy might
+be setup to call TED (a small freeware text editor) as the editor so 4FILES
+can be fully functional with minimal memory requirements; and another copy
+might call Multi-Edit (a full featured editor) and be set up for 350+K of
+memory.  Due to 4FILES' small size it is realistic to use multiple copies
+(each with its own .CFG file) to provide this flexibility.
+
+When setting up for 4FILES it is suggested that the filename plus extension
+be used, causing DV to load 4FILES directly itself rather than calling DOS
+to load it.  This  saves  several K of memory and saves  much time during
+utility calls since execution will be  direct.  On utility calls if  DOS
+loaded 4FILES, DV will shell to DOS before the  utility is loaded.  Also,
+if a utility is called while 4FILES is in a small window, the utility's
+screen may appear to be blank and unscrollable, depending on the location
+of text on the page.  In this situation just zoom the window to full size.
+
+In the DV setup for 4FILES, set "Uses it's own colors" to yes, but don't
+use colors which interfere with blinking.  For  example, when dark grey is
+used for the 4FILES list background, 4FILES  will  display correctly but
+when you switch to another window the whole 4FILES window will blink.  Some
+monochrome highlight choices have this same effect.
+
+Under DESQview the 4FILES CTRL-ESC and ALT-ESC keys loose their meaning
+since 4FILES will always load showing its home directory.  These keys can
+still be useful though, allowing "plain" ESC to be deactivated as
+described herein.
+
+
+===============
+SAFETY FEATURES
+===============
+
+DISK OVERFLOW PREVENTION
+========================  In DOS, a file write that exceeds disk capacity
+truncates the file, usually with no immediate outward indication of a
+problem.  Automatic protection against such data loss must be provided by
+the  program itself, and 4FILES is so equipped.  Competing programs do not
+check for disk overflow; some simply truncate the file, and some truncate
+it to zero length.  Some give absolutely no warning, and others warn only
+after the damage is done.
+
+Whenever you change records or directories, 4FILES checks for an over-flow
+condition.  If your edits exceed disk capacity, you are immediately alerted
+with a message giving the number of excess bytes.  At this point the note
+file is still in memory, and operations which would cause a file write
+are blocked.  These include drive or directory changes, calling browse or
+edit utilities, and quitting.  Meanwhile, you have FULL editing freedom,
+even text insertion and pasting, while editing your notes down.
+
+The overflow bytes message is updated on each record change, and the byte
+tally can run up as high as necessary.  When the message stops appearing,
+the notes will then fit on disk and blocked-off functions are re-enabled.
+
+                                                                        27.
+
+Entirely deleting a note deducts more than the note size from the overflow;
+the length of the "filename.ext" plus three delimiter bytes are also
+nixed.  If you delete a file (as opposed to just its note) or subdirectory
+with the D or K commands, the space freed up from the record and its note
+will be properly accounted for.  Changes during ^E operations are
+accounted for also since the directory is always reread afterward.
+
+4FILES pinpoints available disk space down to the last byte.  In one
+unusual circumstance the overflow detection behavior may seem strange,
+although it is still working correctly.  Writing a  new file requires at
+least one cluster of disk space (1024, 2048, or 4096 bytes, depending on
+the drive). Writing the first note in a subdirectory requires one cluster
+of available space, but if the disk is already full, doing so will cause an
+overflow condition.  You might try going to another subdirectory that has
+notes and deleting a few notes, but this probably will not work.  You may
+appear to free up enough bytes, but unless this also frees up a cluster
+4FILES will still indicate an overflow since one does in fact exist.
+
+Unmarking files may also reduce disk requirements, especially if all files
+are unmarked, freeing up a whole cluster.
+
+
+READ ONLY "TRAP" AVOIDED
+========================  4DOS and 4FILES can move and edit notes only if
+the "attribute" of the DESCRIPT.ION file allows a file write.
+Unfortunately, the "READ-ONLY" attribute can be inadvertently set by some
+utilities, especially those which can operate on blocks of files (such as
+XTREE Pro).  When loading a directory, 4FILES checks ahead for the
+READ-ONLY attribute, and will prompt you to clear it.  Competing programs
+aren't so nice.  They let you edit notes and appear to save your notes to
+disk -- but ... uh, uh, surprise!  Your work is gone.  4FILES won't let
+you waste effort making edits which can't be saved, nor will it lose them
+under any circumstances.
+
+If you say "NO" to clearing the attribute during a directory change, you
+return to the old directory.  During 4FILES startup, picking "NO"
+terminates the program. "YES" clears the bit, and operations are normal.
+NEVER intentionally mark a DESCRIPT.ION file "READ-ONLY" for any reason.
+4FILES catches the error, but 4DOS  doesn't check for it.  As a result, a
+file moved or copied TO the affected  directory will lose its note.  A
+file in that directory will lose its note if it is renamed.
+
+4FILES also will not allow you to use the A or ^A commands to change the
+attributes of DESCRIPT.ION, nor will it allow you to copy or rename it.  It
+may be deleted only if all notes have been erased.  Such protections are
+essential to the safety of the description system.
+
+
+TIMELY INACCESSIBLE-DISK DETECTION
+==================================  Files on a write protected disk
+cannot be altered, and if the root directory is full, files can't be
+added to it. During 4FILES startup and all drive or directory changes an
+immediate check is made to see if one of those conditions exists.  If so,
+you will be alerted with a prominent "PROTECTED" or "ROOT FULL" message.
+As appropriate, certain 4FILES functions are disabled, and you will get
+
+                                                                        28.
+
+an error message if you try to use them.  For example, in a full root you
+will not be able to edit notes unless the DESCRIPT.ION file already
+exists.  You can view files on a protected disk, but file management and
+note editing is impossible. No wasted time writing notes you can't save!!
+
+
+INTERNAL CRITICAL ERROR HANDLER
+===============================  DOS handles some simple, common problems
+as critical errors, and can disrupt execution of a program.  These problems
+include leaving a drive door open or calling a drive with no disk inserted.
+4FILES has its own INT24 handler to treat such problems seamlessly.  It
+also goes to extra effort to handle use of drives A and B in single floppy
+systems seamlessly.
+
+
+===========
+4FILES TIPS
+===========
+
+Here are some ideas for making the most of 4FILES in everyday use.
+
+1) TEAMWORK WITH LARGE APPLICATIONS #1:  4FILES is a real time saver when
+used in conjunction with some application programs.  For example, you can
+write a 4DOS alias which loads 4FILES whenever you exit your comm program.
+Using Procom as an example, if you create this 4DOS/NDOS alias:
+
+       ALIAS COM = C:\COM\PROCOM ^ 4FILES C:\COM\DOWN /T/D
+
+the command "COM" will cause 4FILES to be load when Procom exits.  Your
+download directory will be shown sorted in reverse order by file creation
+time, placing new files at the top.  Alternatively, using /E/D would put
+.ZIPS at the top.  Then, using <G+> you may view the contents of the new
+text or .ZIP files.  To unzip a file, type F4 to call PKUNZIP or 4UNZIP.
+
+
+2) TEAMWORK WITH LARGE APPLICATIONS #2:  In Windows or OS/2, keep a corner
+of the 4FILES window visible in the background where it is immediately
+accessible.  Use 4FILES to refer to your file notes when you are having
+trouble deciding which file to load into a Windows application from the
+"sparse" directory lists Windows provides.  This also keeps 4FILES handy
+for quick file note updates when you created or modify data files.
+
+
+3) MORE ROOM FOR BIG APPLICATIONS:  To make more room for big applications,
+you can use SHROOM or SWAPDOS to swap 4FILES to EMS or XMS memory or disk.
+Use of these programs is described elsewhere in this manual.  The freed-up
+memory may make the difference between your application running or not
+running.
+
+
+4) MULTIPLE 4FILES CONFIGURATIONS: You can write a variety of aliases to
+quickly load 4FILES in specialized, frequently used configurations.  An
+alias called 4E might call 4FILES with the /E switch set.  Another called
+
+                                                                        29.
+
+4T, might make the call 4FILES C:\WP\TEXT.  In such aliases, giving the
+full pathspec to 4FILES will speed loading, or you may want to have the
+directory containing 4FILES listed early in your PATH statement.
+
+
+5) SPEED YOUR RETURN AFTER SHELLING TO DOS: use this alias: ALIAS = E EXIT.
+Then "E <CR>" gets you back to 4FILES (or other shelling program) fast from
+the secondary shell.
+
+
+6) REMEMBER THE "DOUBLE-TAP" KEYS:   ^E^E, < G**>, and the double strokes
+to quit the Sort menu.  Also <G***> to return to the previous directory.
+
+
+7) FREEZING THE SCREEN #1: With the ^E command or when using a utility
+port with a batch file or alias, a message might flash off screen too fast
+to read, or it might appear that nothing happens at all.  Appending a "++"
+to the command will freeze the screen after execution until a key is hit,
+allowing you to see what happened.  Also, 4FILES can be configured to pause
+after every execution.
+
+
+8) FREEZING THE SCREEN #2: Some utilities you may like to use will scroll
+several pages right off the screen.  The solution is to call an alias, as
+in these examples calling Borland's TDUMP.  They are most conveniently
+placed in an alias file, but can be entered on the command line if the
+alias expansion is enclosed in single quotes (once entered they are in
+memory, ready for use).  "=" is not needed from the command line.
+
+        ALIAS HEX=C:\PROG\TDUMP.EXE %1-h | MORE
+    or  ALIAS HEX=C:\PROG\TDUMP.EXE %1-h | C:\UTIL\LIST.COM /S
+
+    The first example pipes to an MSDOS resource which pauses at the end of
+each page.  The later pipes output into Vern Buerg's LIST program, which
+allows back and forth scrolling through the output.  To put this to heavy
+use, map "HEX.ALS" to the 4FILES F3 key.  (This is just an example; it is
+really more efficient to use LIST.COM's ability to do a hex dump directly
+by configuring <G+> or <F3> to call it with $F/h in the command tail.)
+
+
+9) OPTIMUM KEYBOARD: We all get set in our ways so it may take some
+adjustment, but if your function keys are across the top, getting a
+keyboard with F-keys on the left will REALLY speed up your work in all
+programs and make it more accurate.  In 4FILES the proximity of these keys
+to <ESC>, <TAB>, <CTRL> and <ALT> is handy, especially when marking/
+unmarking all files with ^F5 and ^F6. My switch to such a keyboard was VERY
+rewarding!
+
+    If you have a laptop computer, be sure to select KeyboardType=3 from
+the Configuration Options screen.  Also, check out the separate cursor
+keypad units described above under "Directory Navigation".
+
+                                                                        30.
+
+10) FAST LOADING OF CALLED UTILITIES:  On the configuration screen,
+provide the full pathspec and filename for each utility, rather than
+relying on DOS to search for the program in your PATH.  Your utilities
+will load in the blink of an eye; relying on PATH you will probably notice
+at least some delay, and perhaps a lot if the directory holding the
+program is deep in your PATH.
+
+
+11) COLOR SUGGESTION FOR COLOR MONITORS:  As supplied 4FILES displays
+in colors that won't interfere with screen blinking.  Through experiment-
+ation I have come up with two other color schemes which I feel are easier
+on the eyes, as well as being functional.  In particular, they give a good
+balance between the color of the cursor bar and the colors of both normal
+text and sorted fields.  The best one uses a dark grey background, which
+may require switch adjustments on the 4FILES configuration menu if you
+have blinking troubles with utilities which are called from 4FILES (the
+same attribute bit can mean "dark grey" or "blinking character" depending
+on whether the blink-enable bit is turned on or off in the BIOS -- and
+some programs fail to set this bit to the state they need to have it in).
+
+                           COLOR SET #1               COLOR SET #2
+                    -------------------------    -----------------------
+    FIELD         || BACKGROUND   CHARACTER   || BACKGROUND   CHARACTER
+    ------------- || ----------   ----------- || ----------   ----------
+    NORMAL TEXT   || Dark  Grey   Dark Green  || Black        Dark Cyan
+    SORTED FIELD  || Dark  Grey   Light Yell  || Black        Light Yell
+    CURSOR BAR    || Light Grey   Black       || Light Grey   Black
+    CUT HI-LIGHT  || Dark  Red    Black       || Dark  Grey   Light Red
+    FUNCTION KEY  || Dark  Grey   Light Grey  || Light Grey   Black
+    MENU TEXT     || Dark  Grey   Dark  Cyan  || Black        Rust
+    INDICATORS    || Dark  Red    Light White || Dark  Red    Light Grey
+
+
+====================================
+4FILES ... ORIGIN & FUTURE EVOLUTION
+====================================
+
+4FILES is coded entirely in assembly language for high speed and small
+size; consequently the work involved has been considerable, and the
+job isn't even done.  The code was written entirely in-house and totals
+750K, about 23,000 lines of code.
+
+The concept arose from the lack in 4DOS of two things.  1)  4DOS has no
+good means to create or edit the file notes it otherwise handles so well,
+and its internal note editor is basic and frustrating to use.  2) while
+4DOS has its own internal transfer commands (COPY, MOVE and RENAME) which
+automatically keep notes with their files, it does not have a good way to
+perform these operations on marked groups of files.  4DOS unaware
+utilities capable of marked file operations (such as XTREE-PRO) are
+however also unsatisfactory, since they are oblivious to file notes and
+will trash them.  4FILES was designed as a tool to do all of these things
+and more, such as zipping file notes into the archive with their files.
+
+                                                                        31.
+
+In addition, every file manager I tried left much to be desired in terms
+of efficiency from the user's viewpoint.  A simple interface packing a lot
+of power has been my goal.
+
+The 4FILES project is not yet complete.  Future releases will have an
+internal ability to unzip and view archived files, 120-character file
+description ability, a dual-directory workspace for file management, and a
+built-in ability to swap to EMS or XMS memory when calling utilities or
+shelling to DOS.  Your requests for additional features or changes to
+existing ones are very welcome!
+
+
+ACKNOWLEDGMENTS:  My deepest thanks to John Fox, Tom Schulte, Mike Bessy,
+Pierre Jelenc, Ward Yelverton, Mack Tanner, Roland Friedrich, Ralf Berg
+and Matt Kahn who have all been of great help to me in various ways in
+refining 4FILES.  Also, special thanks to Matt for making his MAS-BBS
+board available as my home base for tech support, and to Roland for his
+Windows and OS/2 icons.
+
+
+===========================================
+DETAILED INSTRUCTIONS FOR INSTALLING 4FILES
+===========================================  For simple instructions see
+Quick Start on page 3.  The following assumes you do not have a text editor,
+and it will take but a few  minutes.  "< >" means a keyboard key.
+
+1)  The PATH is an internal list of specified drives and subdirectories where
+DOS will look for a program you are trying to execute, if it cannot be
+found on the current drive and directory.  To see if you have a PATH set
+up, type PATH<enter> on the DOS command line.  If the message given is "No
+PATH", go to step 2.  Otherwise, write down  one of the paths (there is a
+";" separating each) if one which is listed is where you wish to store
+4FILES; then go to step 4.  If you didn't write one down, go to step 3.
+
+2. Change to your "boot" drive and directory by typing C: (or A: if you
+booted from a floppy) and typing <Enter>.  Then type CD \<Enter> to get to
+the "root" directory.  Type DIR<Enter> and look to see if you have the file
+AUTOEXEC.BAT. If so, go to step 3.
+
+We will create an AUTOEXEC.BAT file now.  It will be called everytime you
+boot your computer, setting your PATH and making a nicer DOS prompt.  Type:
+COPY CON AUTOEXEC.BAT <Enter>.  Then, substituting your drive for "d",
+type: PATH=d:\UTIL<Enter>PROMPT=$P$G<Enter><Ctrl-Z><Enter>.  Go to step 4.
+
+3.  Add a PATH statement to your existing AUTOEXEC.BAT file by typing:
+COPY AUTOEXEC.BAT + CON AUTOEXEC.BAT<Enter>.  What you type on the
+"CONsole" is now appended to the file.  Type:
+
+              PATH=d:\UTIL<Enter><Ctrl-Z><Enter>
+
+where " d" is the letter of your boot drive and <Ctrl-Z> is a two key
+combination.
+
+4.  Put the 4FILES disk in drive A: and type: COPY A:*.* \UTIL<Enter> to
+copy all 4FILES files to the directory.  (Substitute a different directory
+
+                                                                        32.
+
+for \UTIL as necessary, such as one you wrote down in step 1.).  This also
+copies all files, including the TV public domain file viewing utility
+supplied with 4FILES.
+
+5.  4FILES is now installed.  Since 4FILES is in your PATH now, typing 4F
+will start it up no matter what drive or directory you are currently in.
+
+6.  Type: CD \, then start 4FILES by typing 4F.  Next hit the <Alt-F10>
+key and "U". The bar will be on the line for the <G+> key (the "grey-plus"
+key).  It is set to LIST.ALS (if there is no .CFG file) to allow file
+viewing if you have 4DOS installed.  We'll change it; type-in
+d:\UTIL\TV.COM (if TV.COM was included with your copy of 4FILES), and type
+<ESC> and P.  Move the highlight bar to any file, press <G+>, and TV will
+display the file and let you browse it.  Program files will look like
+garbage.  <ESC> quits back to 4FILES.
+
+Move the bar to the UTIL directory  and then press <G+>.  You are now in
+that directory  (if this fails, use <Scroll-Lock>).  Move down to the
+4F-READ.ME file and hit <G+> to browse it.  When done, hit <TAB> and
+type (or modify) a file note. Then hit <G-> to return to the parent
+directory.  Move elsewhere in that list and hit <G*> 3 times.  You're
+back to the previous directory.  Quit with <ESC> or <Alt-ESC>.  More in
+the manual.  See the Windows section for further Windows setups.
+
+
+===========================================================================
+  AGREEMENT -- USE / REGISTRATION / DISTRIBUTION / & LICENSING OF "4FILES"
+===========================================================================
+
+
+WHAT YOU GET FOR REGISTRATION
+=============================  With registration you receive:  1) The
+latest version of 4FILES and a printed manual;  2) a serial number which
+allows you to brand newer minor releases and the next major version as
+they appear on bulletin boards or at disk vendors <minor versions are
+also optionally available by mail>; 4) a free upgrade to the next major
+version by postal mail or E-mail; and 5) free technical support.
+
+4FILES has been a very time consuming project because I have gone to great
+pains both to maximize its convenience and power and to assure protection
+of your data.  Please recognize this effort by registering your copy
+promptly, and by passing 4FILES on to others who might enjoy it.
+
+
+AGREEMENT FOR USE AND DISTRIBUTION
+==================================  4FILES and its documentation are
+copyrighted intellectual property which are distributed as shareware, and
+may be used or distributed only in compliance with the following terms and
+conditions.  4FILES is neither free nor in the public domain.  All rights
+are reserved worldwide by the author.  Any use of 4FILES constitutes your
+agreement to all provisions herein.
+
+                                                                        33.
+
+USE & REGISTRATION FOR A SINGLE COMPUTER
+========================================  Use of 4FILES is free during your
+evaluation period.  This period ends when you begin to use 4FILES for any
+useful work which is not incidental to exploring its capabilities, and may
+not exceed 30-days beyond your acquisition date.  When you use 4FILES for
+the primary purpose of accomplishing useful work (as contrasted to a
+genuine evaluation) you are obligated to do your "share" of the shareware
+arrangement by registering your copy promptly.
+
+
+MULTIPLE USE & SITE LICENSING
+=============================  A site license is required if 4FILES can
+potentially be used simultaneously on more than one computer, terminal or
+workstation in a business, institution, organization, government agency,
+home, etc.   To apply for a license, please fill out the registration
+form in 4F_REG.TXT.  A sample site license and rates are contained in the
+file 4F-SITE.TXT
+
+
+DISTRIBUTION OF 4FILES
+======================
+Distribution by any means is encouraged, provided:
+
+1) ... that the distribution includes all original files (see Packing
+List, below) in their unaltered forms and with unaltered filenames, and
+does not include the .CFG file.  If the package is incomplete its
+distribution is prohibited; please contact me for a complete package.  A
+BBS may add a tag file listing it as the source, and disk vendors may add
+introductory or installation batch files.
+
+2) ... that, unless a higher figure has been approved in writing, the
+distribution fee does not exceed $8 if 4FILES is distributed alone or $12
+(in 1991 dollars) if it is packed on-disk with other programs.  Commercial
+vendors who are not members of ASP must have written permission to
+distribute.  Please inquire as necessary.
+
+3) ... that in any vendor catalog or other publication, it is clearly
+stated that this is shareware and that $30 must be paid to Hand-Crafted
+Software if the program is useful, in addition to the distribution fee (if
+any).
+
+4) ... that 4FILES may not be included or bundled with other goods or
+services without express written permission of the author.  Inquiries are
+welcome, and a non-shareware version can be produced for such purposes.
+
+
+WARRANTY & DISCLAIMER
+=====================  Any use of 4FILES constitutes your agreement that it
+is provided "as-is" with no express or implied warranty (other than free
+technical support), that you assume full responsibility for assuring that
+it performs acceptably on your system, and that in no event shall Larry
+Edwards, Hand-Crafted Software or their successors be held liable for any
+damages arising from use of the program.
+
+                                                                        34.
+
+----------------------------------------------------------------------------
+I hope you think my soft"wares" are terrific; much extra effort has been
+expended toward that end.  Your registration will be (or is) much apprec-
+iated.  Please let me know of any improvements you would like.
+----------------------------------------------------------------------------
+
+============
+PACKING LIST   (All files except 4F.COM, TV.COM & 4F.PIF
+============    are readable text files.)
+
+    4F      .COM   4FILES Program file.
+    4F      .DOC   Full documentation.
+    4F      .HLP   HELP text file.
+    4F      .KEY   Alternate HELP text file.
+    4F      .PIF   Setup file for Windows.
+    4F      .VER   Version update details and history.
+    4F-I-OS2.ICO   Icon for use with OS/2.
+    4F-I-ICO.ICO   Icon for use with Windows.
+    4F-KB   .TXT   Keyboard suggestion.
+    4F-NEW  .TXT   Changes in this major upgrade.
+    4F-READ .ME    Introductory information, and a word on compatibility.
+    4F-REG  .TXT   Registration form.
+    4F-SITE .TXT   Sample site license & rates.
+    4F-TV   .COM   Public domain file browser. (May be omitted for distrib.)
+    4F-TV   .DOC   (May be omitted for distribution)
+    4F-VEND .TXT   Info for SYSOPs & disk vendors.
+    FILE_ID .DIZ   Description for BBSs.
+
+======================================================================= 35.
+                         4FILES REGISTRATION FORM
+                         ========================
+
+         Larry T. Edwards // Hand-Crafted Software // (907)-747-8996
+               Box 6001 // Sitka, Ak 99835 USA // (FAX)-747-4801
+
+ Payment by check or International Postal Money Order to above address
+ preferred.  Credit card payments can be made for $5 extra to:
+
+    PsL (Program #10574), 800-242-4775, Box 35705 Houston, Tx 77235
+
+    CompuServe (Program #912), !Go SWREG
+
+ Your signature here or registration with PsL or CompuServe signifies
+ acceptance of the agreement contained near the end of the documentation.
+
+ ===== PLEASE PRINT CLEARLY! =====                     4FILES VERSION #____
+
+Your name: _____________________________________ Position:_________________
+
+Company: _______________________________________  Phone: (W) ______________
+
+Street or Box: ___________________________________       (H) ______________
+
+City/State/Zip: __________________________________  Country: ______________
+
+I got 4FILES from (name BBS/vendor/etc):________________, ____________ Forum
+
+E-Mail Addr: CIS ___________. Genie ___________. INTERNET: _________________
+
+Using 4FILES with:  __ MSDOS  __ DRDOS  __Windows  __OS/2    Version ____
+             with:  __ 4DOS   __ NDOS   __ Neither           Version ____
+
+Send free major upgrade by __ postal mail, __E-mail ON: __ 5", __ 3" disk.
+
+$__  Our (my) operation can't possibly use more than one copy of 4FILES
+     simultaneously. $30 ($35 overseas) is enclosed to register one copy.
+     PRICE INCLUDES PRINTED MANUAL and services outlined in "agreement."
+
+$__  Our (my) operation hereby applies for a site license to install 4FILES
+     for use on up to ___ computers or terminals.  Payment according to the
+     schedule in the file 4F-SITE.TXT is enclosed (call if file is lost).
+
+$__  Send minor upgrades by postal mail ($4 postage/handling, in advance).
+
+$__  Send disk(s) of related shareware/public-domain utilities described
+     in manual (3.5" $2.00; 5.25" $4.00; for 4DOS add $2/$4 respectively).
+====================
+$    TOTAL enclosed.
+
+Signature: ________________________________________     Date: _____________
+
+THANK YOU!
+================================================================
+COMMENTS / PROBLEMS / CHANGES OR ADDITIONS YOU DESIRE IN 4FILES:
+================================================================
+(Please comment on the back of this page.)

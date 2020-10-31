@@ -1,0 +1,204 @@
+
+  UPDATE INFORMATION
+
+  4FILES 3.0
+  ------------------
+
+  o  Capacity is increased to 799 records.
+
+  o  Marked files may now be copied, moved, renamed, and archived (to ZIP, ARJ
+     and LHA formats, with file descriptions included).  Marked file operations
+     for file attributes and deletion already existed in earlier versions.
+
+  o  History lists have been added for these input fields: filename, target 
+     directory, directory change, and DOS command line.  Input field have been 
+     completely redesigned.
+
+  o  Many new keystroke commands have been added.
+
+  o  A special keyboard configuration for laptop computers is now available.
+
+  o  There is an internal routine for registered users to brand future 
+     shareware versions as registered.
+
+  o  The Configuration Routine has been improved, a utility port added, and
+     several option switches added.  New command line switches have been added
+     as well.
+
+  o  A DOS-order directory sort has been added to the 10 pre-existing sorts.
+
+  o  The setting and handling of file marks has been improved.
+
+
+TEMP Directory Recommended
+--------------------------
+    Note that for the marked file and archiving operations to work as fast as
+possible you should have a tempory directory, named TEMP, set up.  In
+AUTOEXEC.BAT you can put a statement like:  SET TEMP=d:\ where "d" is a RAMDISK
+or hard drive.  A directory may be added if desired.  4FILES deletes its
+temporary files when done with them.
+
+
+History Lists
+-------------
+    There are separate history lists for the following user input fields:
+1) the ^E command, 2) directory changes, 3) renaming during copy/move, 4)
+renaming with the "R" command, 5) archive names (when zipping, etc.), and 6)
+the target directory for copy/move/archive.  Once commands have been executed,
+the up and down arrow keys will scroll the appropriate history list from the
+bottom and top respectively.  The current filename is located at the top of 
+all filename history lists (the input field is initially blank).  Each list has 
+a capacity of ten strings, and beyond that the oldest will scroll off.  The 
+newest string is at the bottom, as in 4DOS.  
+
+
+File Management Operations
+--------------------------
+    Copy, Move, Rename and archiving rely on shelling to DOS.  By default the
+activity occurs full screen, but configuration switches may be set to cause
+execution in a nice window (by setting full screen to "N").  This does not work
+with some video cards (with controllers that break the rules).  An option 
+switch allows these DOS to run in a window rather than full-screen.
+
+
+File Archiving
+--------------
+    The archiver history list maintains ".ZIP", ".ARJ", and ".LZH" templates at
+the top of the list, and they will not scroll off (making the active capacity
+of the list seven strings).  When archiving, if no extension is specified,
+.ZIP is assumed.  Based on the extension given, or the default, PKZIP, ARJ,
+or LHA is called via a secondary DOS shell.  This allows the archiver to be
+found by DOS via your PATH statement.  At present there is no field on the
+configuration menu to specifiy the location of the archivers.
+
+    File descriptions will automatically be added to ZIP files as comments.
+While ARJ also has a provision for storing file comments, at present 4FILES is
+unable to take advantage of it.  LHA does not accommodate file comments.
+
+4FILES does not yet have an internal means of unarchiving files, so you will
+need to continue to rely on other utilities such as 4UNZIP for the time being.
+
+
+File Marks
+----------
+    File marks are stored in each directory in a file called DEMARCAT.ION.
+By default, when 4FILES enters a directory it reads this file and checks first
+to see if it was created during the current 4FILES session.  If not, it is
+deleted and ignored; if so, it is read and then deleted.  This behaviour may be
+changed with one of the configuration switches, so that marks from a previous
+session are retained.  If when loading 4FILES it is necessary to reuse old file
+marks but this configuration switch is not "on," you may use the /M command
+line switch instead.
+
+    The disk overflow protection system takes into account the size of both the
+DESCRIPT.ION and DEMARCAT.ION files (if any) which will be written for the
+current directory, assuring that these files will not be truncated by trying to
+write to a disk which does not have enough room for them.
+
+
+New Key Mappings
+----------------
+    The keyboard may now be configured for a laptop computer via the
+configuration screen.  The <[>, <]> and <Enter> keys are substituted for
+<G*>, <G-> and <G+> respectively.  Settings for this switch are 1=AT, 2=PC and
+3=laptop, as shown on-screen.  The "2" setting substitutes the <Scrl-Lk> key
+for <G*>.
+
+    <F7> now toggles the display of file attributes and file times.
+In addition, <Shift><Numlock> still does this on non-laptop keyboards.
+
+    A new utility port has been added for <F8>.
+
+    In File Mode only, <F9> now duplicates ^X (execute immediately).
+
+
+Configuration Option Info
+-------------------------
+    For Copy, Move, and Rename operations there is now a configuration menu
+switch for determining whether an existing 4DOS command or user alias named
+COPY, MOVE or RENAME will be unaliased before sending the command.  NOTE THAT
+ENABLING ALIASES DISABLES THE SAFETY IN 4FILES WHICH PREVENTS MARKED FILES FROM
+OVERWRITING ONE ANOTHER IF THE TARGET DIRECTORY DOES NOT EXIST.  You MUST
+incorporate this safety yourself into BOTH the copy and move aliases you use,
+for example by including the 4DOS /D switch.  4FILES operates this way to
+support users who have aliases which complete a path fragment (given for a
+copy/move operation) into a full path.  If 4FILES were totally safe for both
+switch settings, such aliases would be pre-empted by the prompt to create the
+non-existent directory, which is what a path fragment appears to be.
+
+    Note that the entry for this switch on the configuration menu has a
+"_CAUTION!_" statement.  The switch is completely safe if set to "N."  If set
+to "Y," you must take the above precautions.  Also, if set to "Y" your aliases
+must be able to handle (either using or discarding) both the /R and /P switches.
+
+
+Changed & New Command Line Switches:
+------------------------------------
+  /C(hrono) sort replaces /T(ime/date) sort.
+  /R(everse) sort replaces /D(escending) sort.
+  /U(nsorted) is a new switch, and gives the DOS order.
+
+  The above changes were made to agree with useage in the new Re-sort Menu,
+  which has (U)nsorted added to it.
+
+  /L  For use if 4F is called from a numeric-keypad intensive operation.
+      Keypad state is restored on exit from 4FILES.  This is a new switch,
+      required by changes in NumLock (see below).
+
+  /M  Prevents marks in an old DEMARCAT.ION file from being ignored.
+
+
+New keystroke commands:
+-----------------------
+  ^C    Copy all marked files.
+  ^M    Move  "    "      "
+  ^R    Rename "   "      "
+
+   Z    Zip a single file with its file description.
+  ^Z    Zip all marked files with file descriptions.
+
+  @^Y   Delete file input or a file description from the cursor to the right.
+
+  New file marking keys, in addition to the old F5, F6, ^F5 and ^F6:
+  ------------------------------------------------------------------
+  <Space>         Toggle marked/unmarked for the current file.
+  <^SPACE>        Swap (toggle) the marks on all files.
+  <^/> and <^\>   These duplicate <^F5> & <^F6> file marking.
+
+  Other Keys
+  ----------
+  <NumLock>         Now has its normal, keypad-toggling function back.
+  <Shft><NumLock>   Toggles the display of file attributes and creation time.
+                    (This is what <NumLock> did in earlier versions.)
+
+  ^D   IN TEXT ENTRY MODES:  Deletes the file descriptions for all marked
+       files (giving a prompt first of course).  In file mode this key deletes
+       marked files.  The prompts appear on different segments of the screen to
+       help distinguish the pending actions of the two senses of this key.
+
+
+  ^H   IN FILE MODE: If 4DOS is active, shell to DOS and show the command
+       history window.
+
+  ^H   IN TEXT ENTRY MODES:  Destructive backspace.
+
+  ^W   Presents a DESCRIPT.ION Write Menu, with choices to (S)ave notes
+       immediately or (A)bandon all unsaved note edits.
+
+  <Shft><ESC>   Alternate exit means in Windows and OS/2 since the preferred
+               <@ESC> and <^ESC> keys are appropriated by these systems.
+
+  <^INS>       These three keys cut and paste text as they do in Windows ...
+  <$INS>       ... and are in addition to the preferred use of the F9 ...
+  <$DEL>       ... and F10 keys.
+
+  Laptop keyboard switch -- see detailed description above.
+  ---------------------------------------------------------
+
+Directory List Sorting
+----------------------
+    In the sorting menu, ascending or descending sorts are now selected with
+the UpArrow or DownArrow keys, rather than <G-> or <G+>.  (U)nsorted has been
+added.
+
+-= end =-

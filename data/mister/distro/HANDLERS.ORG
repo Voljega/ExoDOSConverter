@@ -1,0 +1,110 @@
+/// Handlers figure out what to do with what was loaded onto the system.
+/// TDL comes with common file handlers, and the utilities to make them work.
+/// You can add additional handlers to this file, up to a maximum of 255.
+///
+/// Handlers come in two types:
+///   extraction: The file is an archive that needs extracting (zip, arc, etc.)
+///    execution: The file can be executed (exe, com, bat, bas, pcx, txt, etc.)
+///
+/// Extraction handlers *extract* archives into cache directories.
+///  Execution handlers *execute* whatever is found in a cache directory.
+/// Usually this means programs, but you can "execute" any file based on its
+/// extension.  For example, you can "execute" a text file with an extension
+/// of .TXT by using a text file viewer such as LIST.COM. If the same
+/// handler should handle multiple extensions (for example, if you want to
+/// use LIST to view both TXT and DOC files), you can specify this by
+/// separating them with semicolons, just like a PATH statement.
+///
+/// Launcher templates use the following variables in the launcher= line:
+///
+/// Execution:
+///   %d = directory file is located in
+///   %s = file to execute (ie. file.ext)
+///        Current directory will be switched to %d
+///   %f = file to execute, fully-qualified (ie. c:\dir\file.ext)
+///        Current dir will be the directory the helper program resides in.
+///
+/// Because %s and %f are both source variables, you cannot use %s and %f in
+/// the same launcher= line.  (If you don't understand this, use %s for
+/// everything unless your launcher utility is a batch file.)
+///
+/// Extraction:
+///   %s = source archive, fully-qualified
+///   %d = destination for extracted files
+///
+
+[ZIP]
+type=extraction
+description=Compressed Archive (PKZIP)
+; pkunzip's EMS and XMS support assumes it is not operating as a child
+; process, and causes problems for the parent if called as such.  This
+; breaks TDL's swapping mechanism, so we disable EMS and XMS usage with
+; the -+ and -- options.  This should not cause any problems.
+launcher=pkunzip.exe -+ -- -d %s %d
+locations=utils;distro\utils;c:\utils\common
+
+[ARC]
+type=extraction
+description=Compressed Archive (SEA)
+launcher=pkunpak.exe %s %d
+locations=utils;distro\utils;c:\utils\common
+
+[EXE;COM]
+type=execution
+description=Executable Program
+launcher=%s
+
+[BAT]
+type=execution
+description=DOS Batch File
+launcher=command.com /c %s
+
+[BAS]
+; NOTE:  If running on a real IBM PC, AT, or PS/2 system, you should
+; change the launcher= line to use BASICA instead of GWBASIC.  BASICA will
+; use the BASIC ROM present on real IBM systems for 100% authenticity and
+; speed. (For programs that targeted the IBM PC, it is usually REQUIRED to
+; use IBM's BASICA for correct results.)
+type=execution
+description=BASIC Program
+launcher=gwbasic.exe %s
+locations=utils;c:\basic;c:\dos
+; usermessage= is optional, and specifies a short user message to be shown
+; to the user right before a program launches.  255 character limit.
+usermessage=Some PC BASIC programs end at the BASIC "Ok" prompt. If you see this when the BASIC program ends, type "system" to exit BASIC and return back here.
+
+[IMG;RAW;360;320;180;160]
+type=execution
+description=Floppy Disk Image
+; %d is not needed as A: drive is hardcoded in the batch file
+launcher=makeflop.bat %f
+locations=utils;distro\utils
+
+[TXT;DOC;1ST]
+type=execution
+description=ASCII Text File
+launcher=list.com %s
+locations=utils;distro\utils
+
+[BIN]
+type=execution
+description=Binary Data
+launcher=tv.exe %s
+locations=utils;distro\utils
+
+
+///
+/// [???] indicates a default handler to use if the extension has no handler.
+/// This is enabled for all files found in an archive for "power" users.
+///
+
+[???]
+type=execution
+description=Unknown File
+launcher=list.com %s
+locations=utils;distro\utils
+usermessage=No recognizable files were produced by the extraction phase. LIST.COM will now run inside that directory so you can examine what was extracted (or confirm if nothing was extracted).  Press ESC to leave LIST when done.
+
+
+/// DO NOT REMOVE THIS LAST LINE:
+[END]

@@ -1,0 +1,56 @@
+                           4FILES REGISTRATION FORM
+                           ========================
+
+         Larry T. Edwards // Hand-Crafted Software // (907)-747-8996
+               Box 6001 // Sitka, Ak 99835 USA // (FAX)-747-4801
+
+ Payment by check or International Postal Money Order to above address
+ preferred.  Credit card payments can be made for $5 extra to:
+
+    PsL (Program #10574), 800-242-4775, Box 35705 Houston, Tx 77235; or
+    CompuServe (Program #912), !Go SWREG
+
+ Your signature here or registration with PsL or CompuServe signifies
+ acceptance of the agreement contained near the end of the documentation.
+
+ ===== PLEASE PRINT CLEARLY! =====                     4FILES VERSION #____
+
+Your name: _____________________________________ Position:_________________
+
+Company: _______________________________________  Phone: (W) ______________
+
+Street or Box: ___________________________________       (H) ______________
+
+City/State/Zip: __________________________________  Country: ______________
+
+I got 4FILES from (name BBS/vendor/etc):________________, ____________ Forum
+
+E-Mail Addr: CIS ___________. Genie ___________. INTERNET: _________________
+
+Using 4FILES with:  __ MSDOS  __ DRDOS  __Windows  __OS/2    Version ____
+             with:  __ 4DOS   __ NDOS   __ Neither           Version ____
+
+Send free major upgrade by __E-mail, or postal mail on __ 5", __ 3" disk.
+
+$__  Our (my) operation can't possibly use more than one copy of 4FILES
+     simultaneously. $30 ($35 overseas) is enclosed to register one copy.
+     PRICE INCLUDES PRINTED MANUAL and services outlined in "agreement."
+
+$__  Our (my) operation hereby applies for a site license to install 4FILES
+     for use on up to ___ computers or terminals.  Payment according to the
+     schedule in the file 4F-SITE.TXT is enclosed (call if file is lost).
+
+$__  Send minor upgrades by postal mail ($4 postage/handling, in advance).
+
+$__  Send disk(s) of related shareware/public-domain utilities described
+     in manual (3.5" $2.00; 5.25" $4.00; for 4DOS add $2/$4 respectively).
+====================
+$    TOTAL enclosed.
+
+Signature: ________________________________________     Date: _____________
+
+THANK YOU!
+================================================================
+COMMENTS / PROBLEMS / CHANGES OR ADDITIONS YOU DESIRE IN 4FILES:
+================================================================
+(Please comment on the back of this page.)

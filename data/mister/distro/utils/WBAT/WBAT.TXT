@@ -1,0 +1,2261 @@
+:copyright
+ WBAT - Copyright (c) 1999-2005, Horst Schaeffer - horst.schaeffer@gmx.net ^
+:
+
+:start
+#                       WBAT Dialog Box Tool                            ^
+
+ WBAT is a batch tool for dialog boxes that will give you a Windows touch
+ for the DOS box. Of course WBAT also works under plain DOS.
+
+
+ Features:
+
+ +   Layout for box with ~buttons, input fields, menus, checkboxes,~
+     and ~radio buttons~ - all elements can be freely arranged
+
+ +   ~Quick box~ with specifications in the command line
+
+ +   ~List box~ for selection from list of items generated in batch
+
+ +   ~Text~ output; ~fill~ screen areas, ~clear, color~
+
+ +   Character ~fonts~ and custom color ~palettes~
+
+ +   ~INI file(s)~ with defaults and preferences
+:
+
+:main "WBAT - Dialog Boxes for DOS" [x]
+
+ [ WBAT &Tour     ]  Information about all WBAT features
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ [ Setup         ]  Get ready for your own WBAT applications
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ [ Layouts       ]  Layout design for boxes, menus, text
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ [ Commands      ]  Command details for your batch files
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ [ C&ontrol       ]  Batch control: errorlevel and variables ^
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ [ Handling      ]  Mouse and keyboard by user
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [  exit  ]
+:
+
+:tour-menu "WBAT Tour" [x]
+
+[ Quick box&     ]
+[ Box layout&    ]
+[ Buttons, Menu& ]
+[ Input fields&  ]
+[ Checkboxes&    ]
+[ Radio buttons& ]
+[ List box&      ]
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Text display&  ]
+[ Fill, CLS&     ]
+[ Cursor&        ]
+[ Screen save&   ]
+[ Font, &Palette& ]
+[ ANSI?&         ]
+[ STDOUT&        ]
+[ Set &Errorlevel ]
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ --- &END ---   ]
+::
+
+:tour-info
+The ~WBAT TOUR~ will inform you about all WBAT
+features without going too much into the details.
+
+
+
+
+
+Some notes before you begin:
+
+* ~ESC~ or click on ~[x]~ in upper right corner (when
+  available) will cancel a box
+
+* ~Right mouse button outside~ a box will also cancel
+  (unless this feature is deactivated)
+
+* To ~move a box~, hold down left mouse button on top
+  line (title) and drag.
+
+
+:Quick-box
+#                       Quick box                                       ^
+
+Let's begin with a very simple command:
+
+        ~wbat box OK~
+
+This is a PAUSE replacement, prompting the user to continue.
+
+By default all boxes are placed in the middle of the screen.
+::
+
+:Quick-pos
+You would like to have the box somewhere else?
+Line and column of a box (for its upper left corner) may be specified:
+
+        ~wbat box 20,60 continue~
+
+In case the box is not properly within the screen borders, don't worry:
+WBAT will correct the position.
+
+And if the box happens to cover something on the screen that you would
+like to read: drag box with mouse click on upper frame.
+::
+
+:Quick-choice
+#                       Quick choice                                    ^
+
+Now specify more than one item, and you have a simple CHOICE replacement:
+
+        ~wbat box 21,40 continue,back,tour menu~
+
+The items must be separated by comma. Blank space is allowed within
+an item.
+
+Note that you can use hotkeys to select (first character by default,
+marked red in this demo). For more about hotkeys see ~Layouts~ section.
+
+In your batch file, action on the user's input is done the same way as
+with CHOICE: ~by errorlevel~ (1 for first item selected, 2 for second etc.)
+
+Example:
+        ~if errorlevel 3 goto TOUR-MENU
+        if errorlevel 2 goto T-quick
+        rem "continue" here~
+
+! Remember to test errorlevels
+  for GOTO in descending order.
+::
+
+:Quick-prompt
+#                    Prompt text and color                              ^
+
+An optional prompt text can be specified in (double) quote marks,
+preceding the button items.
+
+Example:  ~wbat box 19,55 "Continue Tour?" ok,back~
+
+You can even have several lines of text: a caret character (^) in the
+quoted string marks a line break.
+
+
+Optionally, the ~box color~ may be specified in parentheses (default
+colors are defined in WBAT.INI).
+
+Example:  ~wbat box 19,55 (blue on light brown) "Continue Tour?" ok,back~
+
+
+For color expressions and more box
+options (item pre-set and time-out)
+see ~Commands~ in main menu.
+::
+
+:box-layout
+#                       Box layout                                      ^
+
+If you want more functionality than just a few buttons, you need a ~layout~
+where you can freely arrange text and control elements:
+
+        ~*~ buttons or menu items
+        ~*~ input fields
+        ~*~ checkboxes
+        ~*~ radio buttons
+
+In the layout all control elements are marked by square brackets.
+See example on following page.
+
+The general command is:  ~WBAT box @layout.txt:label~
+
+Command options for all boxes are:
+box position, color, initial bar position
+and time-out. See ~Commands~ (main menu).
+::
+
+:box-example
+#                       Box layout example                              ^
+
+Here is an example ...                   .. and this is the layout
+
+
+
+ Note:
+
+ Boxes always pop up;
+ that means: the background is
+ restored when the box is closed.
+
+ However, a special "fix" option
+ is available to leave the box on
+ the screen.
+::
+
+:box-exm "Example" [x]
+
+ Please enter your name and city ^
+
+ Name: [$ name,40              ]
+
+ City: [$ city                 ]
+
+ [.] male  [.] female
+
+ [!] over 21
+
+         [    OK    ] [ cancel ]
+::
+
+:box-lref
+#                       Layout reference                                ^
+
+You can have any number of layouts in a text file. Each layout unit is
+identified by label, like in batch files.
+
+A layout unit ends with a colon at the beginning of a line, usually the
+next label.
+
+In your WBAT command you specify the layout by file name and label:
+
+     *  the filename with a preceding ~@~-sign    e.g. @dialog.txt
+     *  the label with a preceding ~colon~        e.g. :START
+
+Example:     wbat box ~@dialog.txt:START~
+
+However, in most cases you will omit the file name, because WBAT offers
+an easy way to use default files. Another method is having the layout
+in the batch file itself, and simply use ~@%%0:label~.
+
+For details see ~Commands/Layout Reference~
+::
+
+
+:box-other
+#                       Box layout                                      ^
+
+
+Other layout features:
+
+  *     ~Variables~ can be used in a layout, like in batch files
+
+  *     A box ~title~ can be specified (showing in a different color)
+
+  *     Optional ~[x]~ in upper right corner to cancel/escape
+
+  *     ~Divider~ lines in different color
+
+
+For details see ~Layouts~ section.
+The control elements are described
+in the following chapters.
+:
+
+:buttons
+#                   Buttons in box layout                               ^
+
+Buttons may be placed anywhere in the box layout, with the item text
+in square brackets.
+
+Example:        ~[   ok   ] [ cancel ]~
+
+Mouse click on a button, or ENTER on highlighted button, will close the
+box, and return the number of the button by ~errorlevel~, and optionally,
+the name through a ~variable~.
+
+The item text must not begin with a $-sign, period or exclamation mark,
+because these symbols are reserved to identify other control elements.
+
+The special ~?~ identifier marks the ~ESCAPE button~, which has the same
+functionality as the ESC key, The question mark will not show.
+
+Example:        ~[   ok   ] [? cancel ]~
+
+In this case the "cancel" button will not return
+errorlevel 2, but 100, as for any other ESCAPE action.
+For details see ~Control / ESC Handling~).
+::
+
+:button-menu [x]
+[ menu       ]
+[ errorlevel ]
+[ variables  ]
+:
+
+:buttons-menu
+#                       Menu box                                        ^
+
+A ~menu~ is merely a vertical arrangement of buttons (in one or more
+columns). However, buttons in a box usually show in a different color,
+which is grey in this demo (button color is defined in WBAT.INI).
+
+If you want to have a menu without visible "buttons" (like in example
+below), use the ~menu~ command instead of ~box~. The handling is the same.
+
+Command:       ~WBAT menu @layout.txt:label~
+
+You can make a wide box with verbose menu items, or a slim box with
+brief key words. Example (for menu on this page):
+~
+        :button-menu [x]
+        [ menu       ]
+        [ errorlevel ]
+        [ variables  ]
+        :~
+Insert empty lines, or add text as you wish.
+For extras like title, [x] box, divider lines
+see ~Layouts~ in main menu.
+:
+
+:buttons-errorlevel
+#               Selected button/item by errorlevel                      ^
+
+In your batch file you can handle the user's selection by errorlevel, as
+done with CHOICE (remember to check errorlevels in descending order!)
+
+Example:
+        ~wbat menu :button-menu~
+        ~if errorlevel 100 goto MAIN~           (catch ESC/[x])
+        ~if errorlevel 3 goto B-variables~
+        ~if errorlevel 2 goto B-errorlevel~
+        ~rem here is errorlevel 1~
+        ~:B-menu~
+
+Note that only buttons count for the errorlevel number, in case you have
+other control elements in your layout.
+
+For details, including ESC handling,
+see ~Control~ section.
+::
+
+:buttons-variables
+#                       Handling user input                             ^
+
+The selected button can also be returned ~by name~, assigned to the
+variable ~WBAT~. By default this variable is set to the (first) word
+of the selected menu item.
+
+A simple ~GOTO %%WBAT%%~ will then jump to the label with the name of the
+selected item.
+
+Note: WBAT will only produce environmental variables ...
+
+  when the command      ~CALL W.BAT .....~
+  is used instead of    ~WBAT ......~
+
+This special construct works under Windows NT/2000/XP as well, and should
+be safe for future Windows versions.
+
+For details and more information about
+using variables see ~Control~ section.
+::
+
+:input
+#                  Input field in box layout                            ^
+
+An input field is denoted by a ~$~-sign followed by the name of the
+variable that will return the input string.
+
+Example:       ~[$ city         ]~
+
+The input length is determined by the space including the brackets.
+A different length (longer or shorter) may be specified, as well as
+additional options:
+
+        ~U~  force upper case
+        ~P~  password entry mode
+        ~!~  input required (unless box is closed by ESC)
+
+Example:       ~[$ name,40,U!   ]~
+
+If the input length exceeds the visible field size,
+the string will be shifted, if necessary.
+
+Note that it is possible to make a box with
+an input field only (without buttons).
+In this case ENTER will close the box.
+::
+
+:input-var
+#                       Input variable                                  ^
+
+
+To handle input, you must tell WBAT to return variables, using the
+construct:
+               ~CALL W.BAT box ....~
+
+For details see ~Control~ section in main menu.
+
+You may assign an initial/default string to the variable, before the
+box is displayed. ~Be sure to clear the variable, if you want an empty
+input field.~
+
+Note: WBAT will remove trailing spaces from the input string.
+::
+
+:checkbox
+#                  Checkboxes in box layout                             ^
+
+A checkbox is used to toggle an option on/off. To offer checkboxes in
+a dialog box, put an exclamation mark in square brackets.
+
+Example:       ~[!] include subdirectories~
+
+In this example only the checkbox itself can be clicked on to toggle the
+status. To include the associated text in the sensitive area, include it
+in the square brackets.
+
+Example:       ~[!  include subdirectories]~
+
+
+Note:
+On the keyboard toggle with space bar.
+
+The symbol marking ~on~ is defined
+in WBAT.INI (default: "x").
+:
+
+:checkbox-example "Checkbox" [x]
+
+ [!] include subdirectories
+ [!] all upper case
+
+ [     ok    ] [  cancel   ]
+:
+
+:checkbox-var
+#                       Checkbox variable                               ^
+
+
+You can have up to 9 checkboxes in a dialog box. The status of each
+checkbox is returned by the value ~0~ (off) or ~1~ (on), assigned to
+the variable WCB~1~ for the first one, WCB~2~ for the second, etc.
+
+This is an example of handling the returned variable:
+~
+        set option=
+        if %%WCB1%%==1 set option=/S
+~
+
+Note that the initial/default status can be assigned to these variables
+before the box is displayed. An empty variable or any invalid value is
+taken as ~0~ (~OFF~).
+::
+
+:radio
+#                  Radio buttons in box layout                          ^
+
+Radio buttons are used to offer several alternatives, where only one
+can be selected - the others are automatically off.
+
+Radio buttons are denoted by a point in square brackets.
+
+Example:       ~[.] LFN    [.] short DOS name~
+
+As for the checkbox, the associated text may be included in the square
+brackets.
+
+Example:       ~[.  left aligned ]~
+               ~[.  right aligned]~
+               ~[.  centred      ]~
+
+Note: On the keyboard use space bar to
+turn the highlighted item ~ON~.
+
+The symbol marking ~on~ is defined
+in WBAT.INI (default: "*").
+:
+
+:radio-example "Radio Buttons" [x]
+
+ [.  left aligned ]
+ [.  right aligned]
+ [.  centred      ]
+
+ [      ok        ]
+::
+
+:radio-var
+#                       Radio button variable                           ^
+
+You can have ~one set~ of up to 9 radio buttons in a dialog box (minimum
+is 2, of course). The one that was selected is returned by the number of
+the radio button (1...), assigned to the variable ~WRB~.
+
+This is an example of handling the returned variable:
+~
+        set align=left
+        if %%WRB%%==2 set align=right
+        if %%WRB%%==3 set align=center
+~
+
+Note that the initial/default value can be assigned to the variable
+before the box is displayed. An empty or invalid value is taken as ~1~
+(~first~).
+::
+
+:listbox
+#                       Selection from list                             ^
+
+A list box looks like a menu, but there are some important differences:
+
+   * ~no square brackets~ are required in the layout (full line is taken)
+
+   * ~up to 32Kb~ can be displayed, with ~scrolling~
+
+This means you can easily produce the source text in your batch process:
+a directory or file list, for example.
+
+The command is:    ~WBAT list @file.ext[:label]~
+
+You may specify a label like in any ~box~ command, but if you omit the
+label, the complete file is taken.
+
+The @-sign (denoting file name) is not mandatory in a LIST command.
+::
+
+:list-example
+#                       List example                                    ^
+
+
+This example lists the files in the
+current directory. Pick a file...
+
+
+To scroll: use the cursor keys (up/down),
+or click [and hold] the mouse on the top
+or bottom frame.
+Click on arrow for page up/down.
+
+
+Here are the commands for this DIR listing:
+~
+    DIR *.* /b/a-d/one >  %%temp%%\temp.txt
+    call W.BAT list 3,60  %%temp%%\temp.txt
+
+    wbat box 8,53 "Your selection was:^** %%wbat%% **" again,continue
+    del %%temp%%\temp.txt
+~
+::
+
+:list-keys
+#                   Select line by keyboard                             ^
+
+
+You can use the keyboard to select a line like in the Windows Explorer:
+
+If you type one or more character(s), the marker goes to the next line
+that begins with this character or string. If nothing is found down the
+list, the search restarts at the top.
+
+You must not pause longer than a second between key strokes (else: the
+search string is reset). Non-character keys will also reset.
+
+The maximum pause can be adjusted with ~ListHotTicks~ in the INI file,
+[general] section, by the number of ticks (18 ticks = 1 second), e.g.:
+
+        ~ListHotTicks=36~                ;2 seconds
+:
+
+:list-browse
+#                       View text files                                 ^
+
+You can also use WBAT LIST to view small text files.
+
+Note that the maximum file size is 32Kb, and the line width is 76 bytes
+(truncated if longer).
+
+The example lists the file WBAT.INI
+
+Comand: ~wbat list WBAT.INI~
+:
+
+
+:Text
+#                       Text display
+
+To display text on the screen you can use ~TYPE~ or ~ECHO~, but the
+~WBAT text~ command offers some extra features:
+
+    *  output position anywhere on the screen
+    *  text read from layout file by label (as for boxes)
+    *  variables %%...%% in text are filled in
+    *  colors, header, attributes
+
+By default the text will show with the colors presently on the screen.
+This means you will usually clear the screen with the desired colors
+(see WBAT CLS) before text output.
+
+WBAT reads the text from the given layout file by label, or takes the
+complete text file if no label is specified. Note however, that only
+a screenfull of text is displayed - rest truncated, no scrolling.
+
+Command examples:  ~WBAT text 2,4 :info~
+                   ~WBAT text @file.txt~
+::
+
+:text-area
+#                       Text area                                       ^
+
+Text is displayed in a rectangle, determined by the longest line and
+the number of lines. However, you will only notice this, when you
+display text with a different background color, like in this example.
+
+
+
+
+
+
+
+To adjust the text in the rectangle, add empty lines and space left/right.
+
+The position is specified, as usual, for the upper left corner. Default
+position is 1,1. If the text frame exceeds the right/lower border, the
+position will be adjusted to fit. Text exceeding the screen dimensions
+will be truncated.
+
+Optional colors in parentheses
+:
+
+:text-example
+
+  Command for this text:
+
+  wbat text 8,16 (blue on light brown) @:text2example ^
+
+::
+
+:text-attrib
+#                  Attributes in text display                           ^
+
+There are two extra colors that you can use in the layout to mark lines
+or a section of the text. These colors are defined in the WBAT.INI:
+~
+               TextHi      Screen Text Highlight
+~
+To highlight a word or text section, insert the tilde character (~~) at
+the beginning and the end of the section. (The tilde symbol can be
+replaced in the INI file, [general] section, HiSymbol.)
+
+
+#              TextTitle   Screen Text Title                            ^
+
+A ~#~-symbol in the ~leftmost column~ marks a title line (anywhere, not only
+at the top of a page). The title is a colored bar across the full width
+of the text area, determined by the longest line. To force a longer title,
+pad with blank space or mark the end by caret (^).
+::
+
+:text-quick
+#                       Quick text                                      ^
+
+
+As for the box command there is a "quick mode" to display a brief message
+specified as command argument.
+
+This is very convenient for messages or titles with a special color,
+like in this example:
+
+
+
+
+
+Command:  ~wbat text 11,30 (+white on red) " Pls. ignore this message! "~
+::
+
+:fill
+#            Fill an area with patterns, strings, color, CLS            ^
+
+You can fill a rectangular area on the screen with any character or
+string, or just change the colors. A special option allows shifting
+the given string line by line. See following demo page.
+
+
+
+
+
+
+With the FILL command you can also clear the screen:
+
+        ~wbat fill " "~
+
+The CLS command will do the same:
+
+        ~wbat CLS~
+
+Colors optional (default by WBAT.INI):
+
+        ~wbat CLS (white on blue)~
+::
+
+:fill-syntax
+#                       FILL syntax                                     ^
+
+Syntax:      ~wbat FILL position (dimensions) (colors) "string" +s~
+
+Note the defaults for all arguments.
+
+   ~position~  line and column for upper left corner, default: 1,1
+
+ ~dimensions~  height and width of the area (always in parentheses)
+             defaults: up to screen borders
+
+     ~colors~  expression as usual, default: screen color (WBAT.INI)
+
+     ~string~  will be repeated in each line; " " clears;
+             string omitted: only the color is changed (text remains).
+
+         ~+s~  shift each succeeding line by ~s~ bytes left
+
+In case the area to fill exceeds the screen borders, it will be cut.
+
+Example (for blue area in demo):
+~
+    wbat fill 13,32 (9,28) (+magenta on blue) "À¿ÚÙ" +2
+::
+
+:cursor
+#                       Cursor and scrolling
+
+You will only need the cursor command, if you want to prepare the screen
+for the output of other programs. ~WBAT does not use the DOS cursor~ (only
+the CLS command resets to the home position).
+
+For example, if you made some text output in the upper half of the screen,
+and you want the succeeding output of a program or DOS command to begin
+in the middle of the screen, you will set the cursor to line 13:
+
+           ~wbat cursor 13~
+
+You may also send line feeds to the screen, beginning at the current or
+any specified line. The screen will scroll when the bottom is reached.
+
+Example:   ~wbat cursor 25+5~
+
+This moves the cursor to the bottom line, and scrolls 5 lines.
+:
+
+:screen
+#                       Screen save/restore                             ^
+
+WBAT boxes (box/menu/list) always pop up, that means the background
+is restored when the box is closed. For special effects with nested
+menus and boxes WBAT offers some extra features:
+
+* The ~FIX~ prefix makes a box fix, i.e. it remains on the screen when it
+  is closed. This way you can pop up another box, while the first one
+  remains visible. Note that a fix box cannot be dragged on the screen.
+
+  Example:     ~call w.bat FIX menu :start~
+
+* The ~WBAT save/restore~ commands save the screen while it is used for
+  other output (more boxes, or to view a file, for example).
+
+  WBAT ~SAVE~ copies the screen image to a file in the %%temp%% directory.
+  WBAT ~RESTORE~ restores the screen, and deletes the temporary file.
+  To use more than one file, specify an ID number.
+
+  Example:     ~wbat save 2~
+:
+
+:palfont
+#                 Font and Palette, Windows fonts                       ^
+
+If you run Win98, you will have noticed that this demo does not use the
+default colors supplied by BIOS or WINDOWS.
+
+WBAT offers commands to load a custom ~color palette~ and a character
+~font for the full screen mode~.
+
+The colors also work in a window under Win95/98. ~They do not work under
+Windows NT/2000/XP~, but these systems support custom colors for the CMD
+box anyhow (see ~NTcolors.bat~ if you want soft background colors).
+
+For the GUI window two ~extra bitmap fonts~ are supplied:
+
+   SANS16.FON    9*16 pixel font (window width: 720 pixels)
+   SANS19.FON   10*19 pixel font (window width: 800 pixels)
+
+These fonts have to be installed through the WINDOWS control panel,
+before they can be selected in a GUI window.
+::
+
+:palette
+#                       Custom color palette                            ^
+
+The command ~wbat PAL~ loads a color palette from a file that is specified
+in WBAT.INI.
+
+The palette for this demo is defined in the file ~PAL.INI~, which was
+designed for light backgrounds and dark characters. To modify the color
+values see comments in PAL.INI.
+
+If the palette file is not found (upon ~wbat pal~), WBAT will use a
+built-in default palette, which is the same as in the original PAL.INI.
+
+Notes:
+
+  In a GUI window the colors do not change instantly, but are only
+  applied to succeeding output. Thus, clear the screen ~after~ the PAL
+  command.
+
+  The color palette remains until a program resets the video mode.
+
+  To deactivate the custom palette
+  run the DOS command: ~MODE CO80~
+::
+
+:font
+#                       Full screen font                                ^
+
+The command ~wbat FONT~ loads a character font from a file that is
+specified in WBAT.INI. The file ~SANSERIF.FNT~ is supplied.
+
+Note that the font will only show in full screen mode, but will do no
+harm if activated in a GUI window.
+
+Optionally, you can set the screen to 33 lines:
+
+        ~wbat font 33~          (to reset: wbat font 25)
+
+This command will also change the GUI window to 33 lines, enlarging
+the window (though the font itself is ignored). Pls. test at DOS prompt.
+
+The font remains until a program resets the video mode.
+
+To deactivate the custom font
+run the DOS command: ~MODE CO80~
+::
+
+:No_ansi
+#                       ANSI console driver                             ^
+
+You are currently ~not~ running an ANSI driver.
+
+If you don't know what an ANSI driver is, just skip the following
+section. WBAT does not require an ANSI driver.
+
+Info:
+
+ANSI codes are used to add color and cursor control to the screen
+output. Programs that still use these codes usually come with their
+own ANSI emulation.
+
+The standard Windows configuration does not load the ANSI driver.
+:
+
+:ansi
+#                       ANSI console driver                             ^
+
+First: ~All WBAT output is not affected by ANSI.~
+
+However: Output from other programs (through Standard Output) will not
+show in the color presently on the screen, but instead with the color
+that was previously passed to the driver by an ~ANSI code sequence~
+(initially: white on black).
+
+This means: If you want the output of ~other~ programs to show in a
+specific color, you have to use ANSI codes in addition to the WBAT color
+output.
+
+WBAT offers a command to help you in case the presence of an ANSI driver
+is unknown:
+
+        ~wbat ANSI?~     returns errorlevel 1 if no ANSI driver detected
+
+Optionally, you can add an ANSI code sequence, which will
+only be sent out, if an ANSI driver is active (so you will
+not get any trash on the screen otherwise).
+:
+
+:stdout
+#                       Wbat STDOUT                                     ^
+
+Since there is the Wbat TEXT command, what do we need STDOUT for?
+Answer: Output to STDOUT can be ~redirected to a file~.
+
+And why not just use TYPE?
+There are two things that TYPE cannot do:
+~
+     *  read snippets from a file by label
+     *  replace environmental variables
+~
+
+Command:  wbat STDOUT @file.txt [:label]
+
+Wbat STDOUT only makes sense with redirection to a file, to assemble
+a file from text snippets or templates, for example.
+
+You'll have to find out yourself, what this feature can be useful for...
+:
+
+:Elevel
+#                       Wbat EL                                         ^
+
+~WBAT EL n~ sets the errorlevel to ~n~, which may be useful for testing
+sometimes.
+
+This function can also be used to test whether WBAT.COM is found by
+the command interpreter: Set an unusual value and test it.
+
+        ~WBAT EL 219
+        if errorlevel 219 if not errorlevel 220 goto continue~
+        echo WBAT not found
+        goto exit
+        :continue
+
+Note: Under Win2000/XP ~%%errorlevel%%~ expands into the nurmeric string
+of the errorlevel, provided that there ist not already an environment
+variable with the name ~errorlevel~. (If you SET this variable, it will
+have no effect on the "if errorlevel .." statements anyhow.)
+:
+
+:setup-title
+ÚÄÄÄ¿ÂÄÄÄ¿ÚÄÂÄ¿Ú   ¿ÂÄÄÄ¿^
+ÀÄÄÄ¿ÃÄ   À ³  ³   ³ÃÄÄÄÙ
+ÀÄÄÄÙÁÄÄÄÙ  Á  ÀÄÄÄÙÁ
+:
+
+:setup-menu "Setup for WBAT applications" [x]
+
+[ Installation    ]  Where to store WBAT runtime files, PATH
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ I&NI file        ]  WBAT.INI, override, file/color details
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ En&vironment     ]  Provide space for environmental variables
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Project editing ]  Editor, multiple DOS boxes
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  [   END    ]
+:
+
+:install1
+#                       WBAT Installation                               ^
+
+To run this demo you have probably extracted the WBAT files to a
+preliminary folder.
+
+When you want to use WBAT for your own batches, DOS must be able to
+locate the program files from anywhere in your directory structure.
+
+This is done through the PATH assignment (see AUTOEXC.BAT), which may
+look like this:
+           path C:\WINDOWS;C:\WINDOWS\COMMAND;C:\DOS\UTIL
+
+COMMAND.COM tries to locate program files in the specified folders, when
+a file is not found in the current directory.
+
+Since only a few WBAT files have to be publicly available, it will be
+best to copy these files to an existing utility directory, that is
+already included in your PATH statement. Of course you may also create
+a new folder, and add it to the PATH statement.
+:
+
+:install2
+#                     Installing WBAT files                             ^
+
+Note: ~The original WBAT files should be kept in a separate folder,
+      so you can run the DEMO any time with the original settings.~
+
+Copy these files to a "public" folder           ~WBAT.COM~
+that is accessed thru PATH:                     ~W.BAT~
+                                                ~WBAT.INI~
+
+The first two are the executable files. The INI file is expected by WBAT
+in the same folder with the program file.
+
+
+By default the files ~PAL.INI~ and ~SANSERIF.FNT~ are also expected in
+this folder. However, if you do not like to have too many files there,
+use a subdirectory or any other place on your disk. In these cases you
+have to modify your WBAT.INI. See next chapter for details.
+
+To make the ~bitmap fonts~ SANS16.FON and SANS19.FON
+available in the GUI box, they must be installed
+through the Windows Control Panel.
+:
+
+:inifile
+#                       INI file WBAT.INI                               ^
+
+The global WBAT settings are read from the file ~WBAT.INI~, which must be
+in the same directory with WBAT.COM.
+
+However, you may create modified WBAT.INI's for special projects in other
+directories. WBAT will always look for WBAT.INI in the current directory,
+before it checks the directory of WBAT.
+
+The configuration items are explained in the respective sections of this
+demo. See also comments in WBAT.INI.
+
+Note: If no INI file is found, WBAT will use the built-in defaults,
+which are the same as in the original INI file.
+:
+
+:ini-menu [x]
+[ WBAT.INI ]
+[ override ]
+[ files    ]
+[ colors   ]
+:
+
+:ini-override
+#                 Override INI file settings                            ^
+
+~All settings~ of the INI file can be temporarily overridden by variables.
+The variable name is the item name of the INI file, with a "~W~" prefix.
+
+Examples:       SET ~W~button=black on +cyan
+                SET ~W~rightESC=0
+                SET ~W~radiosymbol=254
+
+To return to the INI file setting: clear the variable.
+
+Example:        SET ~W~button=
+
+
+
+
+:ini-files
+#                 File specifications in WBAT.INI                       ^
+
+Generally, you can specify files in your WBAT.INI according to DOS
+conventions (only 8.3 names). As an extra, the ~+~ prefix can be used to
+refer to the directory of WBAT (i.e. where the program file WBAT.COM
+is located).
+
+* For the default ~source file~ (layouts) the file name should be specified
+  without path. This way you can use the name for local default files,
+  as well as for the global default file in the WBAT folder (which only
+  requires the ~+~ reference).
+
+  Example:      ~SourceFile=WBAT.TXT~
+
+* ~PAL.INI~ and ~SANSERIF.FNT~ must be specified with full path or with
+  the "+" prefix. Examples:
+
+     PalFile=C:\some\where\PAL.INI
+     PalFile=+PAL.INI                (in directory of WBAT)
+     PalFile=+data\PAL.INI           (in subdirectory)
+:
+
+:ini-colors
+#                       Colors in INI file                              ^
+
+See comments in INI file, and details in the ~Layouts~ section.
+For color expressions see ~Commands/Colors~.
+
+Some special features:
+
+* For the ~divider~ and the ~shadow~ colors the background is ignored.
+  The divider background is always taken from the actual box color.
+
+* The box shadow may be turned off by the specification ~NONE~.
+
+* For the hotkey color (in buttons) the background is optional.
+  ~NONE~ turns hotkey functionality completely off.
+:
+
+:Environment
+#                       Environment Space                               ^
+
+WBAT uses ~environmental variables~ to report input strings or "buttons
+by name", for example.
+
+Variables are stored in the COMMAND environment space.
+To list all variables that are currently stored, use the DOS command
+~SET~ (without arguments).
+
+Since the environment space is limited, you should take care that there
+is enough to run your WBAT batches. Windows uses a default of 384 bytes
+for the DOS box. To change the size, go to Properties of DOS box/Memory.
+
+Win98 seems to auto-increase the environment space by up to 400, but it
+would be a good idea to supply enough space from the beginning. For DOS
+versions up to 6.x see notes in file ESPACE.TXT.
+
+The tool ECHECK.BAT is supplied to test whether a given minimum is
+available. For parameters see notes in this file.
+
+~Remember to clear all variables that
+are no longer used in your batches.~
+::
+
+:project-editing
+#                       Project editing                                 ^
+
+
+If you use a Windows editor, ~extended ASCII characters~ (graphic symbols
+or special European characters) will only show properly (as in DOS box)
+when you select a TERMINAL font. Your editor may also offer the bitmap
+fonts supplied with WBAT (as Terminal fonts, size 12/14).
+
+
+You can open several DOS boxes to test your batch, edit the layout file,
+and run the WBAT demo for info, all at the same time.
+
+~Do not edit a batch file while it is running in another DOS box.
+COMMAND.COM keeps the physical location of the line to continue, and
+this may change, when you edit the file.~
+:
+
+
+:command-menu "Commands in Batch Files" [x]
+
+[ Command &Summary  ]  List of all WBAT commands
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ W.BAT construct  ]  To produce variables, alt: STDOUT
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Multiple command ]  several WBAT commands in a line
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Position         ]  Output position, dimensions
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Colors           ]  In command, INI file, expressions
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Layout reference ]  @file:label, local/global reference
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Bar options      ]  Pre-select, time-out
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [   END   ]
+:
+
+:command-title
+ÚÄÄÄ¿ÚÄÄÄ¿ÚÄÂÄ¿ÚÄÂÄ¿ÚÄÄÄ¿ÚÄ¿ ¿ÂÄÄÄ¿ÚÄÄÄ¿^
+³    ³   ³³ ³ ³³ ³ ³ÃÄÄÄ´³ ³ ³³   ³ÀÄÄÄ¿
+ÀÄÄÄÙÀÄÄÄÙÁ   ÁÁ   ÁÁ   ÁÁ ÀÄÙÁÄÄÄÙÀÄÄÄÙ
+:
+
+:commands
+#                   WBAT commands, syntax                               ^
+
+      ~WBAT~ command [parameters]      (general syntax)
+~call W.bat~ command [parameters]      (when variables to be produced)
+
+Commands:
+     ~box|menu|list~ [position] [colors] [@file][:label] [#bar[,time-out]]
+     ~text~          [position] [colors] [@file][:label]
+
+     ~box~      [position] [colors] ["text"] buttons [#bar[,time-out]]
+     ~text~     [position] [colors]  "text"
+     ~fill~     [position] [dimensions] [colors] ["string"] [+shift]
+
+     ~cls~      [colors]                  ~save~     [ID number]
+     ~cursor~   [line] [+feeds]           ~restore~  [ID number]
+     ~ansi?~    [code]                    ~font~     [33|25]
+     ~stdout~   @file[:label]             ~pal~
+
+     ~fix box|menu|list~ ... (prefix: box remains visible when closed)
+
+Parameter details in following chapters.
+For functionality of commands see ~WBAT Tour~.
+:
+
+
+:wbat-batch
+#                       W.BAT construct                                 ^
+
+To produce variables that can be used in your batch files, a special
+command construct is required. The old method of setting variables
+directly (from inside a program) is not supported, because it does not
+work under Windows NT/2000, and is not safe for future Windows versions.
+
+When you want WBAT to produce ~variables~ (with box/menu/list commands),
+
+you have to use:  ~CALL W.BAT~ <command> <parameters>
+instead of:       WBAT .....
+
+The file W.BAT runs WBAT.COM, and takes care of the variables.
+Read ~W.BAT command~ (next page) for important information.
+
+As an alternative, WBAT can write the SET statements to STDOUT,
+for redirection to a temporary batch file.
+:
+
+:wbat-menu [x]
+[ W.BAT &command ]
+[ W.BAT &details ]
+[ STDOUT method ]
+:
+
+:wbat-command
+#                           W.BAT                                       ^
+
+The batch file W.BAT passes the command parameters to WBAT.COM.
+A ~maximum of 9 parameters~ is allowed, but usually you won't have
+that many.
+
+Example: call w.bat box 5,12 (+white on blue) @file.ext:label #3,5
+         ---------- ~-1--2--3-----4----5---6----------7---------8-9~
+
+Avoid spaces in the layout reference, and use "+" instead of "bright"
+in color expressions. As an alternative, the entire parameter string
+may be enclosed in double quote marks (does not work under DOS 6.x or
+earlier versions).
+
+Example: call w.bat ~"box 5,12 (+white on blue) @file.ext:label #3,5"~
+
+The quoted string is passed to W.BAT as a single
+command parameter. WBAT.COM will ignore the quote marks.
+
+Note:
+ The ~quick box~ (without layout) cannot be used with
+ the CALL W.BAT construct. Handling by errorlevel only.
+:
+
+:wbat-details
+#                       How W.BAT works ...
+
+~Read this only if you are interested...~
+
+The first line of the file W.BAT runs WBAT.COM with the given parameters:
+
+      ~WBAT $W %%1 %%2 %%3 %%4 %%5 %%6 %%7 %%8 %%9~
+
+The special ~$W~ parameter tells WBAT.COM to open the batch file that it
+it run from (i.e. ~W~.BAT, in same directory with WBAT.COM), and write the
+SET statements beginning in the second line of this file, so they will be
+executed right after the first line is done (i.e. WBAT.COM terminated).
+
+Do not change the first line in W.BAT. The other lines will be
+overwritten each time W.BAT is run.
+
+Note in case you want to rename W.BAT: Only one-byte file names are
+supported, and the $W parameter in the first line must be changed to
+reflect the new file name.
+:
+
+:wbat-stdout
+#                    SET variables through STDOUT                       ^
+
+WBAT also supports a more conventional method to produce the variables.
+This may be useful in case WBAT is run on a read-only medium (where
+W.BAT will not work).
+
+When ~output redirection to a file~ is detected by WBAT.COM, the SET
+commands will be written to STDOUT. The file must be a .BAT file, so
+it can be called to execute the SET commands.
+
+Example:   wbat box :start_menu ~> %%temp%%\wtemp.bat~
+           call ~%%temp%%\wtemp.bat~
+
+
+It is recommended to use the %%temp%% directory.
+Don't forget to delete the temporary file.
+::
+
+
+:multiple
+#                       Multiple commands                               ^
+
+WBAT accepts several commands in a single line. Separate the commands
+by exclamation marks.
+
+Examples:
+        ~wbat cls ! text 2,5 @file.ext:label1 ! box continue,back~
+             ---   -------------------------   -----------------
+        ~wbat pal ! font ! cls~
+             ---   ----   ---
+
+The program name WBAT is required only once at the beginning.
+
+Notes:
+
+  If a ~box~ command (box/menu or list) is included, it must be the
+  ~last one~ in the line.
+
+  Do not use multiple commands with the ~CALL W.BAT..~ construct.
+:
+
+
+:Position
+#                    Position and dimensions                            ^
+
+The position (line and column) can be specified for all boxes, as well
+as for TEXT and FILL. The position always refers to the upper left corner
+of the output. Home position is ~1,1~.
+
+If a box or text output exceeds the right or lower screen border, WBAT
+will adjust the position.
+
+~Defaults:~
+
+   ~Boxes~ (box/menu/list)  are placed in the middle of the screen;
+                          if only the line is specified, the box will
+                          be centred horizontally.
+
+   ~TEXT~ and ~FILL~          will begin at the home position (1,1)
+:
+
+:Dimensions
+#                       Dimensions                                      ^
+
+
+For boxes and text output the dimensions are determined by the layout
+(longest line and the number of lines).
+
+
+The ~FILL~ command, however, allows specification of the dimensions
+(number of lines, columns), enclosed in parentheses.
+
+Example:    wbat FILL 5,12 ~(10,30)~ (white on blue) "<>"
+
+Default dimensions: up to screen borders.
+:
+
+:colors
+#                              Colors                                   ^
+
+The default colors are defined in ~WBAT.INI~. If no INI file is found,
+or if a color is not specified in the INI file, the built-in defaults
+will be taken (which are the same as in the original INI file).
+
+WBAT supports specification of different colors in these commands:
+
+     ~box/menu/list~    the box color
+     ~text~             the (normal) text color
+     ~fill/cls~         the fill color
+
+     (color expressions in commands always in parentheses!)
+
+Other colors, like the button or bar color, can be changed in your
+batch through ~variables~.
+
+Note:
+   The default ~text color~ is the color that
+   is present on the screen (no default by INI)
+:
+
+:color-expressions
+#                       Color expressions                               ^
+
+Colors are specified in the form: <foreground> ON <background>.
+The word "on" is optional.
+Sixteen colors are available in a DOS box (8 normal, 8 bright).
+
+colors:      ~black,red,green,blue,brown,cyan,magenta,white~
+
+optional:    ~bright~ or ~+~ character
+
+synonyms:    ~light~ = bright
+             ~yellow~ = bright brown
+             ~grey/gray~ = (normal) white
+
+Examples:    bright brown on blue
+             +brown on blue
+             black on +brown
+
+Note: ~Color expressions In WBAT commands always
+      must be enclosed in parentheses.~
+:
+
+:layref-menu [x]
+[ default files ]
+[ local batches ]
+[ global batches]
+[ layout in &BAT ]
+[ def. &extension]
+:
+
+:layref
+#                       Layout reference                                ^
+
+The layout for the box/menu/list commands is specified by file name and
+label.
+     *  the filename with a preceding ~@~-sign    e.g. @dialog.txt
+     *  the label with a preceding ~colon~        e.g. :START
+
+Example:     call w.bat box ~@dialog.txt:START~
+
+Generally, you can specify the file according to DOS conventions, either
+without path, with relative or with full path (only DOS 8.3 names).
+The special ~+~ prefix refers to the "public" directory of WBAT.
+
+Example:     call w.bat box ~@+dialog.txt:START~
+
+In most cases you will omit the file name, because
+WBAT offers an easy way to use default files.
+
+Note: ~Do not use layout file names without extension.~
+See "default extension".
+:
+
+:layref-default
+#                     Default layout file name                          ^
+
+
+In the supplied INI file the default layout file is set to ~WBAT.TXT~,
+which is used for this Demo. It is recommended to specify the default
+file ~without path~. Use "WBAT.TXT" or any other name you like.
+
+With this entry you can use the default name for local, as well as for
+global layout files. Examples:
+
+     ~call w.bat box :START~        for WBAT.TXT in current directory
+     ~call w.bat box +:START~       for WBAT.TXT in directory of WBAT
+
+Note: the ~@~-sign is not required, when the layout reference begins
+with a ~plus~-sign or a colon.
+:
+
+:layref-local
+#              Local batch with local layout file                       ^
+
+When a batch ~always runs in its own directory~, you can use a local layout
+file (in the same directory), specified without path.
+
+Example:    ~call w.bat @layout.txt:START~
+     or:    ~call w.bat :START~             (for default WBAT.TXT)
+
+Notes:
+
+You must be sure that the current directory and drive will be properly
+selected in your batch, when the WBAT command is executed.
+
+Be aware that the batch (or the programs run in this batch) may change
+drive and/or directory, before you GOTO the main menu again.
+
+This method is recommended, when you take care of
+proper directory/drive setting anyhow (because you
+have to handle other files in this environment).
+
+For alternatives see following pages.
+:
+
+:layref-global
+#                       Global layout file                             ^
+
+If a batch is desigend to ~run in any directory~, the BAT file must be
+in a directory that is accessed through the PATH assignment (like any
+other program that is supposed to run anywhere).
+
+Since there is no "local directory" that can be assumed, WBAT must be
+informed of the full path of the source file.
+
+To avoid specification of the full path, put the layout file in the same
+directory with WBAT.COM. You can always refer to this directory by the
+"~+~" prefix.
+
+For example:    ~call w.bat +Xproject.txt:Start~
+         or:    ~call w.bat +:Start~            (for default WBAT.TXT)
+
+
+Note: You don't need an individual file
+for each project. Just make sure that
+you have no duplicate labels. The size
+of the layout file is not limited.
+::
+
+:layref-bat
+#                    Layout source in BAT file                          ^
+
+If you prefer to put the layouts right into the batch file, make sure
+that the batch process ~never~ runs into a layout section, and that you
+do not have any duplicate labels. To specify the batch file as layout
+source, use the ~%%0~ batch parameter.
+
+Example:   call w.bat box @~%%0~:Box-layout
+
+WBAT will check the directories in the PATH variable to locate the file,
+if necessary, so you don't have to worry about proper directory path for
+the layout file.
+
+This method works perfecly with "global" batches, where the file can be
+located through PATH. In other cases this method is safe ~only as long as
+you do not change the current directory and drive~
+(or when the %%0 parameter includes the full path
+of the batch file anyhow).
+
+Note that DOS replaces %%0 with the command as typed
+at the DOS prompt (and that's what WBAT gets).
+:
+
+:layref-extension
+#                       Default extension                               ^
+
+
+In the actual command that DOS inserts in place of the %%0 parameter,
+the extension .BAT may have been omitted.
+
+To make the %%0 reference work, WBAT assumes the ~default extension .BAT,
+whenever a layout file without extension~ is specified.
+
+~For this reason: do not use "real" layout files without extension.~
+:
+
+:bar-options
+#                       Bar options                                     ^
+
+By default the highliting bar is set on the ~first item~ of a box, menu
+or list. To set the initial bar position to any other item, specify the
+item number with a ~#~-sign as last parameter.
+
+Example:    call w.bat box :main ~#3~
+
+Note: If the position is invalid (zero or beyond the last item number),
+the first position will be set.
+
+The bar position is also accepted as an arithmetic expression a+b or a-b.
+This can be used in menus to pre-select the next item, for example.
+
+For details see ~Control~ section (Using variables, ? variable).
+:
+
+:time-out
+#                         Time-out                                      ^
+
+Optionally, a ~time-out~ value can be added to close the box automatically
+after a number of seconds, and return the pre-set item as "selected".
+
+Example:    call w.bat box :main ~#3,5~
+
+~Important:~
+The pre-selected item must be a button, because WBAT generates an ENTER
+key after the time-out period, and ENTER closes a box only on buttons!
+However, if the specified button number is invalid (zero or beyond last
+item), the ~ESC~ key will be triggered instead of ENTER.
+
+The time-out is cancelled when a key is pressed or mouse clicked,
+no matter if that was a valid input or not.
+
+Maximum time-out: 3,600 seconds (1 hour)
+
+~Countdown display:~
+
+You can display the countdown at any position in a box
+with layout using the ~#?~ token.
+See ~Layouts / Timer Display~
+:
+
+:layout-menu "Layout Design for Boxes, menus, Text" [x]
+
+[General info    ]  Labels, dimensions ^, variables
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[Box Style       ]  Frame, shadow, title, [[x], dividers ..
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[Control Elements]  Buttons, &hotkeys, input and other elements
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[Text Attributes ]  Text highliting and header lines
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[Timer Display   ]  Countdown to close a box
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[Symbol Summary  ]  All special symbols
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[C&olor Test      ]  See Colors.bat
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [    END    ]
+:
+
+:layout-title
+Ú    ÚÄÄÄ¿Ú   ¿ÚÄÄÄ¿Ú   ¿ÚÄÂÄ¿ÚÄÄÄ¿^
+³    ÃÄÄÄ´ÀÄÂÄÙ³   ³³   ³À ³  ÀÄÄÄ¿
+ÁÄÄÄÙÁ   Á  Á  ÀÄÄÄÙÀÄÄÄÙ  Á  ÀÄÄÄÙ
+:
+
+:Layout-general
+#                       General information                             ^
+
+A layout can be in a file by itself, or together with other layout units,
+where each one is ~identified by label~.
+
+Labels are preceded by a colon, like in batch files. However, the length
+is not limited to 8 characters, as in DOS or Win9x batch files.
+
+The layout is plain ASCII text. Control elements for boxes can be placed
+anywhere in square brackets. A layout ends with a colon in the leftmost
+column (which may be the label for the next layout).
+
+Layouts always produce a rectangular area, determined by the longest line
+and the number of lines. Boxes will have extra space added for the frame
+(one line at top/bottom, and one column at each side). For more space:
+pad with blank space and empty lines.
+
+Note: In case your editor truncates empty space at the end of lines,
+use the caret character (^) to mark the end (it will not show).
+:
+
+:layout-variables
+#              Using environmental variables in layouts                 ^
+
+Variables (enclosed in %-signs) are replaced like in batch files.
+Exception: You cannot use variables in control elements (e.g. buttons).
+
+Example (assuming FILE=SAMPLE.TXT)
+     in layout:   ~Read %%FILE%% for details~
+     in output:   ~Read SAMPLE.TXT for details~
+
+Note that the size of the string has an influence on the box width!
+     BOX lines exceeding 78 bytes will produce an error message.
+     TEXT lines exceeding 80 bytes will be truncated.
+
+A ~fixed output length~ for variables can be achieved by padding with
+underline symbols. This reserves a "field" (including the variable name)
+to fill in the string. The string will be padded with blank space or
+truncated(!), depending on the actual size.
+
+Example
+    in layout:  ~%%VAR%%__________~  %%VAR2%% or more text ...
+    in output:  ~actual string~    string2 or more text ...
+:
+
+:layout-Style
+#                      Box Style                                        ^
+
+
+WBAT reads colors and other settings from the file WBAT.INI.
+
+You will probably make your favorite setup, and use it for all your
+boxes and other WBAT output.
+
+However, you can temporarily override all INI file settings by variables
+(variable name = item name with ~W~ prefix).
+See details in section ~Setup/INI file/override~.
+
+Note that the ~box colors~ can also be specified in the box/menu/list
+commands.
+:
+
+:style-menu "Box style" [x]
+
+[ frame and shadow   ]
+[ title and deviders ]
+[ highlighting       ]
+[ extra ESC button   ]
+::
+
+:Style-frame
+#                       Box Frame
+
+In this demo a blank frame is used, but you may define a different
+pattern in the INI file: imagine a minimum frame of 3 by 3,
+       ~ÚÄ¿~
+ e.g.: ~³ ³~  and then put the 9 characters in a line: "~ÚÄ¿³ ³ÀÄÙ~"
+       ~ÀÄÙ~
+The middle character should be blank, because it will fill the box.
+
+
+#                       Box Shadow
+
+The box shadow is activated when a valid shadow color (default: bright
+black) is found in the INI file (or as environmental variable).
+
+To turn off the shadow, assign ~shadow=NONE~
+::
+
+:style-title
+#                         Box Title
+
+A box title (in place of the upper frame border, see below) can be
+specified in the ~label line~ of the layout. ~Double quote marks~ required.
+
+Example:      :style-menu "Box style"
+              .....
+
+The title will be centred. Color by ~BoxTitle~ in INI file.
+
+#                         Dividers
+
+To make horizontal lines in a different color, use the "Ä" character
+(~ASCIII code: 196~). This will always show in the color defined for
+~Divider~ in the INI file. Only the foreground color is relevant
+(background specification ignored).
+::
+
+:style-highlighting
+#                   Highlighting text in BOX                            ^
+
+
+To highlight a word or text section, insert the tilde character (~~) at
+the beginning and the end of the section.
+
+The color is defined by ~BoxHi~ in WBAT.INI.
+
+
+Notes:
+The same feature is available for ~TEXT~ output (TextHi in INI file).
+The tilde symbol can be replaced in the INI file, [general] section,
+HiSymbol.
+
+:
+
+
+:style-extra
+#                      Extra ESC Button
+
+If you would like to have the Windows style ~[x]~ button in the upper
+right corner of the box: add it in the label line of the layout.
+
+Examples:    ~:style-menu "Box style" [x]~
+
+      or:    ~:any_box [x]~
+
+
+The square brackets are mandatory, but any symbol (instead of "x")
+is accepted.
+
+Note:
+
+    ~Clicking the [x] button has the
+    same effect as the ESCAPE key.~
+:
+
+:Layout-control
+#               Control elements in layout
+
+
+All control elements are enclosed in ~square brackets~.
+
+The first character determines the type of control element:
+
+~       [$ varname    ]  ~input field
+~       [!]              ~checkbox
+~       [.]              ~radio button
+~       [? button ]      ~escape button
+~       [ button ]       ~(anything else) normal button or menu item
+
+The ESCAPE button looks like any other button (the "?" is removed), but
+will trigger the ESC key. For special ESC handling see ~Control~ section.
+
+To use the opening square bracket in normal ~box~ text,
+it must be doubled, e.g. ~[[ in square brackets ]~
+
+:
+
+:element-menu [x]
+[ input field   ]
+[ checkbox      ]
+[ radio buttons ]
+[ hotkeys       ]
+:
+
+:hotkeys
+#                       Hotkeys                                         ^
+
+Hotkeys for buttons or menu items are marked red in this demo (see INI
+file). To disable the hotkey feature, set HotKey=NONE.
+
+The first character of a button or menu item is the default selector.
+In case more than one button begins with the same character, mark any
+other character with a preceding ampersand.
+
+Examples:  Buttons:     ~[ continue ] [ ca&ncel ]~
+           Menu item:   ~[ WBAT &Configuration  ]~
+
+Notes:
+  Hotkey letters also work in combination with the ~ALT key~. (This
+  offers hotkey support also while the cursor is in an input field).
+
+  The ampersand can be used in "quick boxes" as well.
+
+  ~The ampersand also determines, which word is returned
+  as variable~ (see Control section).
+
+  The hotkey can be deactivated for an individual
+  button by a trailing ampersand.
+:
+
+:layout-text
+#                       Text Output                                     ^
+
+By default the text will show with the colors that are found on the
+screen. There is no default text color in WBAT.INI.
+
+To display a new page of text, first clear the screen.
+
+Example:        ~wbat cls ! text 2,4 :layout-text~
+
+Colors may also be specified in the command line, however, note that
+WBAT text produces a rectangular area determined by the number of lines
+and the longest line. ~The screen around this area remains unchanged.~
+
+When using blank space for padding, you can mark the end of the line
+by caret (^). This symbol will not show.
+:
+
+:layout-timer
+#                      Countdown display                                ^
+
+When you use the timer feature to close a box after a given number
+of seconds, the countdown can be displayed at any position in the
+box (not within control elements, and not in a "quick box").
+The token ~#?~ marks the position.
+
+In case the user cancels the countdown (by any input), the counter is
+replaced by ~--~.
+
+For timer syntax see ~Commands / Bar Options~
+::
+
+:layout-tbox "Timer Test"
+
+     This box will close after 15 seconds
+ returning the errorlevel of the marked button
+
+                     #?
+
+         [    ok    ] [  cancel  ]
+:
+
+:layout-symbols
+#                      Special layout symbols                           ^
+
+ ~[~   (box)       marks a button or other control element, up to ~]~
+ ~&~   (box)       marks the hotkey character (only within a button)
+ ~%%~   (box/text)  environmental variables handled like in batch files
+~ ~~~   (box/text)  (tilde) highlights text section (begin/end)
+ ~#~   (text)      title bar (at leftmost column only)
+
+   In case you need the above symbols at the specified places (!)
+   as visible characters, ~double them~.
+
+ ~#?~  (box)       countdown display position
+
+ ~^~   caret character marks the end of a line
+     (only if succeeded by carriage return)
+
+ ~Ä~   (code 196) divider in box, always shows in special color
+
+ ~:~   the colon at the beginning of a line is reserved for labels,
+     marking the beginning and the end of a layout unit
+
+ ~_~   underline reserves space for output of variables
+     (only if immediately succeeding the variable)
+:
+
+:control-title
+ÚÄÄÄ¿ÚÄÄÄ¿ÚÄ¿ ¿ÚÄÂÄ¿ÂÄÄÄ¿ÚÄÄÄ¿Ú    ^
+³    ³   ³³ ³ ³À ³  ÃÄÄÂÙ³   ³³
+ÀÄÄÄÙÀÄÄÄÙÁ ÀÄÙ  Á  Á  À ÀÄÄÄÙÁÄÄÄÙ
+:
+
+:control-menu "Batch Control" [x]
+
+[ General Info    ]  Returned information
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Errorlevels     ]  Returned button number, GOTO, ESC
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Using &Variables ]  GOTO by name, ESC handling, %%?%%
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ ESC &Handling    ]  Conditions and special handling
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ List Box        ]  Special behaviour and handling
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Batch Labels    ]  More info ...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [   END   ]
+:
+
+:control-general
+#                  Batch control - General info                         ^
+
+WBAT returns ~errorlevel~ information, and optionally, ~variables~ to act
+on the user's input.
+
+The handling for ~BOX~es (and menus) is explained in the next chapters.
+For the ~LIST~ box there are some differences, explained in an extra
+chapter.
+
+Remember:
+    WBAT will only produce environmental variables when the command
+    ~CALL W.BAT .....~  is used.
+
+In any case, this construct is required to get the result from input
+fields, checkboxes and radio buttons.
+
+~Important:~
+When a box is closed by ESC (or equivalent action), the variables for
+input fields, checkboxes and radio buttons will remain unchanged, even
+if they were modified in the box. This default behaviour is overruled
+by the option ~ESCinput=1 in WBAT.INI~.
+:
+
+:errorlevel
+#                       Errorlevels
+
+WBAT returns an exit code (1..) according to the selected button number,
+in reading order (left to right, top/down). Only ~buttons~ count.
+
+To act on this exit code, DOS's ERRORLEVEL test is used. Remember that
+"IF ERRORLEVEL n" means "if the exit code is equal to ~or greater than~ n",
+To branch by GOTO statements you will have to check in the order from
+high to low.
+
+Example:  wbat box OK,options,cancel
+          ~if errorlevel 3 goto END~          (exit code >= 3)
+          ~if errorlevel 2 goto OPTIONS~      (exit code >= 2)
+          rem continue here if OK           (exit code <= 1)
+
+Errorlevel 100 is returned on ESC. See extra chapter.
+
+In case a "real" error occurs (e.g. file or label not found), WBAT
+returns errorlevel 255, and displays a message. WBAT will pause on
+errors, unless ErrorPause=0 in your WBAT.INI.
+:
+
+:variable
+#                       WBAT variables                                  ^
+
+
+With the command ~CALL W.BAT~ instead of ~WBAT~(.COM), variables will be set
+for input fields, radio buttons and checkboxes, as well as for buttons
+and menu items (however, not for the "Quick Boxes", i.e. without layout).
+
+These are the variable names used by WBAT:
+
+        ~WBAT~            buttons and menu items
+        ~WCB1..WCB9~      checkboxes: 0 or 1  (off/on)
+        ~WRB~             radio buttons: number 1..9
+        ~(input)~         name as specified in layout
+
+Variables are used in batch files (and layouts) enclosed in %%-marks,
+case ignored, for example:
+
+                goto %%wbat%%
+
+Note: The errorlevel is returned in any case.
+:
+
+:var-menu [x]
+[ button variable ]
+[ WBAT &string     ]
+[ the &? variable  ]
+[ reset variables ]
+:
+
+:var-button
+#                       Button variable                                 ^
+
+The button variable ~WBAT~ returns the selected button or menu item
+~by name~, which can be used as GOTO target, for example.
+
+The string is always one word, delimited by blank space. Usually it is
+the ~first~ (or only) word, but if the ~ampersand~ was used to mark a hotkey,
+then this (complete) word is taken. Example:
+
+  Menu item:                 ~[Run Scan&disk]~
+  Jump to label with:        ~GOTO %%WBAT%%~
+  Label required:            ~:SCANDISK~
+
+The ~&~ is recognised no matter if the hotkey functionality is on or off.
+~
+If the word to be returned as WBAT variable includes
+any symbols (other than letters and digits), these
+may be stripped, to make sure that the string can be
+used as valid label. See next page: WBAT string~
+::
+
+:var-string
+#                       WBAT string                                     ^
+
+Because the WBAT variable will be used as GOTO target in most cases,
+and DOS may have problems with special symbols in batch labels, WBAT
+accepts only letters (including high ASCII letters), digits and these
+symbols:
+                  ~@ $ - _ ?~
+
+All other special characters will be removed.
+
+Note that the ~list~ box returns selected items unchanged
+(see List chapter).
+
+Note also:
+Upper/lower case is preserved. Be aware of this, when you compare
+strings, because ~IF string1==string2~ is case sensitive!
+:
+
+:var-?
+#                       The ? variable                                  ^
+
+The WBAT exit code is also returned as environmental variable ~%%?%%~,
+unless this feature is turned off in the INI file (ELvar). This is handy
+to control the bar position in a menu.
+
+Example:  ~set mpos=1~                           set initial position
+          ~:MAIN~
+          ~call w.bat menu :main #%%mpos%%~        use last position
+          ~set mpos=%%?%%~                         save new position
+
+In this example the bar will be set to the position selected the last
+time. Since it is possible to specify the position as an arithmetic
+expression (a+b or a-b), you can even select the next position:
+
+          call w.bat :menu #~%%mpos%%+1~
+
+Note: This method only works with menus (or boxes
+with buttons only), because the bar position will
+also be set on other elements, whereas the returned
+%%?%% variable only refers to buttons.
+:
+
+:var-reset
+#                  Resetting variables                                  ^
+
+To avoid an overflow of the environment space (see Setup/Environment),
+you should clear variables when they are no longer used.
+
+Example:       ~set name=~
+
+Use a FOR loop to clear several variables, at the end of a batch file,
+for example.
+
+        ~for %%%%a in (wbat wcb1 wcb2 wrb input) do set %%%%a=~
+        ~set ?=~
+
+Do not include variables names with "?" or "*" in the FOR parentheses,
+because the batch interpreter will attempt to find matching files(!)
+
+When the DOS box under Windows is closed at
+the end of a batch file anyhow, you need not
+clear the variables.
+:
+
+:ESC-handling
+#                       ESCAPE handling                                 ^
+
+When a box is closed by ESC, special information is returned by WBAT,
+in order to allow appropriate action.
+
+Equivalent to the ESC key are:
+
+   ->   ~Alt-F4~ key, or click on ~[x]~ (if available)
+   ->   ~Right~ mouse button ~outside box~ (unless deactivated in WBAT.INI)
+  ->>>  Click/Enter on special ~ESCAPE button~ that is denoted by a
+        question mark in the layout, e.g. [? cancel ]
+
+On ESCAPE ~errorlevel 100~ is returned for boxes and menus.
+The ~WBAT variable~ will be set ...
+
+.. to the name of the ~ESCAPE button~, if available - no matter where
+   this button is placed in the box layout.
+
+.. to the name of the ~last button~ if no ESC button is in the layout,
+   (and for "quick boxes", where the ESC button is not supported).
+
+   Note: If the last control element is not a button,
+   the variable will be empty.
+:
+
+:ESC-handling2
+#                       ESCAPE handling                                 ^
+
+Using the special ESCAPE button in your layout makes the handling very
+easy:
+        ~if errorlevel 100 goto ....~   will catch any ESCAPE action
+
+or:     ~goto %%wbat%%~                   will do the complete handling
+                                      (if proper labels provided)
+
+When you do ~not~ have marked one of the buttons in your layout as ESCAPE
+button, it is recommended to have the ~last button~ for the cancel/exit
+functionality. This would be handled with the test:
+
+        ~ if errorlevel <last button number> goto ....~
+
+Remember that testing the errorlevel for the last button covers any value
+above, including 100.
+
+The ~goto %%wbat%%~ alternative will also be easy to handle,
+because any ESCAPE action sets the variable according to
+the ~last button~.
+:
+
+
+:list-handling
+#                       List handling                                   ^
+
+The ~WBAT LIST~ command was designed to offer any kind of items, like
+file or directory names. Note the following differences to other WBAT
+boxes:
+
+* The selected item number is ~not returned by errorlevel~, because more
+  than 255 items are possible. Use the ~%%?%%~ variable to get the number.
+
+* ~Errorlevel 0~ is returned when an item was selected.
+  Errorlevel 254 for ESCAPE, 255 for "real" errors.
+  This means: you can use ~IF errorlevel 100 ...~ to test for ESC, as you
+  are used to with other boxes.
+
+* The ~%%wbat%% variable~ is set to the complete item selected (i.e. the
+  full line from the source file). See next page
+
+* On ~ESC~ the WBAT variable will be ~empty~.
+
+* ~Hotkeys~ cannot be used in the list box.
+:
+
+:list-variable
+#                       List variable                                   ^
+
+
+  The item returned as variable will be exactly as found in the list
+  (since it is not used as GOTO target like in other boxes).
+
+  ~WBAT returns the complete item string including blank space and
+  special symbols~ (however, leading and trailing spaces are removed).
+
+  There is only one exception: the equal sign will be replaced with
+  blank space, because DOS does not accept another equal sign in a
+  SET statement.
+:
+
+
+:label-prefix
+#                       Label prefixes                                  ^
+
+When using several boxes in a batch file, you may get the same button
+variable strings returned from different boxes.
+
+To avoid duplicate labels when you GOTO %%wbat%%, use different prefixes.
+
+Example:      ~GOTO A-%%wbat%%~
+
+Assuming you have a button string ~COPY~, then ...
+
+one label may be:   ~A-COPY~
+another one:        ~B-COPY~
+:
+
+:labels
+#                       Labels                                          ^
+
+Batch labels under ~DOS and Windows 95/98~ have a significant length of
+only 8 characters. The rest is ignored.
+
+You may use longer labels, but make sure that they are ~unambiguous
+within the first 8 bytes~.
+
+Note that the length of labels is not limited under Windows NT/2000
+and 4DOS, as well as in your layout files.
+
+In any case you should avoid special symbols other than allowed in
+valid DOS file names. Also the "?" will cause no problems.
+
+Special European letters:
+
+Labels are not case sensitive, but COMMAND has a bug in the conversion
+of high ASCII letters, such as German "Umlauts". To be on the safe side,
+use uppercase Umlauts in labels. This will be handled properly, no matter
+if the GOTO variables are upper or lower case.
+:
+
+:handling-title
+Ú   ¿ÚÄÄÄ¿ÚÄ¿ ¿ÂÄÄÄ¿Ú    ¿ ÚÄ¿ ¿ÚÄÄÄ¿^
+ÃÄÄÄ´ÃÄÄÄ´³ ³ ³³   ³³    ³ ³ ³ ³³ ÄÄ¿
+Á   ÁÁ   ÁÁ ÀÄÙÁÄÄÄÙÁÄÄÄÙÁ Á ÀÄÙÀÄÄÄÁ
+:
+:handling-menu "Keyboard, mouse handling" [x]
+
+[ ESCAPE       ] ESC and equivalents
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Box handling ] General handling
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Input        ] Editing in input fields
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+[ Flush        ] Keyboard buffer
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[  END  ]
+:
+
+:handle-escape
+#                       ESCAPE and equivalents                          ^
+
+These keys have the same effect as ESCAPE:
+
+                ~ALT+F4, ALT+"X"~
+
+By mouse there are three ways to trigger ESCAPE:
+
+*  Click (left button) on ~[x]~ in upper right corner - if provided
+   in layout.
+
+*  ~Right~ mouse button ~outside~ box - unless deactivated in WBAT.INI
+   by ~rightESC=0~.
+
+*  Click on a button that was marked as ~ESCAPE button~ in the layout
+   (by question mark as identifier)
+
+:
+
+
+:handle-box
+#                       General box handling                            ^
+
+Mouse click on..
+                ~button~        selects button and closes the box
+                ~input field~   enters edit mode and sets cursor
+                ~checkbox~      toggles status
+                ~radio button~  sets "on"
+
+Keyboard:       Functions to move the bar:
+
+                ~forward~       by cursor right or down, TAB
+                ~backward~      by cursor left or up, shift+TAB
+                ~top/bottom~    by home/end
+
+~ENTER~ selects button and closes box.
+~ENTER~ on other control elements just moves to the next one. However,
+ENTER on ~last~ element closes the box in any case.
+
+Checkboxes and radio buttons are toggled/set by ~space bar~.
+
+Hotkeys alternatively in combination with ALT.
+:
+
+
+:Handle-input
+#                       Editing in input field                          ^
+
+These editing keys are supported in an input field:
+
+        ~cursor left/right, home, end~
+        ~insert~ (on/off)
+        ~backspace, del~
+        ~ctrl+del~ (to clear rest of field)
+
+The cursor position can also be set by mouse.
+
+Notes:
+
+While the string is still highlighted (before the first keystroke), the
+first ~visible~ key, as well as DEL, will clear the string. Moving or
+setting the cursor retains such text for editing.
+
+While the cursor is visible in an input field (edit mode), you can use
+hotkeys for buttons ~only with ALT~.
+:
+
+:handle-flush
+#                         Flush keyboard buffer                         ^
+
+When you press keys while a program is not (yet) ready to accept input,
+these keys are stored in the BIOS keyboard buffer.
+
+As soon as this program (or the following one) accepts input, these
+keystrokes will be recognised.
+
+If you do not want the user to enter "blind" keystrokes, intentionally
+or unintentionally, you should make WBAT ~flush~ the keyboard buffer when
+a new box is displayed.
+
+Set in your WBAT.INI:  ~KeybFlush=1~    (default is 0:off)
+:
+
+:tip-close
+#                  Close DOS box automatically
+
+When a batch is run in a GUI window, you may want to close the DOS box
+automatically when the batch has finished. This can be achieved through
+the DOS box properties, program tab, checkbox "close..."
+
+But there is another method that works under Win95/98, even when you
+cannot control the settings on some other person's computer: ~CLS~.
+This makes sense, because there is no reason to keep a window open,
+if it's completely empty.
+
+Be sure that ~ECHO is OFF~ (otherwise the command prompt will show,
+and the screen is no longer empty), and that the screen is cleared
+~white on black~ (ANSI colors active?).
+
+If you want to stop only in case of an error, make a WBAT box on
+errorlevel 1:
+~
+        if errorlevel 1 wbat box "Error" close
+        cls~
+::

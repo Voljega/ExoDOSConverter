@@ -1,0 +1,245 @@
+WELCOME
+
+Welcome to another useful utility by Demonlord...
+
+PROGRAM DESCRIPTION (and minor rambling)
+
+IMG2DSK is a program to copy raw disk image files back to disk. Since I'm
+writing this in a minor hurry, and don't feel like spending a lot of time
+writing a doc file that's 10 times the size of the program it describes, it'll
+be short and sweet... (even though it's getting closer to 10x now :) )
+
+I'll cram in a short disclaimer, just to make sure...
+DISCLAIMER:
+* This file is 100% guaranteed to exist.  Demonlord makes no claims to the
+  existence or non-existence of the reader.
+* Ok, a serious one too... Use the prog however you want to, but I'll never
+  take any responsibilities for what you cause with it. Damage stuff all you
+  want, but don't involve me...
+
+REVISION HISTORY
+
+v1.007 - Added Ignore All errors. When choosing this, the current and all
+         coming write errors will be ignored.
+         Added function so sector number is shown when a write error occurs.
+
+v1.006 - Sets INT 1E to standard sector size and standard sectors/track
+         values. Programs reading/using protected disks can modify these
+         values without restoring them, so this should avoid problems running
+         IMG2DSK after running such programs.
+
+v1.005 - Fixed a minor beauty problem. If you chose to quit when an error
+         occured, the Retry string would appear again.
+
+v1.004 - Inserted Ignore option when an error occurs writing to the disk.
+         Works like it sounds, if a write error occurs, and you choose Ignore,
+         the program will skip the rest of this track/side, and jump to the
+         next track/side.
+
+v1.003 - Inserted support for special 10 sector/track 200K image.
+         (One-on-One uses this format). Will also require 1.2MB/1.44MB disk
+         or specially formatted disk to write back to disk.
+
+v1.002 - Inserted support for special 10 sector/track 400K image
+         (Music/Pinball construction set use these). Will require 1.2MB/1.44MB
+         disks to copy back to a disk. These images cannot be written to
+         standard 360K/720K disks! (Since they only have 9 sectors/track).
+         Also, if you're using the built-in "interface", it will now show
+         which driveletter you've chosen after pressing A or B...
+         Minor changes to this document...
+
+v1.001 - Very minor bugfix, fixed a spelling error :)
+
+v1.000 - Original release
+
+RAMBLING
+
+Now that that's done, let's get on with a description of all the magnificent
+features of this prog!
+
+The prog is of course written in 100% 8088 assembler, to make sure it works
+on those old machines we all love!
+
+If you think the prog is small, well, I like to write optimized code, since I
+hate sloppy patched-up work (no fan of M$, no). Of course I could REALLY
+optimize it if I wanted to, but there's no reason to go to extremes...
+
+If you think the prog is too large, well, it's just because I like to describe
+what happens. If you edit the file, you'll notice that 50% of the file is
+text, like error messages and other crap displayed under one condition or
+another...
+
+REQUIREMENTS
+
+The program requires DOS 2.0, since it uses certain INT 21 function that
+were implemented in DOS 2.0.
+It also requires 2 disk drives, or 1 disk drive and 1 hard drive. (One to
+hold the image file, and one as destination drive).
+
+SYNTAX
+
+The syntax is really simple. There are 2 parameters to use, no flashy
+interface that doesn't really do anything, except occupy HD space, memory and
+eat up processor power. OK, so there is an interface, but it's nothing flashy.
+
+IMG2DSK <imagefile> <destination drive>
+Example: IMG2DSK KQ1.IMG A:
+writes the disk image in KQ1.IMG to the disk in drive A. Drive B can of course
+also be used.
+
+The image file HAS TO be the correct size for it's disk format (see list
+below), since the size of the image file determines how many tracks, sectors
+and sides the disk originally had, and will have when IMG2DSK* is done...
+
+If the image file has an illegal size, it'll quit with an error. See the
+section ERRORS below for a list of errors that can pop up...
+
+Note that the drive letter must be followed by ":". Only drives A and B are
+valid, since there aren't many computers around anymore with more than 2
+disk drives...
+
+If you don't enter any parameters, you'll be prompted for image filename and
+drive letter. I included this since DOS versions prior to 3.0 (or something
+like that) use a different way to handle parameters, so if you're using a
+really old version of DOS, run the prog without parameters. This is for full
+compability with DOS 2.x, which if often used on 8088s...
+
+Valid image sizes:
+Size  Tracks  Sides  Sectors  Image size (in bytes)
+160K    40       1       8      163840
+180K    40       1       9      184320
+200K    40       1      10      204800 (exists nowhere in nature) :)
+320K    40       2       8      327680
+360K    40       2       9      368640
+400K    40       2      10      409600 (exists nowhere in nature) :)
+720K    80       2       9      737280
+1.2M    80       2      15     1228800
+1.44M   80       2      18     1474560
+
+PROGRAM OPERATION AND CAPABILITIES
+
+After you've passed the stages described above (entering of filename and
+drive letter), the prog verifies that the image file exists, and checks that
+it has a compatible size. After that, it tells you to insert a disk that the
+image will be written to. MAKE SURE THE DISK CAN HOLD AS MUCH DATA AS YOU'RE
+TRYING TO WRITE TO IT! Bad things will probably happen if you try to write a
+1.44MB image to a 360K disk in a 360K drive. I won't even try what happens!
+(But I can guess what happens when the drive tries to seek above track 42
+ somewhere...).
+
+The program checks that the drive is ready and if it is, the copying starts.
+It reads one track at a time from the image file (one side), to minimize
+memory requirements.
+
+When the program writes to the disk, it writes one entire track at a time,
+since this speeds up the operation. This does, however, not work on all
+drives/computers, so if this operation results in an error, the program
+switches to single sector writes. It means that instead of writing
+9 (or whatever) sectors in one operation, it writes sector by sector, starting
+with 1, continuing with 2 and so on. If this write fails as well, you'll get
+an error message. The sector number that caused the error will be displayed.
+If you get constant errors on sector 9 when writing a 360k image, a good idea
+would be to format the disk to 360k before running again.
+
+You are presented with an error message that can look like this:
+Sector not found writing sector 9
+Retry? [Y/N/Ignore/ignore All]
+
+Obviously, if you select Y, the program will retry writing this sector again
+(it does 3 retries before an error is displayed, and will do 3 new tries
+after pressing 'Y'). Selecting N will dump you back to (D)OS.
+
+Selecting Ignore will skip the rest of this track or side, and continue with
+the coming track/side, whichever it is for the selected image. Choosing
+Ignore All (A), will ignore this and all coming write errors.
+(The sector not found line doesn't display track and side, but that's already
+readable on the line above the error message...)
+
+When the entire disk is done, the program quits back to (D)OS.
+
+You can press ESC at ANY point in the program to abort the whole operation.
+When entering filenames, drive and waiting for disk insertation the program
+quits directly (when pressing ESC). If you press any key during write, you'll
+get an Abort? question, since you might accidentally just have fallen on the
+keyboard...
+
+If the destination disk doesn't seem to work after the image has been written
+to it, make sure to format the disk to the correct format before writing an
+image file to it. When I tried to write a 720K image to a 720K disk that was
+formatted to 360K, the disk didn't work properly after completion, but after
+formatting the disk to 720K and retrying, it worked...
+
+This is, of course, a problem if you're trying to write 200K/400K images.
+There is however an utility called Anadisk, by Sydex, that can be used to
+format disks to special formats. This program can format a 360K disk with 10
+sectors/track (for example. You can make almost any kind of weird sector
+layout, including different sector sizes, odd numbering and more)...
+
+
+ERRORS
+
+Below is a list of errors, and specifications on what conditions they are
+displayed. If the program quits with an error, the errorlevel (exitcode)
+is always 1, if it's successful, it quits with 0.
+
+No drive letter specified!
+Specify a drive to write the image file to.
+---
+Invalid drive specified!
+You have specified an invalid drive as a parameter (only A and B are valid) or
+you've forgotten the ":" after the drive letter.
+---
+Image file not found!
+The image file you've specified can not be found.
+---
+Image has invalid size, no known format matches!
+The image file has an unsupported size, so IMG2DSK can't handle it.
+---
+Operation aborted! Returning to OS
+You've chosen to abort the program.
+---
+Address mark not found
+Disk is write protected
+Sector not found
+Disk changed
+DMA overrun
+Invalid media for this image format
+CRC error
+Controller failure
+Seek failed
+Drive not ready
+Unknown error!
+
+The errors above are disk errors, that will appear if there are any errors
+writing to the destination disk. The most probable problem is either that
+the disk has bad sectors, or that the disk is formatted with different
+sector sizes. The disk has to be formatted using only 512 byte sectors, like
+DOS uses! Raw image files doesn't support anything else, so...
+
+LAST WORDS
+
+Since this is the first version (or a slightly revised version of the
+original) of this program, I haven't tested it too much on other platforms
+than the Pentium that it's written on. I've tested writing all the images I
+have, and they've all worked afterwards. I've done some minor testing on my
+286 with DOS 6.2, that has worked as well. I've also tried writing just one
+image on the 286 with DOS 2.11, and that worked as well. I have problems
+testing under DOS 2.11 since I only have one 360K drive in the 286 (I have
+one 720K too, but that's not supported under DOS 2.11), so testing under DOS
+2.11 is a bit tough... (I have a 213 MB HD also, but it's not supported under
+2.11 either...)
+
+What I'm trying to say here is that the program works fine for me, and I
+hope it'll do so for you too, but if you have any problems you can always
+write me... (I'm not saying that I WILL fix any/all bugs you find, but I'm
+pretty sure I'll at least take a good look at the problem...)
+
+If you have any questions regarding this program, or something else, don't
+hesitate to write...
+
+Comments/bugreports/problems/whatever can be sent to:
+
+demonlord@swipnet.se
+
+Note: I'm always on the lookout for more old self-booting games, so if you
+have any, please don't hesitate to write...

@@ -1,0 +1,222 @@
+                               PictView 1.94
+
+                          http://www.pictview.com
+                           support@pictview.com
+
+
+                     Copyright (c) 1994-2000 by Jan Patera
+               Copyright (c) 1996-2000 by Dement - quantization
+
+
+What is PictView?
+
+  PictView is a mouse-driven viewer and converter of images. It runs on all
+EGA, VGA,  SuperVGA and  Extended-VGA  video  adapters. PictView is able to
+read images  stored in approximately  40 graphics  file formats and convert
+them into  another format. All functions are extremely fast, up to 10 times 
+faster than other programs.
+
+Supported formats of graphics files:
+
+!PX - Thumbnail from PC PaintBrush IV Deluxe for Windows, read only
+BMI - Zoner Bitmap, read only
+BMP - Windows BitMap
+BMP - OS/2 BitMap
+BW  - SGI image in gray scales
+CAL - CALS Raster Type I, read only
+CDR - CorelDraw! 2.0 - 9.0 read preview and imported
+      images only
+CDT - CorelDraw! 5.0 - 9.0 Template, read preview and imported bitmaps only
+CLP - MS Windows Clipboard, bitmaps only, read only
+CMX - CorelDraw! 5.0 - 9.0 - Corel Metafile Exchange Fileformat, read preview
+      only
+CPT - Corel PhotoPaint 6.0, read only
+CUR - MS Windows cursors, read only
+CUT - Dr. Halo/Dr. Genius
+DCX - Multipage facsimilie documents
+DIB - Windows Device Independent BitMap (=BMP)
+FLC - AutoDesk Animator Pro animation
+FLI - AutoDesk Animator animation
+GIF - CompuServe Graphics Interchange Format
+HAM - IFF/ILBM in HAM mode
+HRZ - Slow scan television, read only
+ICN - RIPterm images, read only
+ICO - MS Windows Icon
+ICO - OS/2 Icon, read only
+IFF - Amiga Interchange File Format
+IMG - IMG Software set, read only
+IMG - GEM IMG, read only
+IMG - Vivid Raytracer, read only
+JMX - Images from the Tetris game, read only
+JIF,JFF,JPG - JPEG and JFIF, images in gray scales and YCbCr color
+      model only, including progressive mode
+LBM - InterLeaved BitMap ( =IFF )
+MAC - MacPaint, read only
+MIL - CALS Raster Type I, read only
+MSP - Microsoft Paint, read only
+OFX - OLIFAX fax package, read only
+PAN - Panoramatic images for SmoothView Pan Viewe, preview only read only
+PAT - CorelDraw! 6.0 - 9.0 patterns, preview only read only
+PBM - Portable BitMap, raw/binary format only
+PC2 - Degas Elite medium resolution, read only
+PCD - Kodak PhotoCD, Base/16, Base/4 and Base read only
+PCT - Macintosh PICT, including HiColor, read only
+PCX - ZSoft PC PaintBrush
+PGM - Portable GrayMap, raw/binary format only
+PIC - PC Paint/Pictor
+PIC - Dr. Halo/Dr. Genius, read only some files only
+PNG - Portable Network Graphics, read only
+PNM - Portable aNyMap, actually one of PBM/PGM/PPM
+PPM - Portable PixelMap, raw/binary format only
+PSD - Adobe Photoshop 2,5 - 4.0, including CMYK, read only
+PYX - An old Epson Scanner format, read only
+QFX - QuickLink II Fax file format, read only
+RAS - Raster Sun Microsystems, only
+RGB - TrueColor SGI image
+RLE - Intergraph Raster Image, bilevel only
+RLE - RunLength Encoded Windows BitMap  (=BMP)
+RLE - Utah RunLength Encoded
+RLE - RunLength Encoded SGI files
+SAM - Images in text documents from AmiPro
+SCx - ColoRIX, uncompressed only
+SGI - Silicon Graphics Image File Format
+SEP - TIFF 6.0 Separated CMYK, read only
+ST  - NeoPaint for DOS thumbnails, read only
+STW - NeoPaint for Windows thumbnails, read only
+TGA - TrueVision Targa
+TIF - Aldus / Microsoft Tagged Interchange File Format (TIFF)
+UDI
+WPG - WordPerfect Graphics, read only
+ZBR - Zoner Zebra for Windows 1.0 - 1.5, preview only read only
+
+  Images can be up to 32000 pixels wide, sometimes less, depending on the
+format. JPEGs are generally limited to 2000 or less pixels.
+  Images can be up to 5200 lines high.
+
+
+Supported video adapters
+
+  Any video adapter supporting VESA BIOS
+  Trident 89xx/9000 with 512KB RAM
+  Trident 8900 with 1MB RAM
+  Trident 89xx/91xx/92xx with 1MB RAM a and HiColor modes ( 16bit
+    RAMDAC only )
+  Trident 89xx/91xx/92xx with 1MB RAM and TrueColor and HiColor modes
+  OAK 037c UNIQUE with 256KB RAM
+  OAK 067/077 with 512KB RAM
+  OAK 087 with 1MB RAM and TrueColor modes
+  Realtek with 512KB RAM
+  Tseng ET3000 with 256KB RAM
+  Tseng ET3000 with 512KB RAM
+  Tseng ET4000 with 1MB RAM
+  UMC VGA with 256KB RAM
+  UMC VGA with 512KB RAM
+  UMC VGA with 1MB RAM and HiColor modes
+  Hualon Microelectronics Corporation VGA HMC8630x with 512 KB RAM
+  Compaq QVision with 1MB RAM
+  any VGA with 256KB RAM
+
+
+PictView requires
+
+- AT 386 or better
+- 300 KB RAM or more
+- EGA adapter or VGA, SuperVGA, Extended-VGA
+
+- XMS is not required, but enables work with large images
+
+
+Running PictView
+
+PictView can be run in two modes, either with its menus, or from the
+command line.
+
+ Normal (menus) usage:
+
+    Just type: PictView
+
+ Command line usage:
+
+  For detailed info, issue PictView.exe /?
+
+  Examples:
+    PictView  parrot.jpg
+    PictView \users\johnp\images\parrot.jpg
+    PictView c:image.tif 720
+    PictView   bambus.bmp     640
+
+
+ Command line syntax:
+
+      PictView.EXE File [Width]
+
+  File - a  name and an extension (may  include a path) of the  file to be
+displayed.  PictView  automatically  chooses  the  best  graphics  mode to 
+display the  image. You can influence  this mode selection if  you specify
+the second optional parameter. This parameter is a number saying the width
+in pixels  of the graphics  mode you  want  to display the  image in. This
+number  can be  for example:  320  for  320x200 mode,  640 (640x480),  800
+(800x600),  1024  (1024x768),  1152   (1152x864)  1280  (1280x1024),  1600
+(1600x1200) or any other number, but  this mode width must be supported by
+your video adapter !!
+
+
+
+  I would  like to thank  Douglas Bashford  for his careful reading of all
+texts  in this package  and corrections of my mistakes. Release of English
+version of PictView would be impossible without his effort.
+
+
+Running PictView within Windows
+
+
+As a default, MS Windows don't  provide more XMS memory than 2MB. This may
+be insufficient  for large images. I suggest you to create a shortcut (or
+a PIF file in case of Win3.1; in fact, a shortcut is  represented by a PIF
+file). Specify  concrete amount of memory you think would be engough. Just
+start  with 2MB and if PictView  complains, increase the value and restart 
+PictView.
+
+Note:
+ Some video  drivers for MSWin 95/98 under some circumintances don't allow
+ DOS programs to use any SuperVGA mode.
+
+Note:
+ MS Windows NT from their nature do not allow DOS programs to use anything
+ else than standard VGA modes.
+
+
+
+And something for lawyers
+
+  The  Graphics  Interchange  Format(c)   is  the  Copyright  property  of
+CompuServe  Inc.  GIF(sm)  is  a   Service  Mark  property  of  CompuServe
+Incorporated.
+  All other product names are trademarks or registered trademarks of their
+respective owners. They are used for identification in this package only.
+  Overview of the JFIF file format and algorithms for Forward and Inverse
+DCTs  are borrowed  from the   source texts  of JPEG's  Independent Group,
+Releases 3 and 4.
+  Overview  of  the Progressive images file structure is borrowed from the
+same source texts, Release 6.
+
+
+  This software is  freeware, so you may use  it as freely as you  want to
+and where you want to. No fees for the author are required. All warranties
+are disclaimed, including  damage to hardware and/or software  from use of
+this product. In no event will I be held liable for any damages, including
+lost profits,  lost savings or  other incidental or  consequential damages
+arising out  of your use  or inability  to  use the program,  or any other
+claim by any other party.
+
+Any comments, notes, questions, error reports etc. are very welcome.
+Please, use the English, Czech or Russian language in your mails !!
+
+
+Author  : Jan Patera, Czech Republic
+
+Internet: support@pictview.com, patera@km1.fjfi.cvut.cz
+
+http://www.pictview.com
+http://pascal.fjfi.cvut.cz/~patera/pictview
+http://www.geocities.com/SiliconValley/Pines/9994

@@ -1,0 +1,29 @@
+                            SITE LICENSES FOR 4FILES
+                            ========================
+
+                     Larry T. Edwards // Hand-Crafted Software
+                 Box 6001 // Sitka, Ak 99835 USA // (907)-747-8996
+
+                                 (FAX)-747-4801
+
+A site license is required if installation or distribution of 4FILES within
+your company, institution, organization, government agency, etc. can result
+in more than one simultaneous use of 4FILES.  To apply for a Site License,
+please submit a registration form (see the file 4F_REGIS.TER) along with the
+appropriate fee.
+
+License fees are based on the number of installations of the program, with
+a discount on the single user registration fee per installation as follows:
+
+             Total # of
+             Terminals    Discount
+             ---------    --------
+               2 -   5    10%
+               6 -  10    15%
+              11 -  25    20%
+              26 -  50    25%
+              51 -  75    30%
+              76 - 100    35%
+             101 - 200    40%
+             200 - 500    45%
+                   500+   50%
