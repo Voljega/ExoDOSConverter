@@ -203,7 +203,7 @@ class ExoDOSConverter:
         if self.conversionType == util.retropie:
             self.postConversionForRetropie(game, genre, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType in [util.esoteric, util.simplemenu]:
-            self.postConversionForOpenDingux(game, genre, localGameOutputDir, localParentOutputDir, metadata)
+            self.postConversionForOpenDingux(game, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType == util.mister:
             self.postConversionForMister(game, genre, localGameOutputDir, localParentOutputDir, metadata)
         elif self.conversionType == util.recalbox:
@@ -280,14 +280,16 @@ class ExoDOSConverter:
         for fileToRemove in tobeRemoved:
             self.logger.log("    remove non-compatible file %s" % fileToRemove)
             os.remove(os.path.join(localGameOutputDir,game, fileToRemove))
-        # Create about.jpg combining About.txt and pic of the game + script to run showJPG.exe ?
+        # Create about.jpg combining About.txt and pic of the game
+        # TODO script to run showJPG.exe ?
         if metadata.frontPic is not None:
-            shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)),
-                        os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
-            # TODO write About.png
+            cover = os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1])
+            shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)), cover)
             aboutTxt = open(os.path.join(localGameOutputDir, '2_About.txt'), 'r', encoding='utf-8')
-            mister.text2png(aboutTxt.read(), os.path.join(localGameOutputDir, '2_About.png'), fontfullpath="font.ttf")
+            mister.text2png(aboutTxt.read(), cover, os.path.join(localGameOutputDir, '2_About.png'))
             aboutTxt.close()
+            os.remove(os.path.join(localGameOutputDir, '2_About.txt'))
+            os.remove(os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
         # Zip internal game dir to longgamename.zip
         misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','mu').replace('¿','')\
             .replace('é','e').replace('á','').replace('ō','o').replace('#','').replace('½','').replace('$','').replace('à','a')\
@@ -304,7 +306,7 @@ class ExoDOSConverter:
                     os.path.join(self.outputDir, 'games'))
 
     # Post-conversion for openDingux for a given game
-    def postConversionForOpenDingux(self, game, genre, localGameOutputDir, localParentOutputDir, metadata):
+    def postConversionForOpenDingux(self, game, localGameOutputDir, localParentOutputDir, metadata):
         self.logger.log("  opendingux post-conversion")
         openDinguxPicDir = '.previews' if self.conversionType == util.esoteric else '.media'
         # Copy image to opendingux img folder for game.pc
@@ -355,9 +357,3 @@ class ExoDOSConverter:
         # move dosbox.cfg to {game}.conf at top level
         shutil.move(os.path.join(localGameOutputDir, "dosbox.cfg"),
                     os.path.join(localParentOutputDir, util.getCleanGameID(metadata, '.conf')))
-        # TODO not needed anymore apparently, to remove in the future
-        # generate sh file        
-        # shFile = open(os.path.join(gameOutputDir,"launch.sh"),'w')
-        # shFile.write("!/bin/bash\n")
-        # shFile.write("/opt/retropie/emulators/dosbox/bin/dosbox -conf "+retropieGameDir+"/dosbox.cfg\n")
-        # shFile.close()

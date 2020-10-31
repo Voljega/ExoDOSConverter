@@ -3,7 +3,6 @@ import util
 import shutil
 import ntpath
 import platform
-import PIL
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
@@ -320,39 +319,57 @@ def createEditBat(localGameOutputDir):
 
 
 # Create about.png
-def text2png(text, fullpath, color="#FFF", bgcolor="#000", fontfullpath=None, fontsize=13, leftpadding=3,
-             rightpadding=3, width=200):
+def text2png(text, cover, generatedImgpath):
+    padding = 10
+    imageWidth = 200
+    textWidth = 640 - imageWidth
+    color = "#FFF"
+    bgcolor = "#000"
     REPLACEMENT_CHARACTER = u'\uFFFD'
     NEWLINE_REPLACEMENT_STRING = ' ' + REPLACEMENT_CHARACTER + ' '
     font = ImageFont.truetype('DejaVuSans.ttf', 12)
     text = text.replace('\n', NEWLINE_REPLACEMENT_STRING)
 
+    img = Image.new("RGBA", (640, 480), bgcolor)
+    draw = ImageDraw.Draw(img)
+    # Paste cover in the top right corner
+    coverImg = Image.open(os.path.join(cover))
+    coverWidth, coverHeight = coverImg.size
+    ratio = float(coverHeight) / float(coverWidth)
+    newHeight = int(ratio * float(imageWidth))
+    img.paste(coverImg.resize((imageWidth, newHeight), Image.ANTIALIAS), (textWidth - padding, padding))
+
     lines = []
     line = u""
+    line_height = font.getsize(text)[1]
+    text_height = 0
     for word in text.split():
         if word == REPLACEMENT_CHARACTER:  # give a blank line
             lines.append(line[1:])  # slice the white space in the begining of the line
             line = u""
             lines.append(u"")  # the blank line
-        elif font.getsize(line + ' ' + word)[0] <= (width - rightpadding - leftpadding):
+            text_height = text_height + line_height
+            # Change the text width when we are below coevr height + padding
+            if text_height >= (newHeight + padding):
+                textWidth = 640
+        elif font.getsize(line + ' ' + word)[0] <= (textWidth - padding - padding):
             line += ' ' + word
         else:  # start a new line
             lines.append(line[1:])  # slice the white space in the begining of the line
             line = u""
-            # TODO: handle too long words at this point
+            # Not done: handle too long words at this point
             line += ' ' + word  # for now, assume no word alone can exceed the line width
+            text_height = text_height + line_height
+            # Change the text width when we are below coevr height + padding
+            if text_height >= (newHeight + padding):
+                textWidth = 640
 
     if len(line) != 0:
         lines.append(line[1:])  # add the last line
 
-    line_height = font.getsize(text)[1]
-    img_height = line_height * (len(lines) + 1)
-    img = Image.new("RGBA", (640, img_height), bgcolor)
-    draw = ImageDraw.Draw(img)
-
-    y = 0
+    y = padding
     for line in lines:
-        draw.text((leftpadding, y), line, color, font=font)
+        draw.text((padding, y), line, color, font=font)
         y += line_height
 
-    img.save(fullpath)
+    img.save(generatedImgpath)
