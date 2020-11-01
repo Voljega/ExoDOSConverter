@@ -42,9 +42,6 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     titlesIDX = distroDir + '/TITLES.IDX'
     filesDir = destDir + '/files/'
 
-    if isDebug:
-        logger.log("  Gathering list of files...")
-
     sourceFiles = []  # Source filenames with full paths and extensions (sorted)
     baseFiles = []  # Source filenames with extensions (no paths)
     titles = []  # Source filenames without paths or extensions
@@ -52,16 +49,17 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
 
     foundfiles = list(scantree_files(sourceDir))
 
-    logger.log("  Found %i files to copy." % len(foundfiles))
+    if isDebug:
+        logger.log("  Indexing %i files" % len(foundfiles))
 
     if len(foundfiles) > 32767:
-        logger.log("  Fatal: Current design of DOS TDL does not support more than 32767 files.")
-        sys.exit(64)
+        logger.log("  Fatal: Current design of DOS TDL does not support more than 32767 files.", logger.ERROR)
+        return
 
     if len(foundfiles) > 16383:
         logger.log('  Warning: This many files may cause the DOS TDL to operate slower than normal\n'
                    '  due to the titles index not being able to be cached in memory.  TDL will still\n'
-                   '  run, but might require a very fast I/O device for acceptable speed.')
+                   '  run, but might require a very fast I/O device for acceptable speed.', logger.WARNING)
 
     # Sort discovered files by their filename, case insensitive.  Additional
     # sort criteria may be added in the future, but I lack the skills to do so,
@@ -71,17 +69,11 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     sfoundfiles = sorted(foundfiles, key=lambda dirent: dirent.name.lower())
 
     for entry in sfoundfiles:
-        if isDebug > 1:
-            logger.log('  ' + entry.path)
         sourceFiles.append(entry.path)
         fname = entry.name
         baseFiles.append(fname)
         tmptitle = fname.rsplit(sep='.', maxsplit=1)[0]
-        if isDebug:
-            logger.log('  ' + tmptitle + ':' + str(len(tmptitle)))
         tmptitle = tmptitle.encode('ascii', 'backslashreplace').decode()
-        if isDebug:
-            logger.log('  ' + tmptitle + ':' + str(len(tmptitle)))
         titles.append(tmptitle)
 
     # if isDebug:
@@ -94,7 +86,7 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     #     # logger.log ("Last 5 titles found were:")
     #     # logger.log(titles[-5:],"\n")
 
-    logger.log("  Converting to DOS-friendly 8.3 filenames...")
+    logger.log("  Converting to DOS-friendly 8.3 filenames")
     """
     Currently, this uses titleid as the short name for simplicity and testing.
     Later versions will use a funging function to generate human-readable
@@ -146,19 +138,19 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
                         dname = longname.translate(translation_table)[0:6] + i + j + longname[-4:]
                         dname = str.upper(dname)
                         if isDebug:
-                            logger.log("  Extra mangling:" + oldname + " to " + dname)
+                            logger.log("    Extra mangling:" + oldname + " to " + dname)
                         if dname not in DOSnames:
                             if isDebug:
-                                logger.log("  Success:" + collided + " " + dname)
+                                logger.log("    Success:" + collided + " " + dname)
                             break
                     if dname not in DOSnames:
                         break
 
         # If we got here, too many collisions (need more code!)
         if dname in DOSnames:
-            logger.log("  Namespace collision converting" + longname + " to " + dname)
-            logger.log("  Ask the programmer to enhance the collision algorithm.")
-            sys.exit(8)
+            logger.log("    Namespace collision converting" + longname + " to " + dname)
+            logger.log("    Ask the programmer to enhance the collision algorithm.")
+            return
 
         DOSnames.append(dname)
 
@@ -237,7 +229,7 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     if os.path.exists(filesDir):
         logger.log('  Output directory %s already exists.\nPlease specify a non-existent directory for the destination.' % destDir)
         sys.exit(1)
-    logger.log("  Copying files from " + sourceDir + " to " + destDir + "...")
+    logger.log("  Copying games zip from " + sourceDir + " to " + destDir + ", this might take a while...")
     shutil.copytree(distroDir, destDir)
     if not os.path.exists(filesDir):
         os.makedirs(filesDir)
@@ -245,7 +237,7 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     # Copy source:longfilenames to destination:shortfilenames
     for i in range(len(DOSnames)):
         if isDebug:
-            logger.log("  " + DOSnames[i])
+            logger.log("    " + DOSnames[i])
         shutil.copy(sourceFiles[i], filesDir + DOSnames[i])
 
-    logger.log("  Done.")
+    logger.log("  All games indexed")

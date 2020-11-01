@@ -89,13 +89,13 @@ class ExoDOSConverter:
                 # move cd, floppy, boot disk into ao486 folder
                 if not os.path.exists(os.path.join(self.outputDir, "ao486")):
                     os.mkdir(os.path.join(self.outputDir, "ao486"))
-                self.logger.log("  Copying cd folder, this might take a while ...")
+                self.logger.log("  Moving cd folder to tdlprocessed, this might take a while ...")
                 if os.path.exists(os.path.join(self.outputDir, "cd")):
                     shutil.move(os.path.join(self.outputDir, "cd"), os.path.join(os.path.join(self.outputDir, "ao486")))
-                self.logger.log("  Copying floppy folder, this might take a while ...")
+                self.logger.log("  Moving floppy folder to tdlprocessed, this might take a while ...")
                 if os.path.exists(os.path.join(self.outputDir, "floppy")):
                     shutil.move(os.path.join(self.outputDir, "floppy"), os.path.join(os.path.join(self.outputDir, "ao486")))
-                self.logger.log("  Copying bootdisk folder, this might take a while ...")
+                self.logger.log("  Moving bootdisk folder to tdlprocessed, this might take a while ...")
                 if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
                     shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
         elif self.conversionType == util.emuelec:
@@ -306,7 +306,6 @@ class ExoDOSConverter:
             self.logger.log("    remove non-compatible file %s" % fileToRemove)
             os.remove(os.path.join(localGameOutputDir,game, fileToRemove))
         # Create about.jpg combining About.txt and pic of the game
-        # TODO script to run showJPG.exe ?
         if metadata.frontPic is not None:
             cover = os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1])
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)), cover)
