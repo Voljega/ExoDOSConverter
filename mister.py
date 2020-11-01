@@ -249,9 +249,9 @@ def convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger):
 def convertMountedFolder(letter, localPath, game, outputDir, localGameOutputDir, logger):
     if localPath.endswith('\\'):
         localPath = localPath[:-1]
-    # TODO basename is not good either, path is lost !! needs reduction of the path instead / missing parts
+    # TODO game\basename is not good either, path is lost !! needs reduction of the path instead / missing parts
     logger.log("      subst folder %s as %s:" % (ntpath.basename(localPath), letter))
-    return 'subst /d ' + letter + ':\nsubst ' + letter + ': ' + ntpath.basename(localPath)
+    return 'subst ' + letter + ': /d\nsubst ' + letter + ': ' + game + '\\' + ntpath.basename(localPath)
 
 
 # Create Setup.bat file
