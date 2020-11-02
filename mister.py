@@ -51,7 +51,7 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
                     logger.log('      <ERROR> Impossible to convert "%s" command' % line, logger.ERROR)
                     launchBat.write(line + '\n')
             elif line.lower() in ['d:', 'f:', 'g:', 'h:', 'i:', 'j:', 'k:']:
-                launchBat.write('e:\n')
+                launchBat.write('f:\n')
             elif line.lower() == 'call run' or line.lower() == 'call run.bat':
                 if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
                             'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
