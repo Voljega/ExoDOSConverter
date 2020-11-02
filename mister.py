@@ -177,7 +177,7 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
         os.mkdir(os.path.join(outputDir, 'cd'))
 
     if os.path.isdir(localPath):
-        return convertMountedFolder('e', localPath, game, outputDir, localGameOutputDir, logger)
+        return convertMountedFolder('d', localPath, game, outputDir, localGameOutputDir, logger)
     else:
         # Move cds file
         if not os.path.exists(os.path.join(outputDir, 'cd', game)):
