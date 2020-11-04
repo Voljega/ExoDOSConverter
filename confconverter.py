@@ -6,10 +6,9 @@ import util
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
 
-    def __init__(self, games, exoDosDir, outputDir, useGenreSubFolders, conversionType, conversionConf, logger):
+    def __init__(self, games, outputDir, useGenreSubFolders, conversionType, conversionConf, logger):
         self.games = games
         self.logger = logger
-        self.exoDosDir = exoDosDir
         self.outputDir = outputDir
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionType = conversionType

@@ -5,7 +5,7 @@ selectionPath;Custom Selection; Path to your custom selection file
 loadCustom;Load;Load your custom selection from file
 saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
-exodosVersion;eXoDOS version;Your exoDOS collection version
+collectionVersion;Collection version;Your collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg

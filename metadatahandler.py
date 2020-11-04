@@ -50,26 +50,27 @@ class MetadataHandler:
             parser = etree.XMLParser(encoding="utf-8")
             games = etree.parse(xmlPath, parser=parser).findall(".//Game")
             for g in games:
-                try:
-                    path = self.get(g, 'ApplicationPath').split("\\")
-                    dosname = path[-2]
-                    metadataname = os.path.splitext(path[-1])[0]
-                    name = self.get(g, 'Title')
-                    #                    print("%s %s %s" %(dosname, name, metadataname))
-                    desc = self.get(g, 'Notes')
-                    releasedate = self.get(g, 'ReleaseDate')[:4] if self.get(g, 'ReleaseDate') is not None else None
-                    developer = self.get(g, 'Developer')
-                    publisher = self.get(g, 'Publisher')
-                    genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
-                    manual = self.get(g, 'ManualPath')
-                    manualpath = util.localOutputPath(os.path.join(self.exoDosDir, manual)) if manual is not None else None
-                    frontPic = util.findPics(name, self.cache)
-                    metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
-                                       manualpath, desc)
-                    metadatas[metadata.dosname] = metadata
+                name = self.get(g, 'Title')
+                if name != 'eXoDOS':
+                    try:
+                        path = self.get(g, 'ApplicationPath').split("\\")
+                        dosname = path[-2]
+                        metadataname = os.path.splitext(path[-1])[0]
+                        #                    print("%s %s %s" %(dosname, name, metadataname))
+                        desc = self.get(g, 'Notes')
+                        releasedate = self.get(g, 'ReleaseDate')[:4] if self.get(g, 'ReleaseDate') is not None else None
+                        developer = self.get(g, 'Developer')
+                        publisher = self.get(g, 'Publisher')
+                        genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
+                        manual = self.get(g, 'ManualPath')
+                        manualpath = util.localOutputPath(os.path.join(self.exoDosDir, manual)) if manual is not None else None
+                        frontPic = util.findPics(name, self.cache)
+                        metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
+                                           manualpath, desc)
+                        metadatas[metadata.dosname] = metadata
 
-                except:
-                    self.logger.log(sys.exc_info())
+                    except:
+                        self.logger.log('  Error %s while getting metadata for %s\n' % (sys.exc_info()[0], self.get(g, 'Title')), self.logger.ERROR)
         self.logger.log('Loaded %i metadatas' % len(metadatas.keys()))
         self.metadatas = metadatas
         return metadatas

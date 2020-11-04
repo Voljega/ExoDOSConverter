@@ -1,6 +1,6 @@
 # ExoDOSConverter
 
-a custom converter of the ExoDOS collection v4 to several EmulationStation and/or Linux based distributions format : 
+a custom converter of the ExoDOS collection v5 to several EmulationStation and/or Linux based distributions format : 
  - Recalbox
  - Batocera
  - Retropie
@@ -13,7 +13,9 @@ https://www.retro-exo.com
 
 For those of you for which this name doesn't mean anything, ExoDOS Collection is a collection of DOS games and in my opinion the best one as it includes full, correct configuration for all games.
 It is based on Launchbox and Windows only though
-There's also an ExoDOSWin3x collection for Windows 3.1 games
+The collection is supported in its V5 full version only, V4 support has been dropped
+Lite version will be likely supported later with Download on demand implemented in the converter, if it's feasible
+There's also an ExoDOSWin3x collection for Windows 3.1 games, version 2 of which will be supported when it's released
 
 Before using this tool, don't forget to install the collection with its `setup.bat`
 
@@ -54,9 +56,9 @@ cd ExoDOSConverter            # change to ExoDOSConverter directory
 chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned version)
 ```
 - If you didn't install the collection beforehand on Windows or with wine by executing `setup.bat`, you'll need to do that or  alternatively:
->Unzip `XODOSMetadata.zip` to the home dir of the collection, this should create a `Images` folder
+>Unzip `.Content/XODOSMetadata.zip` to the home dir of the collection, this should create `Images` and `xml` folder
 
->Unzip `!DOSmetadata.zip` to the home dir of the collection, this should create a `eXoDOS/Games/!dos folder`
+>Unzip `.Content/!DOSmetadata.zip` to the home dir of the collection, this should create a `eXoDOS/Games/!dos folder`
 
 - launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
 
@@ -64,7 +66,7 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 
 Either use the latest [release](https://github.com/Voljega/ExoDOSConverter/releases) or you can build your own version using one of these two options :
 - @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
-- read the `build.txt` 
+- read the `build.txt` to build your own version
 
 ## Expert mode
 
@@ -80,5 +82,5 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 
 ## Know issues
 
-A few games in eXoDOS v4 have some conversion issues with this tool.  
+A few games in eXoDOS v5 have some conversion issues with this tool.  
 see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues)

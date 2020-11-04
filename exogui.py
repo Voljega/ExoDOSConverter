@@ -113,16 +113,16 @@ class ExoGUI:
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
 
-        self.exodosVersionLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['exodosVersion'].label)
-        wckToolTips.register(self.exodosVersionLabel, self.guiStrings['exodosVersion'].help)
-        self.exodosVersionLabel.grid(column=2, row=0, sticky="W", pady=5)
-        self.guiVars['exodosVersion'] = Tk.StringVar()
-        self.guiVars['exodosVersion'].set(self.configuration['exodosVersion'])
-        self.exodosVersionComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
-                                                  textvariable=self.guiVars['exodosVersion'])
-        self.exodosVersionComboBox.grid(column=3, row=0, sticky="W", pady=5, padx=5)
-        self.exodosVersionValues = util.exodosVersions.copy()
-        self.exodosVersionComboBox['values'] = self.exodosVersionValues
+        self.collectionVersionLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['collectionVersion'].label)
+        wckToolTips.register(self.collectionVersionLabel, self.guiStrings['collectionVersion'].help)
+        self.collectionVersionLabel.grid(column=2, row=0, sticky="W", pady=5)
+        self.guiVars['collectionVersion'] = Tk.StringVar()
+        self.guiVars['collectionVersion'].set(self.configuration['collectionVersion'])
+        self.collectionVersionComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
+                                                  textvariable=self.guiVars['collectionVersion'])
+        self.collectionVersionComboBox.grid(column=3, row=0, sticky="W", pady=5, padx=5)
+        self.collectionVersionValues = util.exodosVersions.copy()
+        self.collectionVersionComboBox['values'] = self.collectionVersionValues
 
         self.mapperLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['mapper'].label)
         wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
@@ -252,7 +252,7 @@ class ExoGUI:
     def handleCollectionFolder(self, *args):
         collectionDir = self.guiVars['collectionDir'].get()
 
-        # TODO better test here with all subfolders and differenciation between v4 and v5 ?
+        # TODO better test here with all subfolders and differenciation between DOS v5 and future Win3x v2 ?
         # and maybe an error message somewhere
         if not os.path.isdir(collectionDir) or not util.validCollectionPath(collectionDir):
             self.logger.log(
@@ -397,7 +397,6 @@ class ExoGUI:
 
         loadSaveFrame = Tk.Frame(hatRightFrame)
         loadSaveFrame.grid(column=0, row=0, sticky='E')
-        # TODO Finish this
         self.loadCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['loadCustom'].label, command=self.loadCustom)
         wckToolTips.register(self.loadCustomButton, self.guiStrings['loadCustom'].help)
         self.loadCustomButton.grid(column=0, row=0, padx=5, sticky='E')
@@ -584,7 +583,7 @@ class ExoGUI:
         self.unselectAllGamesButton['state'] = 'disabled'
         self.filterEntry['state'] = 'disabled'
         self.conversionTypeComboBox['state'] = 'disabled'
-        self.exodosVersionComboBox['state'] = 'disabled'
+        self.collectionVersionComboBox['state'] = 'disabled'
         self.useGenreSubFolderCheckButton['state'] = 'disabled'
         self.mapperComboBox['state'] = 'disabled'
         self.collectionEntry['state'] = 'disabled'
@@ -616,11 +615,15 @@ class ExoGUI:
         conversionConf['outputCfg'] = self.guiVars['outputCfg'].get()
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
         # TODO better move this to converter when v5 is released and properly handle it, or move it to verify ? Also use messagebox
-        gamesDir = os.path.join(collectionDir, "eXoDOS", "Games")
+        gamesDir = os.path.join(collectionDir, "eXo", "eXoDOS")
         gamesDosDir = os.path.join(gamesDir, "!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
         self.logger.log(str(len(games)) + ' game(s) selected for conversion')
         # TODO we could go from list of full game names now, as 'games' short names from !dos folder should correspond to dir in the zip of each game
+
+        # Uncomment only when new collection is released
+        # self.logger.log("Generating CSV for new collection in %s" % os.path.join(self.scriptDir,'data'), self.logger.WARNING)
+        # util.buildCollectionCSV(self.scriptDir, gamesDosDir, self.logger)
 
         if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir):
             self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)

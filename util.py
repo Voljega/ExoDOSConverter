@@ -19,7 +19,7 @@ retrobat = 'Retrobat'
 emuelec = 'Emuelec'
 conversionTypes = [batocera, recalbox, retropie, retrobat, emuelec, simplemenu, esoteric, mister]
 
-exodosVersions = ['v4', 'v5']
+exodosVersions = ['eXoDOS v5']
 
 mappers = ['No', 'RG350']
 
@@ -98,19 +98,34 @@ def getRomsFolderPrefix(conversionType, conversionConf):
 
 # Checks validity of the collection path and its content
 def validCollectionPath(collectionPath):
-    return os.path.exists(os.path.join(collectionPath, 'eXoDOS')) and os.path.exists(
-        os.path.join(collectionPath, 'eXoDOS', 'Games')) and os.path.exists(
+    return os.path.exists(os.path.join(collectionPath, 'eXo')) and os.path.exists(
+        os.path.join(collectionPath, 'eXo', 'eXoDOS')) and os.path.exists(
         os.path.join(collectionPath, 'xml')) and os.path.exists(os.path.join(collectionPath, 'Images'))
 
 
 # Parse the collection static cache file to generate list of games
 def fullnameToGameDir(scriptDir):
     gameDict = dict()
-    collectFile = open(os.path.join(scriptDir,'data','collec-v4.csv'),'r')
+    collectFile = open(os.path.join(scriptDir,'data','eXoDOSv5.csv'),'r')
     for line in collectFile.readlines():
         strings = line.split(';')
         gameDict[strings[0]] = strings[1].rstrip('\n\r')
     return gameDict
+
+
+# Build games csv for a new/updated collection
+def buildCollectionCSV(scriptDir, gamesDosDir, logger):
+    collectFile = open(os.path.join(scriptDir, 'data', 'collec-new.csv'), 'w')
+    logger.log('Listing games in %s' % gamesDosDir, logger.WARNING)
+    games = [file for file in os.listdir(gamesDosDir) if os.path.isdir(os.path.join(gamesDosDir, file))]
+
+    for game in games:  # games = list of folder in !dos dir
+        if os.path.isdir(os.path.join(gamesDosDir, game)):
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir, game)) if
+                    os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
+                                                                                 0].lower() == 'install']
+            # logger.log('  ' + bats[0] + '->' + game, logger.WARNING)
+            collectFile.write(bats[0] + ';' + game + '\n')
 
 
 # Finds pic for a game in the three pics caches
@@ -142,7 +157,8 @@ def buildPicCache(imageFolder, picCache, logger):
     cache = dict()
     if os.path.exists(imageFolder):
         # TODO Bug ??? if not os.path.isdir(file) and not if not os.path.isdir(os.path.join(imageFolder, file)) ?
-        rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(file)]
+        # TODO Check Fix
+        rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(os.path.join(imageFolder,file))]
         subFolders = [file for file in os.listdir(imageFolder) if os.path.isdir(os.path.join(imageFolder, file))]
         for image in rootImages:
             cache[image] = os.path.join(imageFolder, image)
