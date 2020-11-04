@@ -33,6 +33,11 @@ The conversion should cover the following :
 As the ExoDOSCollection itself uses a lot of `.bat` script and other Windows-only features, this tool will also be windows only.
 This might evolve is some workaround are found to fully exploit this on Linux on other OSes
 
+## Anti-virus false positives
+
+Some antiviruses (like Windows Defender) might detect the released exe version as false postive.  
+This is due to the exe python packager `pyInstaller` and it's safe to exclude the tool from virus detection 
+
 ## State of development
 
 For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
