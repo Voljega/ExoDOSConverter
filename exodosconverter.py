@@ -72,32 +72,36 @@ class ExoDOSConverter:
                 dirs = [file for file in os.listdir(self.outputDir) if
                         os.path.isdir(os.path.join(self.outputDir, file))
                         and file not in ['games', 'cd', 'floppy', 'manuals', 'bootdisk']]
-                for genreDir in dirs:
-                    shutil.rmtree(os.path.join(self.outputDir, genreDir))
-                # copy mister zips
-                gamesDir = os.path.join(self.outputDir,'games')
-                shutil.copy2(os.path.join(self.scriptDir,'data','mister','-Manually Added Games.zip'), gamesDir)
-                shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilitites and System Files.zip'), gamesDir)
-                # Call Total DOS Launcher Indexer, delete top level games folder after
-                self.logger.log('Total DOS Indexer for ' + self.conversionType)
-                TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'),
-                                 self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
-                os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
-                if not self.conversionConf['useDebugMode']:
-                    os.mkdir(os.path.join(self.outputDir,'TDL_VHD','games'))
-                # shutil.rmtree(os.path.join(self.outputDir,'games'))
-                # move cd, floppy, boot disk into ao486 folder
-                if not os.path.exists(os.path.join(self.outputDir, "ao486")):
-                    os.mkdir(os.path.join(self.outputDir, "ao486"))
-                self.logger.log("  Moving cd folder to tdlprocessed, this might take a while ...")
-                if os.path.exists(os.path.join(self.outputDir, "cd")):
-                    shutil.move(os.path.join(self.outputDir, "cd"), os.path.join(os.path.join(self.outputDir, "ao486")))
-                self.logger.log("  Moving floppy folder to tdlprocessed, this might take a while ...")
-                if os.path.exists(os.path.join(self.outputDir, "floppy")):
-                    shutil.move(os.path.join(self.outputDir, "floppy"), os.path.join(os.path.join(self.outputDir, "ao486")))
-                self.logger.log("  Moving bootdisk folder to tdlprocessed, this might take a while ...")
-                if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
-                    shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                gamesDir = os.path.join(self.outputDir, 'games')
+                if os.path.exists(gamesDir):
+                    for genreDir in dirs:
+                        shutil.rmtree(os.path.join(self.outputDir, genreDir))
+                    # copy mister zips
+                    shutil.copy2(os.path.join(self.scriptDir,'data','mister','-Manually Added Games.zip'), gamesDir)
+                    shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilities and System Files.zip'), gamesDir)
+                    # Call Total DOS Launcher Indexer, delete top level games folder after
+                    self.logger.log('Total DOS Indexer for ' + self.conversionType)
+                    TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'),
+                                     self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
+                    os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
+                    # TODO potentiel bug here ? we should delete games not create it inside TDL_VHD ?
+                    if not self.conversionConf['useDebugMode']:
+                        os.mkdir(os.path.join(self.outputDir,'TDL_VHD','games'))
+                    # shutil.rmtree(os.path.join(self.outputDir,'games'))
+                    # move cd, floppy, boot disk into ao486 folder
+                    if not os.path.exists(os.path.join(self.outputDir, "ao486")):
+                        os.mkdir(os.path.join(self.outputDir, "ao486"))
+                    self.logger.log("  Moving cd folder to tdlprocessed, this might take a while ...")
+                    if os.path.exists(os.path.join(self.outputDir, "cd")):
+                        shutil.move(os.path.join(self.outputDir, "cd"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                    self.logger.log("  Moving floppy folder to tdlprocessed, this might take a while ...")
+                    if os.path.exists(os.path.join(self.outputDir, "floppy")):
+                        shutil.move(os.path.join(self.outputDir, "floppy"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                    self.logger.log("  Moving bootdisk folder to tdlprocessed, this might take a while ...")
+                    if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
+                        shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
+                else:
+                    self.logger.log('  Some critial errors seems to have happened during process.\n  Stopping before Total Indexer phase', self.logger.ERROR)
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals
@@ -167,7 +171,7 @@ class ExoDOSConverter:
         bats = [os.path.splitext(filename)[0] for filename in os.listdir(gameBatDir) if
                 os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
                                                                              0].lower() == 'install']
-        zipParam = os.path.splitext(bats[0])[0] + '.zip'
+        zipParam = bats[0] + '.zip'
         if zipParam is not None:
             with ZipFile(os.path.join(self.exoDosDir, "eXoDOS", zipParam), 'r') as zipFile:
                 # Extract all the contents of zip file in current directory
@@ -307,7 +311,7 @@ class ExoDOSConverter:
             cover = os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1])
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)), cover)
             aboutTxt = open(os.path.join(localGameOutputDir, '2_About.txt'), 'r', encoding='utf-8')
-            mister.text2png(aboutTxt.read(), cover, os.path.join(localGameOutputDir, '2_About.png'))
+            mister.text2png(self.scriptDir, aboutTxt.read(), cover, os.path.join(localGameOutputDir, '2_About.png'))
             aboutTxt.close()
             os.remove(os.path.join(localGameOutputDir, '2_About.txt'))
             os.remove(os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))

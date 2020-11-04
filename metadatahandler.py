@@ -67,7 +67,7 @@ class MetadataHandler:
                         frontPic = util.findPics(name, self.cache)
                         metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
                                            manualpath, desc)
-                        metadatas[metadata.dosname] = metadata
+                        metadatas[metadata.dosname.lower()] = metadata
 
                     except:
                         self.logger.log('  Error %s while getting metadata for %s\n' % (sys.exc_info()[0], self.get(g, 'Title')), self.logger.ERROR)
@@ -77,7 +77,7 @@ class MetadataHandler:
 
     # Retrieve exoDos metadata for a given game
     def handleMetadata(self, game):
-        dosGame = self.metadatas.get(game)
+        dosGame = self.metadatas.get(game.lower())
         self.logger.log("  Metadata: %s (%s), genres: %s" % (dosGame.name, dosGame.year, " | ".join(dosGame.genres)))
         return dosGame
 
@@ -134,16 +134,17 @@ class MetadataHandler:
     # Convert multi genres exodos format to a single one
     def buildGenre(self, dosGame):
         if dosGame is not None and dosGame.genres is not None:
-            if "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
+            if 'Flight Simulator' or 'Vehicle Simulation' in dosGame.genres:
+                return 'Simulation'
+            elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
                 return "Race"
+            # TODO 10th Frame shouuld be there
             elif 'Sports' in dosGame.genres:
                 return 'Sports'
             elif 'Pinball' in dosGame.genres:
                 return 'Pinball'
             elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres or "Casino" in dosGame.genres:
                 return "Puzzle"
-            elif 'Flight Simulator' in dosGame.genres:
-                return 'Simulation'
             elif 'Shooter' in dosGame.genres:
                 return 'ShootEmUp'
             elif 'Platform' in dosGame.genres:
@@ -164,6 +165,8 @@ class MetadataHandler:
                 return 'Strategy-Gestion'
             elif 'Simulation' in dosGame.genres:
                 return 'Simulation'
+            elif 'Shooter' in dosGame.genres:
+                return 'ShootEmUp'
             elif 'Action' in dosGame.genres:
                 return 'Action-Adventure'
             else:

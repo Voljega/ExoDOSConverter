@@ -19,15 +19,15 @@ class CommandHandler:
                 return False
         return True
 
-    # Removes games parts from exoDos paths
+    # Removes eXoDOS parts from exoDos paths
     def reducePath(self, path, game, inside=False):
         #        self.logger.log("    PATH CONVERT: %s" %path)
-        if path.lower().startswith(".\\games") or path.lower().startswith("\\games") \
-                or path.lower().startswith("games"):
+        if path.lower().startswith(".\\exodos") or path.lower().startswith("\\exodos") \
+                or path.lower().startswith("exodos"):
             pathList = path.split('\\')
             if pathList[0] == '.':
                 pathList = pathList[1:]
-            if len(pathList) > 1 and pathList[0].lower() == 'games':  # and pathList[1].lower()==game.lower() :
+            if len(pathList) > 1 and pathList[0].lower() == 'exodos':  # and pathList[1].lower()==game.lower() :
                 if not inside:
                     path = ".\\" + "\\".join(pathList[1:])
                 else:

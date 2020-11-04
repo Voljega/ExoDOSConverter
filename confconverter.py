@@ -135,11 +135,12 @@ class ConfConverter:
                 retroDosboxBat.write(cmdline)
 
     # Handle potential sub files and problems in it
-    def handlePotentialSubFile(self, subPath, game, localGameOutputDir):
+    def handlePotentialSubFile(self, subPath, game, localGameOutputDir, handledSubFiles=[]):
         subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
         subBat = os.path.join(localGameOutputDir, game, subPath.rstrip(' \n\r') + '.bat')
-        if os.path.exists(subBat) and not os.path.isdir(subBat):
+        if os.path.exists(subBat) and not os.path.isdir(subBat) and subBat.lower() not in handledSubFiles:
             self.logger.log('    Handle Bat File %s' % subBat, self.logger.WARNING)
+            handledSubFiles.append(subBat.lower())
             subBatFile = open(subBat, 'r')
             subBatFileClone = open(subBat + '1', 'w')
             for cmdline in subBatFile.readlines():
@@ -154,7 +155,7 @@ class ConfConverter:
                         else :
                             cmdline = cmdline.replace('c:','c:\\'+game).replace('C:','C:\\'+game)
                     else:
-                        self.handlePotentialSubFile(cmdline, game, localGameOutputDir)
+                        self.handlePotentialSubFile(cmdline, game, localGameOutputDir, handledSubFiles)
                     subBatFileClone.write(cmdline)
             subBatFileClone.close()
             subBatFile.close()

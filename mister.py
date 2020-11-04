@@ -319,7 +319,7 @@ def createEditBat(localGameOutputDir):
 
 
 # Create about.png
-def text2png(text, cover, generatedImgpath):
+def text2png(scriptDir, text, cover, generatedImgpath):
     padding = 10
     imageWidth = 200
     textWidth = 640 - imageWidth
@@ -327,7 +327,8 @@ def text2png(text, cover, generatedImgpath):
     bgcolor = "#000"
     REPLACEMENT_CHARACTER = u'\uFFFD'
     NEWLINE_REPLACEMENT_STRING = ' ' + REPLACEMENT_CHARACTER + ' '
-    font = ImageFont.truetype('DejaVuSans.ttf', 12)
+    # font = ImageFont.truetype('DejaVuSans.ttf', 12)
+    font = ImageFont.truetype(os.path.join(scriptDir, 'data', 'mister','DejaVuSans.ttf'), 12)
     text = text.replace('\n', NEWLINE_REPLACEMENT_STRING)
 
     img = Image.new("RGBA", (640, 480), bgcolor)
