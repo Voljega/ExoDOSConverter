@@ -57,7 +57,7 @@ class MetadataHandler:
                         dosname = path[-2]
                         metadataname = os.path.splitext(path[-1])[0]
                         #                    print("%s %s %s" %(dosname, name, metadataname))
-                        desc = self.get(g, 'Notes')
+                        desc = self.get(g, 'Notes') if self.get(g, 'Notes') is not None else ''
                         releasedate = self.get(g, 'ReleaseDate')[:4] if self.get(g, 'ReleaseDate') is not None else None
                         developer = self.get(g, 'Developer')
                         publisher = self.get(g, 'Publisher')

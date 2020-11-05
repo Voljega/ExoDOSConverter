@@ -57,7 +57,7 @@ class CommandHandler:
     def handleImgmount(self, line, game, localGameOutputDir, inside=False):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
                                                                           startTokens=['a', 'b', 'c', 'd', 'e', 'f',
-                                                                                       'g', 'h', 'i', 'y', '0', '2'],
+                                                                                       'g', 'h', 'i', 'j', 'k', 'y', '0', '2'],
                                                                           endTokens=['-t', '-size'])
 
         prString = ""

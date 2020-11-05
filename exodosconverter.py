@@ -59,6 +59,7 @@ class ExoDOSConverter:
 
         self.metadataHandler.writeXml(self.outputDir, gamelist)
 
+        self.logger.log('\n<--------- Post-conversion --------->')
         # Cleaning for some conversions
         if self.conversionType in [util.esoteric, util.simplemenu, util.mister]:
             self.logger.log('Post cleaning for ' + self.conversionType)
