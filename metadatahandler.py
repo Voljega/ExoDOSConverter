@@ -134,11 +134,12 @@ class MetadataHandler:
     # Convert multi genres exodos format to a single one
     def buildGenre(self, dosGame):
         if dosGame is not None and dosGame.genres is not None:
-            if 'Flight Simulator' or 'Vehicle Simulation' in dosGame.genres:
+            if 'Flight Simulator' in dosGame.genres or 'Vehicle Simulation' in dosGame.genres:
                 return 'Simulation'
+            elif "Education" in dosGame.genres or "Quiz" in dosGame.genres:
+                return 'Misc'
             elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
                 return "Race"
-            # TODO 10th Frame shouuld be there
             elif 'Sports' in dosGame.genres:
                 return 'Sports'
             elif 'Pinball' in dosGame.genres:
@@ -157,11 +158,15 @@ class MetadataHandler:
                 return 'Strategy-Gestion'
             elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres:
                 return 'RPG'
+            elif 'Interactive Fiction' in dosGame.genres:
+                return "Adventure-Visual"
             elif "Adventure" in dosGame.genres and "Action" in dosGame.genres:
                 return "Action-Adventure"
             elif "Adventure" in dosGame.genres:
                 return "Adventure-Visual"
             elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres:
+                return 'Strategy-Gestion'
+            elif 'Construction and Management Simulation' in dosGame.genres:
                 return 'Strategy-Gestion'
             elif 'Simulation' in dosGame.genres:
                 return 'Simulation'
@@ -169,6 +174,8 @@ class MetadataHandler:
                 return 'ShootEmUp'
             elif 'Action' in dosGame.genres:
                 return 'Action-Adventure'
+            elif 'Arcade' in dosGame.genres:
+                return 'Misc'
             else:
                 return 'Unknown'
         else:

@@ -80,12 +80,14 @@ def handleRunBat(game, localGameOutputDir, outputDir, logger):
         handled = {
             'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom': 'imgset ide10 "/cd/comcon/comma2.iso"',
             'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom': 'imgset ide10 "/cd/comcon/cover3.cue"',
-            'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom':
+            'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.cue" ".\\cd\\redal4.cue" -t cdrom':
                 'imgset ide10 "/cd/comconra/redal2.iso"',
-            'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom':
-                'imgset ide10 "/cd/comconra/redal4.iso"',
-            'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom':
-                'imgset ide10 "/cd/comconra/redal3.iso"'}
+            'imgmount d ".\\cd\\redal4.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.cue" -t cdrom':
+                'imgset ide10 "/cd/comconra/redal4.cue"',
+            'imgmount d ".\\cd\\redal3.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.cue" -t cdrom':
+                'imgset ide10 "/cd/comconra/redal3.cue"',
+            'imgmount d .\\cd\\redal4.cue -t cdrom': 'imgset ide10 "/cd/comconra/redal4.cue"'
+        }
         for cmdline in runFile.readlines():
             cmdline = cmdline.lstrip('@ ').rstrip(' \n\r')
             if cmdline.lower().startswith("imgmount "):

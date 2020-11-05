@@ -172,16 +172,17 @@ class ConfConverter:
             # Clone run.bat and only modify imgmount lines
             # Add some hardcoded lines which are impossible to handle
             handled = {
-                'imgmount d ".\\games\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\games\\comcon\\cd\\Command & Conquer CD-1.iso" ".\\games\\comcon\\cd\\Covert Operations.cue" -t cdrom \n':
+                'imgmount d ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" -t cdrom \n':
                     'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom',
-                'imgmount d ".\\games\\comcon\\cd\\Covert Operations.cue" ".\\games\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\games\\comcon\\cd\\Command & Conquer CD-1.iso" -t cdrom \n':
+                'imgmount d ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" -t cdrom \n':
                     'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom',
-                'imgmount d ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.iso" ".\\cd\\redal4.iso" -t cdrom',
-                'imgmount d ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal4.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.iso" -t cdrom',
-                'imgmount d ".\\games\\comconra\\cd\\Red Alert Counterstrike CD3.iso" ".\\games\\comconra\\cd\\Red Alert CD1.iso" ".\\games\\comconra\\cd\\Red Alert CD2.iso" ".\\games\\comconra\\cd\\Red Alert Aftermath CD4.iso" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal3.iso" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.iso" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n':
+                    'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.cue" ".\\cd\\redal4.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" -t cdrom \n':
+                    'imgmount d ".\\cd\\redal4.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n':
+                    'imgmount d ".\\cd\\redal3.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n': 'imgmount d .\\cd\\redal4.cue -t cdrom',
                 'imgmount -u d\n': '\n'
             }
             for cmdline in runFile.readlines():

@@ -84,10 +84,8 @@ class ExoDOSConverter:
                     TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'),
                                      self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
                     os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
-                    # TODO potentiel bug here ? we should delete games not create it inside TDL_VHD ?
                     if not self.conversionConf['useDebugMode']:
-                        os.mkdir(os.path.join(self.outputDir,'TDL_VHD','games'))
-                    # shutil.rmtree(os.path.join(self.outputDir,'games'))
+                        shutil.rmtree(os.path.join(self.outputDir,'games'))
                     # move cd, floppy, boot disk into ao486 folder
                     if not os.path.exists(os.path.join(self.outputDir, "ao486")):
                         os.mkdir(os.path.join(self.outputDir, "ao486"))
@@ -101,7 +99,7 @@ class ExoDOSConverter:
                     if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
                         shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
                 else:
-                    self.logger.log('  Some critial errors seems to have happened during process.\n  Stopping before Total Indexer phase', self.logger.ERROR)
+                    self.logger.log('  Some critial errors seems to have happened during process.\n  Skipping Total Indexer phase', self.logger.ERROR)
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals
@@ -135,7 +133,7 @@ class ExoDOSConverter:
 
     # Full conversion for a given game    
     def convertGame(self, game, gamelist, total, count):
-        genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game))
+        genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()))
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, total, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useGenreSubFolders,
                                                     self.conversionType)

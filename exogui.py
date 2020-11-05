@@ -618,6 +618,11 @@ class ExoGUI:
         gamesDir = os.path.join(collectionDir, "eXo", "eXoDOS")
         gamesDosDir = os.path.join(gamesDir, "!dos")
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
+
+        for g in self.selectedGamesValues.get():
+            if self.fullnameToGameDir.get(g) is None:
+                self.logger.log("Game data not found for %s\nIf you used a v4 selection, some games names may have changed in v5" % g, self.logger.ERROR)
+
         self.logger.log(str(len(games)) + ' game(s) selected for conversion')
         # TODO we could go from list of full game names now, as 'games' short names from !dos folder should correspond to dir in the zip of each game
 
