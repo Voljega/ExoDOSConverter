@@ -1,5 +1,6 @@
 **/__pycache__
 **/cache
+**/distro
 *.bak
 ExoDOSConverter.iml
 **/.idea
