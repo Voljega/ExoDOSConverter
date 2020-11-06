@@ -89,3 +89,8 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 
 A few games in eXoDOS v5 have some conversion issues with this tool.  
 see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues)
+  
+  
+### Licences, shoutouts
+
+ExoDOSConverter uses python code from [MobyGamer's Total DOS Launcher](https://github.com/MobyGamer/total-dos-launcher)
