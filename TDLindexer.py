@@ -267,6 +267,10 @@ def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
                 else:
                     logger.log('  Pre-extracted game data no found for %s / %s'
                                % (dosZipName, dosNameToLongname[dosZipName]), logger.ERROR)
+            else:
+                os.mkdir(os.path.join(destDir, 'games', os.path.splitext(dosZipName)[0]))
+                with ZipFile(os.path.join(destDir, 'files', dosZipName), 'r') as zipFile:
+                    zipFile.extractall(path=os.path.join(destDir, 'games', os.path.splitext(dosZipName)[0]))
 
         # delete game-data
         shutil.rmtree(gamesDataTempDir)

@@ -9,3 +9,4 @@ If you want to build your own executable on Windows, it's pretty straightforward
 - Go into the work directory and type : `pyinstaller --icon=exodosicon.ico --clean -F main.py`
 - Your exe will be generated into a `dist` subDirectory
 - Just copy README.md, exodosicon.ico, build.txt, build.bat, ExoDOSConverter.sh and conf, data and GUI directories alongside the main exe and you're good to go
+- Delete cache and data/mister/distro subfolders in your dist dir if they exist
