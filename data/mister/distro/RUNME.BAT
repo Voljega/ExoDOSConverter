@@ -1,4 +1,0 @@
-@echo off
-IF EXIST E:\LAUNCH.BAT CALL LAUNCH.BAT
-IF NOT EXIST E:\LAUNCH.BAT tdl.exe -q
-

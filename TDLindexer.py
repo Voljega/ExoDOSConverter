@@ -25,7 +25,7 @@ import shutil
 import struct
 import hashlib
 import string
-
+from zipfile import ZipFile
 
 def scantree_files(path):
     # Recursively yield DirEntry objects for given directory
@@ -44,6 +44,12 @@ def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
     filesIDX = distroDir + '/FILES.IDX'
     titlesIDX = distroDir + '/TITLES.IDX'
     filesDir = destDir + '/files/'
+
+    if not os.path.exists(distroDir):
+        with ZipFile(os.path.join(scriptDir, 'data', 'mister', 'distro.zip'), 'r') as zipFile:
+            # Extract distro (compressed to preserve file handlings)
+            logger.log("  unzipping distro.zip")
+            zipFile.extractall(path=os.path.join(scriptDir, 'data', 'mister'))
 
     sourceFiles = []  # Source filenames with full paths and extensions (sorted)
     baseFiles = []  # Source filenames with extensions (no paths)
