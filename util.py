@@ -140,13 +140,20 @@ def findPics(name, cache):
 def findPic(gameName, cache, ext):
     frontPicCache, titlePicCache, gameplayPicCache = cache
     imgName = (gameName + '-01' + ext).replace(':', '_').replace("'", '_')
+    imgNameAlt = (gameName + '-02' + ext).replace(':', '_').replace("'", '_')
     imgPath = None
     if imgName in frontPicCache:
         imgPath = frontPicCache.get(imgName)
+    elif imgNameAlt in frontPicCache:
+        imgPath = frontPicCache.get(imgNameAlt)
     elif imgName in titlePicCache:
         imgPath = titlePicCache.get(imgName)
+    elif imgNameAlt in titlePicCache:
+        imgPath = titlePicCache.get(imgNameAlt)
     elif imgName in gameplayPicCache:
         imgPath = gameplayPicCache.get(imgName)
+    elif imgNameAlt in gameplayPicCache:
+        imgPath = gameplayPicCache.get(imgNameAlt)
     return imgPath
 
 
