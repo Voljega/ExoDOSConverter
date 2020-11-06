@@ -72,7 +72,7 @@ class ExoDOSConverter:
                 # delete empty genres dir
                 dirs = [file for file in os.listdir(self.outputDir) if
                         os.path.isdir(os.path.join(self.outputDir, file))
-                        and file not in ['games', 'cd', 'floppy', 'manuals', 'bootdisk']]
+                        and file not in ['games', 'games-data', 'cd', 'floppy', 'manuals', 'bootdisk']]
                 gamesDir = os.path.join(self.outputDir, 'games')
                 if os.path.exists(gamesDir):
                     for genreDir in dirs:
@@ -82,10 +82,10 @@ class ExoDOSConverter:
                     shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilities and System Files.zip'), gamesDir)
                     # Call Total DOS Launcher Indexer, delete top level games folder after
                     self.logger.log('Total DOS Indexer for ' + self.conversionType)
-                    TDLindexer.index(os.path.join(self.outputDir,'games'),os.path.join(self.outputDir,'tdlprocessed'),
-                                     self.scriptDir, self.conversionConf['useDebugMode'], self.logger)
+                    TDLindexer.index(self.outputDir, self.scriptDir, self.conversionConf['useDebugMode'],
+                                     self.conversionConf['preExtractGames'], self.logger)
                     os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
-                    if not self.conversionConf['useDebugMode']:
+                    if not self.conversionConf['useDebugMode'] or self.conversionConf['preExtractGames']:
                         shutil.rmtree(os.path.join(self.outputDir,'games'))
                     # move cd, floppy, boot disk into ao486 folder
                     if not os.path.exists(os.path.join(self.outputDir, "ao486")):
@@ -314,20 +314,31 @@ class ExoDOSConverter:
             aboutTxt.close()
             os.remove(os.path.join(localGameOutputDir, '2_About.txt'))
             os.remove(os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
-        # Zip internal game dir to longgamename.zip
-        misterCleanName = util.getCleanGameID(metadata, '').replace('+','').replace("'",'').replace('µ','mu').replace('¿','')\
-            .replace('é','e').replace('á','').replace('ō','o').replace('#','').replace('½','').replace('$','').replace('à','a')\
-            .replace('&','and').replace(',','')
-        self.logger.log('    Rezipping game to %s.zip' % misterCleanName)
-        shutil.make_archive(os.path.join(localParentOutputDir, misterCleanName), 'zip',
-                            localGameOutputDir)
-        # Delete everything unrelated
-        shutil.rmtree(os.path.join(localParentOutputDir, game + '.pc'))
-        # Move archive to games folder
+
+        misterCleanName = util.getCleanGameID(metadata, '').replace('+', '').replace("'", '').replace('µ','mu')\
+            .replace('¿','').replace('é', 'e').replace('á', '').replace('ō', 'o').replace('#', '').replace('½', '')\
+            .replace('$','').replace('à', 'a').replace('&', 'and').replace(',', '')
+
         if not os.path.exists(os.path.join(self.outputDir, 'games')):
             os.mkdir(os.path.join(self.outputDir, 'games'))
-        shutil.move(os.path.join(localParentOutputDir, misterCleanName+'.zip'),
-                    os.path.join(self.outputDir, 'games'))
+
+        if self.conversionConf['preExtractGames']:
+            # Create zero sized zip as the game will be pre-extracted
+            open(os.path.join(self.outputDir, 'games', misterCleanName + '.zip'), 'w').close()
+            # Move game.pc folder to games-data
+            if not os.path.exists(os.path.join(self.outputDir, 'games-data')):
+                os.mkdir(os.path.join(self.outputDir, 'games-data'))
+            shutil.move(os.path.join(localParentOutputDir, game + '.pc'), os.path.join(self.outputDir, 'games-data', misterCleanName))
+        else:
+            # Zip internal game dir to longgamename.zip
+            self.logger.log('    Rezipping game to %s.zip' % misterCleanName)
+            shutil.make_archive(os.path.join(localParentOutputDir, misterCleanName), 'zip',
+                                localGameOutputDir)
+            # Delete everything unrelated
+            shutil.rmtree(os.path.join(localParentOutputDir, game + '.pc'))
+            # Move archive to games folder
+            shutil.move(os.path.join(localParentOutputDir, misterCleanName+'.zip'),
+                        os.path.join(self.outputDir, 'games'))
 
     # Post-conversion for openDingux for a given game
     def postConversionForOpenDingux(self, game, localGameOutputDir, localParentOutputDir, metadata):

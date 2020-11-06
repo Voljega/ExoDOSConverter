@@ -135,6 +135,15 @@ class ExoGUI:
         self.mapperValues = util.mappers.copy()
         self.mapperComboBox['values'] = self.mapperValues
 
+        self.guiVars['preExtractGames'] = Tk.IntVar()
+        self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
+        self.preExtractGamesCheckButton = Tk.Checkbutton(self.collectionFrame,
+                                                   text=self.guiStrings['preExtractGames'].label,
+                                                   variable=self.guiVars['preExtractGames'], onvalue=1,
+                                                   offvalue=0)
+        wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
+        self.preExtractGamesCheckButton.grid(column=6, row=0, sticky="W", pady=5)
+
         ttk.Separator(self.configurationFrame, orient=Tk.HORIZONTAL).grid(column=0, row=1, padx=5, pady=0,
                                                                    sticky="EW")
 
@@ -614,6 +623,7 @@ class ExoGUI:
         conversionConf['rendererCfg'] = self.guiVars['rendererCfg'].get()
         conversionConf['outputCfg'] = self.guiVars['outputCfg'].get()
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
+        conversionConf['preExtractGames'] = True if self.guiVars['preExtractGames'].get() == 1 else False
         # TODO better move this to converter when v5 is released and properly handle it, or move it to verify ? Also use messagebox
         gamesDir = os.path.join(collectionDir, "eXo", "eXoDOS")
         gamesDosDir = os.path.join(gamesDir, "!dos")

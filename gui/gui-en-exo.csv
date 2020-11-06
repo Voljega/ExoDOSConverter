@@ -8,6 +8,7 @@ conversionType;Conversion Type;Choose your conversion type
 collectionVersion;Collection version;Your collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
+preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
 expertMode;Expert mode;Allows overriding of generated configuration
 mountPrefix;Mount prefix; Mount command prefix

@@ -36,7 +36,10 @@ def scantree_files(path):
             yield entry
 
 
-def index(sourceDir, destDir, scriptDir, isDebug, logger):
+def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
+    sourceDir = os.path.join(outputDir,'games')
+    destDir = os.path.join(outputDir,'tdlprocessed')
+    gamesDataTempDir = os.path.join(outputDir,'games-data')
     distroDir = os.path.join(scriptDir, 'data', 'mister', 'distro')
     filesIDX = distroDir + '/FILES.IDX'
     titlesIDX = distroDir + '/TITLES.IDX'
@@ -112,7 +115,7 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
     BTW2: Filenames can't have any unicode in them to be universally compatible
     with FAT12 filesystems, so we mangle the unicode out of them.
     """
-
+    dosNameToLongname = dict()
     for idx, longname in enumerate(baseFiles):
         # FAT12 doesn't support unicode - avert thine eyes
         dname = longname.encode('ascii', 'ignore').decode()
@@ -153,7 +156,7 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
             return
 
         DOSnames.append(dname)
-
+        dosNameToLongname[dname] = longname
     # if isDebug:
     #     logger.log("  first 5 DOS-friendly filenames are:")
     #     logger.log("  " + DOSnames[0:5] + "\n")
@@ -241,3 +244,23 @@ def index(sourceDir, destDir, scriptDir, isDebug, logger):
         shutil.copy(sourceFiles[i], filesDir + DOSnames[i])
 
     logger.log("  All games indexed")
+
+    # Create sub games dir
+    os.mkdir(os.path.join(destDir, 'games'))
+
+    # Handle pre extract case
+    if preExtractGames:
+        # Move content of games/game.pc dir to destDir/games
+        for dosZipName in dosNameToLongname:
+            if dosZipName not in ['-MANUALL.ZIP','-UTILITI.ZIP']:
+                longCleanName = dosNameToLongname[dosZipName]
+                gameDataDir = os.path.join(gamesDataTempDir, os.path.splitext(longCleanName)[0])
+                if os.path.exists(gameDataDir):
+                    # preExtractFolder = os.path.join(destDir, 'games', os.path.splitext(dosZipName)[0])
+                    shutil.move(gameDataDir, os.path.join(destDir, 'games', os.path.splitext(dosZipName)[0]))
+                else:
+                    logger.log('  Pre-extracted game data no found for %s / %s'
+                               % (dosZipName, dosNameToLongname[dosZipName]), logger.ERROR)
+
+        # delete game-data
+        shutil.rmtree(gamesDataTempDir)
