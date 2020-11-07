@@ -332,7 +332,7 @@ def text2png(scriptDir, text, cover, generatedImgpath):
     font = ImageFont.truetype(os.path.join(scriptDir, 'data', 'mister','DejaVuSans.ttf'), 12)
     text = text.replace('\n', NEWLINE_REPLACEMENT_STRING)
 
-    img = Image.new("RGBA", (640, 480), bgcolor)
+    img = Image.new("RGB", (640, 480), bgcolor)
     draw = ImageDraw.Draw(img)
     # Paste cover in the top right corner
     coverImg = Image.open(os.path.join(cover))

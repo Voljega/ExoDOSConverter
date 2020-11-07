@@ -310,7 +310,7 @@ class ExoDOSConverter:
             cover = os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1])
             shutil.move(os.path.join(self.outputDir, 'downloaded_images', ntpath.basename(metadata.frontPic)), cover)
             aboutTxt = open(os.path.join(localGameOutputDir, '2_About.txt'), 'r', encoding='utf-8')
-            mister.text2png(self.scriptDir, aboutTxt.read(), cover, os.path.join(localGameOutputDir, '2_About.png'))
+            mister.text2png(self.scriptDir, aboutTxt.read(), cover, os.path.join(localGameOutputDir, '2_About.jpg'))
             aboutTxt.close()
             os.remove(os.path.join(localGameOutputDir, '2_About.txt'))
             os.remove(os.path.join(localGameOutputDir, '5_About' + os.path.splitext(metadata.frontPic)[-1]))
