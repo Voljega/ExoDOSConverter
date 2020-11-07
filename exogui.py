@@ -369,9 +369,12 @@ class ExoGUI:
             self.saveCustomButton['state'] = 'disabled'
             self.selectionPathEntry['state'] = 'disabled'
             self.selectSelectionPathButton['state'] = 'disabled'
-            self.verifyButton['state'] = 'disabled'
-            self.saveButton['state'] = 'disabled'
-            self.proceedButton['state'] = 'disabled'
+            if self.verifyButton is not None:
+                self.verifyButton['state'] = 'disabled'
+            if self.saveButton is not None:
+                self.saveButton['state'] = 'disabled'
+            if self.proceedButton is not None:
+                self.proceedButton['state'] = 'disabled'
 
         else:
             # Do not rebuild cache on first refresh of the value
