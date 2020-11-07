@@ -1,7 +1,10 @@
 id;label;help
 outputDir;Output directory;Path where your set will be created (exodos collection will be left untouched)
-collectionDir;Collection folder;Path to your eXoDOs collection
+selectOutputDir;Select;Select your output directory
+collectionDir;Collection folder;Path to your eXo collection
+selectCollectionDir;Select;Select your eXo collection folder
 selectionPath;Custom Selection; Path to your custom selection file
+selectSelectionPath;Select;Select your selection file
 loadCustom;Load;Load your custom selection from file
 saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
