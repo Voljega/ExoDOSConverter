@@ -106,7 +106,7 @@ def validCollectionPath(collectionPath):
 # Parse the collection static cache file to generate list of games
 def fullnameToGameDir(scriptDir):
     gameDict = dict()
-    collectFile = open(os.path.join(scriptDir,'data','eXoDOSv5.csv'),'r')
+    collectFile = open(os.path.join(scriptDir,'data','eXoDOSv5.csv'),'r', encoding='utf-8')
     for line in collectFile.readlines():
         strings = line.split(';')
         gameDict[strings[0]] = strings[1].rstrip('\n\r')
@@ -115,7 +115,7 @@ def fullnameToGameDir(scriptDir):
 
 # Build games csv for a new/updated collection
 def buildCollectionCSV(scriptDir, gamesDosDir, logger):
-    collectFile = open(os.path.join(scriptDir, 'data', 'collec-new.csv'), 'w')
+    collectFile = open(os.path.join(scriptDir, 'data', 'collec-new.csv'), 'w', encoding='utf-8')
     logger.log('Listing games in %s' % gamesDosDir, logger.WARNING)
     games = [file for file in os.listdir(gamesDosDir) if os.path.isdir(os.path.join(gamesDosDir, file))]
 
@@ -163,8 +163,6 @@ def buildPicCache(imageFolder, picCache, logger):
     picCacheFile = open(picCache, 'w')
     cache = dict()
     if os.path.exists(imageFolder):
-        # TODO Bug ??? if not os.path.isdir(file) and not if not os.path.isdir(os.path.join(imageFolder, file)) ?
-        # TODO Check Fix
         rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(os.path.join(imageFolder,file))]
         subFolders = [file for file in os.listdir(imageFolder) if os.path.isdir(os.path.join(imageFolder, file))]
         for image in rootImages:
