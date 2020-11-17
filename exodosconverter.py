@@ -15,7 +15,7 @@ import TDLindexer
 class ExoDOSConverter:
 
     def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
-                 useGenreSubFolders, conversionConf, fullnameToGameDir, logger):
+                 useGenreSubFolders, conversionConf, fullnameToGameDir, postProcess, logger):
         self.games = games
         self.cache = cache
         self.scriptDir = scriptDir
@@ -30,6 +30,7 @@ class ExoDOSConverter:
         self.confConverter = ConfConverter(self.games, self.outputDir, self.useGenreSubFolders,
                                            self.conversionType, self.conversionConf, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
+        self.postProcess = postProcess
 
     # Loops on all games to convert them
     def convertGames(self):
@@ -51,7 +52,7 @@ class ExoDOSConverter:
             try:
                 self.convertGame(game, gamelist, total, count)
             except:
-                self.logger.log('  Error %s while converting game %s\n' % (sys.exc_info()[0], game), self.logger.ERROR)
+                self.logger.log('  Error %s while converting game %s\n\n' % (sys.exc_info()[0], game), self.logger.ERROR)
                 excInfo = traceback.format_exc()
                 errors[game] = excInfo
 
@@ -131,6 +132,8 @@ class ExoDOSConverter:
         elif os.path.exists(os.path.join(self.outputDir, 'error_log.txt')):
             # Delete log from previous runs
             os.remove(os.path.join(self.outputDir, 'error_log.txt'))
+
+        self.postProcess()
 
     # Full conversion for a given game    
     def convertGame(self, game, gamelist, total, count):

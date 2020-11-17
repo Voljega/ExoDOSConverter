@@ -10,6 +10,7 @@ import shutil
 import platform
 from datetime import datetime
 from exodosconverter import ExoDOSConverter
+from functools import partial
 import _thread
 
 
@@ -180,6 +181,10 @@ class ExoGUI:
         self.selectOutputDirButton.grid(column=2, row=setRow, padx=5, sticky="WE")
         wckToolTips.register(self.selectOutputDirButton, self.guiStrings['selectOutputDir'].help)
 
+    # Handle conversion type change
+    def changeConversionType(self, event):
+        self.handleComponentsState(False)
+
     # Configuration Frame    
     def drawConfigurationFrame(self):
         self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", padx=10, pady=5)
@@ -194,8 +199,8 @@ class ExoGUI:
         self.conversionTypeLabel.grid(column=0, row=0, sticky="W", pady=5)
         self.guiVars['conversionType'] = Tk.StringVar()
         self.guiVars['conversionType'].set(self.configuration['conversionType'])
-        self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
-                                                   textvariable=self.guiVars['conversionType'])
+        self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly", textvariable=self.guiVars['conversionType'])
+        self.conversionTypeComboBox.bind('<<ComboboxSelected>>', self.changeConversionType)
         self.conversionTypeComboBox.grid(column=1, row=0, sticky="W", pady=5, padx=5)
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
@@ -330,23 +335,14 @@ class ExoGUI:
 
     # Listener for Expert Mode Check
     def checkExpertMode(self):
-        if self.guiVars['expertMode'].get() != 1:
-            self.mountPrefixEntry['state'] = 'disabled'
-            self.fullResolutionCfgEntry['state'] = 'disabled'
-            self.rendererCfgEntry['state'] = 'disabled'
-            self.outputCfgEntry['state'] = 'disabled'
-        else:
+        self.handleComponentsState(False)
+        if self.guiVars['expertMode'].get() == 1:
             self.logger.log(
-                'Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information',
+                '\nOnly use Expert Mode if you know what you are doing!\nCheck the github wiki for more information',
                 self.logger.ERROR)
             if not self.loading:
                 messagebox.showwarning('Are you sure ?',
                                        'Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information')
-            self.vsyncCfgCheckButton['state'] = 'normal'
-            self.fullResolutionCfgEntry['state'] = 'normal'
-            self.rendererCfgEntry['state'] = 'normal'
-            self.outputCfgEntry['state'] = 'normal'
-            self.mountPrefixEntry['state'] = 'normal'
 
     # Listener for collection path modifications
     def handleCollectionFolder(self, *args):
@@ -354,58 +350,23 @@ class ExoGUI:
 
         # TODO better test here with all subfolders and differenciation between DOS v5 and future Win3x v2 ?
         # and maybe an error message somewhere
-        if not os.path.isdir(collectionDir) or not util.validCollectionPath(collectionDir):
+        if not util.validCollectionPath(collectionDir):
             self.logger.log(
-                "%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" % collectionDir)
-            self.logger.log("Did you install the collection with setup.bat beforehand ?")
-            self.exodosGamesListbox['state'] = 'disabled'
-            self.selectedGamesListbox['state'] = 'disabled'
-            self.selectGameButton['state'] = 'disabled'
-            self.deselectGameButton['state'] = 'disabled'
-            self.selectAllGamesButton['state'] = 'disabled'
-            self.unselectAllGamesButton['state'] = 'disabled'
-            self.filterEntry['state'] = 'disabled'
-            self.loadCustomButton['state'] = 'disabled'
-            self.saveCustomButton['state'] = 'disabled'
-            self.selectionPathEntry['state'] = 'disabled'
-            self.selectSelectionPathButton['state'] = 'disabled'
-            if self.verifyButton is not None:
-                self.verifyButton['state'] = 'disabled'
-            if self.saveButton is not None:
-                self.saveButton['state'] = 'disabled'
-            if self.proceedButton is not None:
-                self.proceedButton['state'] = 'disabled'
-
+                "\n%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" % collectionDir, self.logger.ERROR)
+            self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
             # Do not rebuild cache on first refresh of the value
             if self.needsCacheRefresh is True:
-                self.logger.log("Rebuild image caches, this is gonna take a while ...")
+                self.logger.log("\nRebuild image caches, this is gonna take a while ...")
                 self.updateConsoleFromQueue()
                 util.cleanCache(self.scriptDir)
             else:
                 self.needsCacheRefresh = True
             self.cache = util.buildCache(self.scriptDir, collectionDir, self.logger)
-            self.guiVars['filter'].set('')
-            self.exodosGamesListbox['state'] = 'normal'
-            self.selectedGamesListbox['state'] = 'normal'
-            self.selectGameButton['state'] = 'normal'
-            self.deselectGameButton['state'] = 'normal'
-            self.selectAllGamesButton['state'] = 'normal'
-            self.unselectAllGamesButton['state'] = 'normal'
-            self.filterEntry['state'] = 'normal'
-            self.loadCustomButton['state'] = 'normal'
-            self.saveCustomButton['state'] = 'normal'
-            self.selectionPathEntry['state'] = 'normal'
-            self.selectSelectionPathButton['state'] = 'normal'
-            if self.verifyButton is not None:
-                self.verifyButton['state'] = 'normal'
-            if self.saveButton is not None:
-                self.saveButton['state'] = 'normal'
-            if self.proceedButton is not None:
-                self.proceedButton['state'] = 'normal'
 
-            # Listener for filter entry modification
+        self.handleComponentsState(False)
 
+    # Listener for filter entry modification
     def filterGamesList(self, *args):
         filterValue = self.guiVars['filter'].get()
         filteredGameslist = [g for g in self.fullnameToGameDir.keys() if filterValue.lower() in g.lower()]
@@ -663,7 +624,7 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom']:
+                              'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir', 'selectCollectionDir', 'selectSelectionPath']:
                 if key.help:
                     confFile.write('# ' + key.help.replace('#n', '\n# ') + '\n')
                 if key.id == 'images':
@@ -683,7 +644,7 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'selectall', 'unselectall', 'loadCustom', 'saveCustom']:
+                              'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir', 'selectCollectionDir', 'selectSelectionPath']:
                 if key.id == 'images':
                     imagesValue = self.guiVars[self.guiStrings['images'].label + ' #1'].get()
                     if self.guiStrings['images'].label + ' #2' in self.guiVars:
@@ -710,35 +671,7 @@ class ExoGUI:
     # Listener for Proceed Button
     def clickProceed(self):
         self.logger.log('\n<--------- Saving ' + self.setKey + ' configuration --------->')
-        self.verifyButton['state'] = 'disabled'
-        self.saveButton['state'] = 'disabled'
-        self.proceedButton['state'] = 'disabled'
-        self.exodosGamesListbox['state'] = 'disabled'
-        self.selectedGamesListbox['state'] = 'disabled'
-        self.selectGameButton['state'] = 'disabled'
-        self.deselectGameButton['state'] = 'disabled'
-        self.selectAllGamesButton['state'] = 'disabled'
-        self.unselectAllGamesButton['state'] = 'disabled'
-        self.filterEntry['state'] = 'disabled'
-        self.conversionTypeComboBox['state'] = 'disabled'
-        self.collectionVersionComboBox['state'] = 'disabled'
-        self.useGenreSubFolderCheckButton['state'] = 'disabled'
-        self.mapperComboBox['state'] = 'disabled'
-        self.collectionEntry['state'] = 'disabled'
-        self.outputEntry['state'] = 'disabled'
-        self.mountPrefixEntry['state'] = 'disabled'
-        self.vsyncCfgCheckButton['state'] = 'disabled'
-        self.fullResolutionCfgEntry['state'] = 'disabled'
-        self.rendererCfgEntry['state'] = 'disabled'
-        self.outputCfgEntry['state'] = 'disabled'
-        self.debugModeCheckButton['state'] = 'disabled'
-        self.expertModeCheckButton['state'] = 'disabled'
-        self.loadCustomButton['state'] = 'disabled'
-        self.saveCustomButton['state'] = 'disabled'
-        self.selectionPathEntry['state'] = 'disabled'
-        self.selectSelectionPathButton['state'] = 'disabled'
-        self.selectCollectionDirButton['state'] = 'disabled'
-        self.selectOutputDirButton['state'] = 'disabled'
+        self.handleComponentsState(True)
 
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
@@ -778,8 +711,41 @@ class ExoGUI:
         else:
             exoDOSConverter = ExoDOSConverter(games, self.cache, self.scriptDir, collectionDir, gamesDosDir, outputDir,
                                               conversionType,
-                                              useGenreSubFolders, conversionConf, self.fullnameToGameDir, self.logger)
+                                              useGenreSubFolders, conversionConf, self.fullnameToGameDir, partial(self.postProcess), self.logger)
             _thread.start_new(exoDOSConverter.convertGames, ())
+
+    # Set enabled/disabled state for a component
+    def setComponentState(self, component, state):
+        if component is not None:
+            component['state'] = state
+
+    # Handles state of all the components based on UI status
+    def handleComponentsState(self, clickedProcess):
+        collectionDir = self.guiVars['collectionDir'].get()
+        mainButtons = [self.verifyButton, self.saveButton, self.proceedButton]
+        entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton, self.selectOutputDirButton]
+        expertComponents = [self.mountPrefixEntry, self.fullResolutionCfgEntry, self.rendererCfgEntry, self.outputCfgEntry]
+        otherComponents = [self.exodosGamesListbox, self.selectedGamesListbox, self.selectGameButton,
+                           self.deselectGameButton, self.selectAllGamesButton, self.unselectAllGamesButton, self.filterEntry,
+                           self.conversionTypeComboBox, self.collectionVersionComboBox, self.useGenreSubFolderCheckButton,
+                           self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton, self.expertModeCheckButton,
+                           self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry, self.selectSelectionPathButton,
+                           self.preExtractGamesCheckButton]
+
+        if clickedProcess or not util.validCollectionPath(collectionDir):
+            [self.setComponentState(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
+            [self.setComponentState(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
+        else:
+            [self.setComponentState(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in expertComponents]
+            [self.setComponentState(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
+            self.setComponentState(self.preExtractGamesCheckButton,
+                                   'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+            self.setComponentState(self.mapperComboBox,
+                                   'normal' if self.guiVars['conversionType'].get() in [util.esoteric, util.simplemenu] else 'disabled')
+
+    def postProcess(self):
+        self.unselectAll()
+        self.handleComponentsState(False)
 
     # Console Frame    
     def drawConsole(self):

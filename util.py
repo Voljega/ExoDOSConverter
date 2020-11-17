@@ -98,7 +98,7 @@ def getRomsFolderPrefix(conversionType, conversionConf):
 
 # Checks validity of the collection path and its content
 def validCollectionPath(collectionPath):
-    return os.path.exists(os.path.join(collectionPath, 'eXo')) and os.path.exists(
+    return os.path.isdir(collectionPath) and os.path.exists(os.path.join(collectionPath, 'eXo')) and os.path.exists(
         os.path.join(collectionPath, 'eXo', 'eXoDOS')) and os.path.exists(
         os.path.join(collectionPath, 'xml')) and os.path.exists(os.path.join(collectionPath, 'Images'))
 
