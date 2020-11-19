@@ -14,10 +14,14 @@ https://www.retro-exo.com
 For those of you for which this name doesn't mean anything, ExoDOS Collection is a collection of DOS games and in my opinion the best one as it includes full, correct configuration for all games.
 It is based on Launchbox and Windows only though
 The collection is supported in its V5 full version only, V4 support has been dropped
-Lite version will be likely supported later with Download on demand implemented in the converter, if it's feasible
+
+This tool is now compatible with both the full eXoDOS V5 version or the eXoDOS Lite version
+
+If you use Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye
+
 There's also an ExoDOSWin3x collection for Windows 3.1 games, version 2 of which will be supported when it's released
 
-Before using this tool, don't forget to install the collection with its `setup.bat`
+Before using this tool, don't forget to install the collection (both full and lite V5 versions) with its `setup.bat`
 
 ## The Tool
 

@@ -2,6 +2,9 @@ import os.path
 import platform
 import collections
 from PIL import Image
+import requests
+import urllib.request
+import urllib.parse
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
 
@@ -23,6 +26,8 @@ exodosVersions = ['eXoDOS v5']
 
 mappers = ['No', 'RG350']
 
+theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
+
 
 def getKeySetString(string, setKey):
     return string.replace('{setKey}', setKey)
@@ -38,6 +43,36 @@ def getConfBakFilename(setKey):
 
 def getGuiStringsFilename(setKey):
     return getKeySetString(guiStringsFilename, setKey)
+
+
+def downloadZip(gameZip, gameZipPath, logger):
+    response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True, headers={'User-agent': 'Mozilla/5.0'})
+    totalSize = int(response.headers.get('content-length'))
+    rightSize = totalSize
+    typeSize = ['b', 'kb', 'mb', 'gb']
+    typeIndex = 0
+    printableSize = ''
+    while rightSize > 0 and typeIndex < len(typeSize):
+        printableSize = str(rightSize) + ' ' + typeSize[typeIndex]
+        rightSize = int(rightSize / 1024)
+        typeIndex = typeIndex + 1
+    logger.log('  Downloading %s of size %s' % (gameZip, printableSize))
+    if response.status_code == 200:
+        with open(gameZipPath, 'wb') as f:
+            if totalSize is None:
+                f.write(response.content)
+            else:
+                downloaded = 0
+                totalSize = int(totalSize)
+                for data in response.iter_content(chunk_size=max(int(totalSize / 1000), 1024 * 1024)):
+                    downloaded += len(data)
+                    f.write(data)
+                    done = int(50 * downloaded / totalSize)
+                    logger.log('\r    [{}{}]'.format('█' * done, '.' * (50 - done)), logger.INFO, True)
+    else:
+        logger.log(
+            '  <ERROR> error %s while downloading %s: %s' % (response.status_code, gameZipPath, response.reason),
+            logger.ERROR)
 
 
 # Loads UI Strings

@@ -59,6 +59,7 @@ class ExoGUI:
         self.collectionVersionLabel = None
         self.collectionVersionComboBox = None
         self.collectionVersionValues = None
+        self.downloadOnDemandCheckButton = None
         self.mapperLabel = None
         self.mapperComboBox = None
         self.mapperValues = None
@@ -216,16 +217,12 @@ class ExoGUI:
         self.collectionVersionValues = util.exodosVersions.copy()
         self.collectionVersionComboBox['values'] = self.collectionVersionValues
 
-        self.mapperLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['mapper'].label)
-        wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
-        self.mapperLabel.grid(column=4, row=0, sticky="E", pady=5)
-        self.guiVars['mapper'] = Tk.StringVar()
-        self.guiVars['mapper'].set(self.configuration['mapper'])
-        self.mapperComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
-                                           textvariable=self.guiVars['mapper'])
-        self.mapperComboBox.grid(column=5, row=0, sticky="E", pady=5, padx=5)
-        self.mapperValues = util.mappers.copy()
-        self.mapperComboBox['values'] = self.mapperValues
+        self.guiVars['downloadOnDemand'] = Tk.IntVar()
+        self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
+        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.collectionFrame, text=self.guiStrings['downloadOnDemand'].label,
+                                                          variable=self.guiVars['downloadOnDemand'], onvalue=1, offvalue=0)
+        wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
+        self.downloadOnDemandCheckButton.grid(column=4, row=0, sticky="E", pady=5)
 
         self.guiVars['preExtractGames'] = Tk.IntVar()
         self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
@@ -296,39 +293,50 @@ class ExoGUI:
         wckToolTips.register(self.vsyncCfgCheckButton, self.guiStrings['vsyncCfg'].help)
         self.vsyncCfgCheckButton.grid(column=0, row=1, sticky="W")
 
+        self.mapperLabel = Tk.Label(self.conversionSecondLineFrame, text=self.guiStrings['mapper'].label)
+        wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
+        self.mapperLabel.grid(column=1, row=1, sticky="E", pady=5)
+        self.guiVars['mapper'] = Tk.StringVar()
+        self.guiVars['mapper'].set(self.configuration['mapper'])
+        self.mapperComboBox = ttk.Combobox(self.conversionSecondLineFrame, state="readonly",
+                                           textvariable=self.guiVars['mapper'])
+        self.mapperComboBox.grid(column=2, row=1, sticky="E", pady=5, padx=5)
+        self.mapperValues = util.mappers.copy()
+        self.mapperComboBox['values'] = self.mapperValues
+
         frame = Tk.Frame(self.conversionSecondLineFrame, width=20)
-        frame.grid(column=1, row=1, sticky="EW")
+        frame.grid(column=3, row=1, sticky="EW")
 
         label = Tk.Label(self.conversionSecondLineFrame, text=self.guiStrings['fullresolutionCfg'].label)
         wckToolTips.register(label, self.guiStrings['fullresolutionCfg'].help)
-        label.grid(column=2, row=1, sticky="W")
+        label.grid(column=4, row=1, sticky="W")
         self.guiVars['fullresolutionCfg'] = Tk.StringVar()
         self.guiVars['fullresolutionCfg'].set(self.configuration['fullresolutionCfg'])
         self.fullResolutionCfgEntry = Tk.Entry(self.conversionSecondLineFrame,
                                                textvariable=self.guiVars['fullresolutionCfg'])
-        self.fullResolutionCfgEntry.grid(column=3, row=1, padx=5, sticky="WE")
+        self.fullResolutionCfgEntry.grid(column=5, row=1, padx=5, sticky="WE")
 
         frame = Tk.Frame(self.conversionSecondLineFrame, width=20)
-        frame.grid(column=4, row=1, sticky="EW")
+        frame.grid(column=6, row=1, sticky="EW")
 
         label = Tk.Label(self.conversionSecondLineFrame, text=self.guiStrings['rendererCfg'].label)
         wckToolTips.register(label, self.guiStrings['rendererCfg'].help)
-        label.grid(column=5, row=1, sticky="W")
+        label.grid(column=7, row=1, sticky="W")
         self.guiVars['rendererCfg'] = Tk.StringVar()
         self.guiVars['rendererCfg'].set(self.configuration['rendererCfg'])
         self.rendererCfgEntry = Tk.Entry(self.conversionSecondLineFrame, textvariable=self.guiVars['rendererCfg'])
-        self.rendererCfgEntry.grid(column=6, row=1, padx=5, sticky="WE")
+        self.rendererCfgEntry.grid(column=8, row=1, padx=5, sticky="WE")
 
         frame = Tk.Frame(self.conversionSecondLineFrame, width=20)
-        frame.grid(column=7, row=1, sticky="EW")
+        frame.grid(column=9, row=1, sticky="EW")
 
         label = Tk.Label(self.conversionSecondLineFrame, text=self.guiStrings['outputCfg'].label)
         wckToolTips.register(label, self.guiStrings['outputCfg'].help)
-        label.grid(column=8, row=1, padx=5, sticky="W")
+        label.grid(column=10, row=1, padx=5, sticky="W")
         self.guiVars['outputCfg'] = Tk.StringVar()
         self.guiVars['outputCfg'].set(self.configuration['outputCfg'])
         self.outputCfgEntry = Tk.Entry(self.conversionSecondLineFrame, textvariable=self.guiVars['outputCfg'])
-        self.outputCfgEntry.grid(column=9, row=1, sticky="WE")
+        self.outputCfgEntry.grid(column=11, row=1, sticky="WE")
 
         self.checkExpertMode()
         self.loading = False
@@ -688,6 +696,7 @@ class ExoGUI:
         conversionConf['outputCfg'] = self.guiVars['outputCfg'].get()
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
         conversionConf['preExtractGames'] = True if self.guiVars['preExtractGames'].get() == 1 else False
+        conversionConf['downloadOnDemand'] = True if self.guiVars['downloadOnDemand'].get() == 1 else False
         # TODO better move this to converter when v5 is released and properly handle it, or move it to verify ? Also use messagebox
         gamesDir = os.path.join(collectionDir, "eXo", "eXoDOS")
         gamesDosDir = os.path.join(gamesDir, "!dos")
@@ -730,7 +739,7 @@ class ExoGUI:
                            self.conversionTypeComboBox, self.collectionVersionComboBox, self.useGenreSubFolderCheckButton,
                            self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton, self.expertModeCheckButton,
                            self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry, self.selectSelectionPathButton,
-                           self.preExtractGamesCheckButton]
+                           self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton]
 
         if clickedProcess or not util.validCollectionPath(collectionDir):
             [self.setComponentState(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
@@ -777,8 +786,13 @@ class ExoGUI:
         self.logTest['state'] = 'normal'
         if numlines == 24:
             self.logTest.delete(1.0, 2.0)
+        previousLine = self.logTest.get('end-1c linestart', 'end-1c')
+        # handle progress bar
+        if msg[1] and previousLine.startswith('    [') and previousLine.endswith(']'):
+            self.logTest.delete('end-1c linestart','end')
+
         if self.logTest.index('end-1c') != '1.0':
             self.logTest.insert('end', '\n')
-        self.logTest.insert('end', msg[1], msg[0])
+        self.logTest.insert('end', msg[2], msg[0])
         self.logTest.see(Tk.END)
         self.logTest['state'] = 'disabled'

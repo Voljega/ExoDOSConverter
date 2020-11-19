@@ -6,10 +6,13 @@ from logger import Logger
 
 if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
-    title = 'eXoDOSConverter 0.7-beta'
+    title = 'eXoDOSConverter 0.8-beta'
     logger = Logger()
     logger.log(title)
     logger.log('Script path : '+scriptDir)
     
     gui = ExoGUI(scriptDir,logger, title) 
     gui.draw()
+
+# The eye V5 link
+# https://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/

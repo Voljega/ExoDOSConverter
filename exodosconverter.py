@@ -101,7 +101,7 @@ class ExoDOSConverter:
                     if os.path.exists(os.path.join(self.outputDir, "bootdisk")):
                         shutil.move(os.path.join(self.outputDir, "bootdisk"), os.path.join(os.path.join(self.outputDir, "ao486")))
                 else:
-                    self.logger.log('  Some critial errors seems to have happened during process.\n  Skipping Total Indexer phase', self.logger.ERROR)
+                    self.logger.log('  Some critical errors seems to have happened during process.\n  Skipping Total Indexer phase', self.logger.ERROR)
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals
@@ -136,9 +136,9 @@ class ExoDOSConverter:
         self.postProcess()
 
     # Full conversion for a given game    
-    def convertGame(self, game, gamelist, total, count):
+    def convertGame(self, game, gamelist, totalSize, count):
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()))
-        self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, total, game))
+        self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useGenreSubFolders,
                                                     self.conversionType)
 
@@ -157,7 +157,21 @@ class ExoDOSConverter:
             # unzip game (xxxx).zip from unzip line in game/install.bat
             # following options should be set in dosbox.conf / actually do it later in converter
             # fullscreen = true, output=overlay, aspect=true
-            self.unzipGame(os.path.join(self.gamesDosDir, game), localGameOutputDir, game)
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(self.gamesDosDir, game)) if
+                    os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
+                                                                                 0].lower() == 'install']
+            gameZip = bats[0] + '.zip'
+            if gameZip is not None:
+                gameZipPath = os.path.join(self.exoDosDir, "eXoDOS", gameZip)
+                if not os.path.exists(gameZipPath):
+                    self.logger.log('  <WARNING> %s not found' % gameZipPath, self.logger.WARNING)
+                    if self.conversionConf['downloadOnDemand']:
+                        util.downloadZip(gameZip, gameZipPath, self.logger)
+                    else:
+                        self.logger.log('  <WARNING> Activate Download on demand if you want to download missing games', self.logger.WARNING)
+                self.unzipGame(gameZip, localGameOutputDir, game)
+            else:
+                self.logger.log("  ERROR while trying to find zip file for " + os.path.join(self.gamesDosDir, game), self.logger.ERROR)
             self.logger.log("  unzipped")
 
             self.copyGameFiles(game, localGameOutputDir, metadata)
@@ -169,31 +183,21 @@ class ExoDOSConverter:
         self.logger.log("")
 
     # Unzip game zip
-    def unzipGame(self, gameBatDir, localGameOutputDir, game):
-        bats = [os.path.splitext(filename)[0] for filename in os.listdir(gameBatDir) if
-                os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
-                                                                             0].lower() == 'install']
-        zipParam = bats[0] + '.zip'
-        if zipParam is not None:
-            with ZipFile(os.path.join(self.exoDosDir, "eXoDOS", zipParam), 'r') as zipFile:
-                # Extract all the contents of zip file in current directory
-                self.logger.log("  unzipping " + zipParam)
-                zipFile.extractall(path=localGameOutputDir)
-            # Check folder name // !dos folder, if not the same rename it to the !dos one
-            unzippedDirs = [file for file in os.listdir(localGameOutputDir) if
-                            os.path.isdir(os.path.join(localGameOutputDir, file))]
-            if len(unzippedDirs) == 1 and unzippedDirs[0] != game:
-                self.logger.log("  fixing extracted dir %s to !dos name %s" % (unzippedDirs[0], game))
-                os.rename(os.path.join(localGameOutputDir, unzippedDirs[0]), os.path.join(localGameOutputDir, game))
-        else:
-            self.logger.log("  ERROR while trying to find zip file for " + gameBatDir, self.logger.ERROR)
+    def unzipGame(self, gameZip, localGameOutputDir, game):
+        with ZipFile(os.path.join(self.exoDosDir, "eXoDOS", gameZip), 'r') as zipFile:
+            # Extract all the contents of zip file in current directory
+            self.logger.log("  unzipping " + gameZip)
+            zipFile.extractall(path=localGameOutputDir)
+        # Check folder name // !dos folder, if not the same rename it to the !dos one
+        unzippedDirs = [file for file in os.listdir(localGameOutputDir) if
+                        os.path.isdir(os.path.join(localGameOutputDir, file))]
+        if len(unzippedDirs) == 1 and unzippedDirs[0] != game:
+            self.logger.log("  fixing extracted dir %s to !dos name %s" % (unzippedDirs[0], game))
+            os.rename(os.path.join(localGameOutputDir, unzippedDirs[0]), os.path.join(localGameOutputDir, game))
 
     # Copy game files and game dosbox.conf to output dir
     def copyGameFiles(self, game, localGameOutputDir, metadata):
         localGameDataOutputDir = os.path.join(localGameOutputDir, game)
-        # self.logger.log("  copy game data")
-        # # Copy game files in game.pc/game
-        # shutil.copytree(os.path.join(self.exoDosDir, "eXoDOS", game), localGameDataOutputDir)
         self.logger.log("  copy dosbox conf")
         # Copy dosbox.conf in game.pc
         shutil.copy2(os.path.join(self.exoDosDir, "eXoDOS", "!dos", game, "dosbox.conf"),

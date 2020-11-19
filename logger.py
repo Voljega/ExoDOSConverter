@@ -22,6 +22,9 @@ class Logger:
         self.log(msg, level)
 
     # Print one line msg to logger
-    def log(self, msg, level=INFO):
-        self.log_queue.put([level, msg.rstrip('\n')])
-        print(msg.rstrip('\n'))
+    def log(self, msg, level=INFO, replaceLine=False):
+        self.log_queue.put([level, replaceLine, msg.rstrip('\n').strip('\r')])
+        if not replaceLine:
+            print(msg.rstrip('\n'))
+        else:
+            print(msg.rstrip('\n'), end='')
