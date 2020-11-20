@@ -3,19 +3,18 @@
 a custom converter of the ExoDOS collection v5 to several EmulationStation and/or Linux based distributions format : 
  - Recalbox
  - Batocera
+ - Retrobat
  - Retropie
  - OpenDingux (both SimpleMenu / Esoteric flavours) with mapping for RG350
- - MiSTer (in the future)
+ - MiSTer (in the works)
 
 ## ExoDOS
 
 https://www.retro-exo.com
 
-For those of you for which this name doesn't mean anything, ExoDOS Collection is a collection of DOS games and in my opinion the best one as it includes full, correct configuration for all games.
+ExoDOS Collection is a collection of DOS games and in my opinion the best one as it includes full, correct configuration for all games.
 It is based on Launchbox and Windows only though
-The collection is supported in its V5 full version only, V4 support has been dropped
-
-This tool is now compatible with both the full eXoDOS V5 version or the eXoDOS Lite version
+The collection is supported in its V5 full and lite versions only, V4 support has been dropped
 
 If you use Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye
 
@@ -25,17 +24,14 @@ Before using this tool, don't forget to install the collection (both full and li
 
 ## The Tool
 
-ExoDOSConverter is a rework with GUI of an old project of mine, and the aim is to fully support ExoDOS v5 and ExoWin3x v2 when they are released.
-For now the tool works with current versions of the collection
-
-The aim of this tool is to convert any selection of games of the ExoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
+The original aim of this tool was to convert any selection of games of the ExoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
+As the project evolved it now covers diffrent distributions and/or formats. 
 
 The conversion should cover the following :
  - conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
- - scrapping of the game metadata, including front boxart and manuals
+ - scrapping of the game metadata, including front boxart, metada and manual
 
-As the ExoDOSCollection itself uses a lot of `.bat` script and other Windows-only features, this tool will also be windows only.
-This might evolve is some workaround are found to fully exploit this on Linux on other OSes
+The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 
 ## Anti-virus false positives
 
@@ -49,7 +45,7 @@ This will be corrected when possible
 
 Fully supported distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat and OpenDingux.
 
-MiSTer compatibility is beeing worked one at the moment
+MiSTer compatibility is beeing worked on at the moment and is already at a pretty advanced stage.
 
 ### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)
