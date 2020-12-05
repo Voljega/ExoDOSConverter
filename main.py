@@ -13,6 +13,3 @@ if __name__ == "__main__":
     
     gui = ExoGUI(scriptDir,logger, title) 
     gui.draw()
-
-# The eye V5 link
-# https://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/

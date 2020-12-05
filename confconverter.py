@@ -87,7 +87,7 @@ class ConfConverter:
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
         # always remove @
         cmdline = cmdline.lstrip('@ ')
-        # TODO whereWeAt identifies where we are in the game tree based on instructions
+        # TODO whereWeAt identifies where we are in the game tree based on instructions, use in the future ?
         whereWeAt = ['c:','.']
         if self.commandHandler.useLine(cmdline, cutLines):
             if cmdline.lower().startswith("c:"):
@@ -126,7 +126,7 @@ class ConfConverter:
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
                 if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
+                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'heromm2d']:
                     self.handleRunBat(game, localGameOutputDir)
                 self.handlePotentialSubFile(cmdline, game, localGameOutputDir)
                 retroDosboxBat.write(cmdline)
@@ -152,7 +152,7 @@ class ConfConverter:
                     if 'c:\\' in cmdline.lower():
                         if self.conversionType == util.mister:
                             cmdline = cmdline.replace('c:', 'E:\\GAMES\\' + game).replace('C:', 'E:\\GAMES\\' + game)
-                        else :
+                        else:
                             cmdline = cmdline.replace('c:','c:\\'+game).replace('C:','C:\\'+game)
                     else:
                         self.handlePotentialSubFile(cmdline, game, localGameOutputDir, handledSubFiles)

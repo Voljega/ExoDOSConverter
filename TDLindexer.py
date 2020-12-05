@@ -27,6 +27,7 @@ import hashlib
 import string
 from zipfile import ZipFile
 
+
 def scantree_files(path):
     # Recursively yield DirEntry objects for given directory
     for entry in os.scandir(path):
