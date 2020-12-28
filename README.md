@@ -50,6 +50,7 @@ MiSTer compatibility is beeing worked on at the moment and is already at a prett
 ### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)
 - first install Tkinter for python3 if needed : `sudo apt-get install python3-tk`
+- you might need to install pillow : `pip install pillow`
 - directly download sources or clone the repo with :
  ```
  sudo apt install git # optional, only if git is not installed
