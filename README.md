@@ -62,9 +62,9 @@ cd ExoDOSConverter            # change to ExoDOSConverter directory
 chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned version)
 ```
 - If you didn't install the collection beforehand on Windows or with wine by executing `setup.bat`, you'll need to do that or  alternatively:
->Unzip `./Content/XODOSMetadata.zip` to the home dir of the collection, this should create `Images` and `xml` folder
+>Unzip `./Content/XODOSMetadata.zip` to the home dir of the collection, this should create `./Images` and `./xml` folder
 
->Unzip `./Content/!DOSmetadata.zip` to the home dir of the collection, this should create a `eXo\eXoDOS\!dos folder`
+>Unzip `./Content/!DOSmetadata.zip` to the home dir of the collection, this should create a `./eXo/eXoDOS/!dos folder`
 
 - launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
 
