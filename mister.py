@@ -33,7 +33,7 @@ def removeUnusedCds(game, localGameOutputDir, logger):
 # Creates launch.bat and handles mount and imgmount paths
 def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')
-    launchBat = open(os.path.join(localGameOutputDir, "1_Start.bat"), 'w')
+    launchBat = open(os.path.join(localGameOutputDir, "1_Start.bat"), 'w', newline='\r\n')
     lines = dosboxBat.readlines()
     for line in lines:
         line = line.lstrip('@ ').rstrip(' \n\r')
@@ -257,7 +257,7 @@ def convertMountedFolder(letter, localPath, game, outputDir, localGameOutputDir,
 
 # Create Setup.bat file
 def createSetupBat(localGameOutputDir, game):
-    setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w')
+    setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w', newline='\r\n')
     setupBat.write('@echo off\n')
     setupBat.write('cd %s\n' % game)
     setupFiles = [file.lower() for file in os.listdir(os.path.join(localGameOutputDir, game)) if file.lower() in
@@ -314,7 +314,7 @@ def createSetupBat(localGameOutputDir, game):
 
 # Create Edit.bat file
 def createEditBat(localGameOutputDir):
-    editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w')
+    editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w', newline='\r\n')
     editBat.write('@echo off\nedit 1_Start.bat\n')
     editBat.close()
 
