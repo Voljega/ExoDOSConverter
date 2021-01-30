@@ -196,7 +196,7 @@ class CommandHandler:
 
     # Rename a filename to a dos compatible 8 char name    
     def dosRename(self, path, originalFile, fileName, fileExt, cdCount):
-        fileName = fileName.replace(" ", "")
+        fileName = fileName.replace(" ", "").replace("[", "").replace("]", "")
         if len(fileName) > 8:
             if cdCount is None:
                 fileName = fileName[0:7]
