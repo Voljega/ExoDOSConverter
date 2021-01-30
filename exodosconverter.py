@@ -169,10 +169,16 @@ class ExoDOSConverter:
                         util.downloadZip(gameZip, gameZipPath, self.logger)
                     else:
                         self.logger.log('  <WARNING> Activate Download on demand if you want to download missing games', self.logger.WARNING)
-                self.unzipGame(gameZip, localGameOutputDir, game)
+                self.unzipGame(gameZip, gameZipPath, localGameOutputDir, game)
             else:
                 self.logger.log("  ERROR while trying to find zip file for " + os.path.join(self.gamesDosDir, game), self.logger.ERROR)
             self.logger.log("  unzipped")
+
+            # Handle game update if it exists
+            updateZipPath = os.path.join(self.exoDosDir, "Update", "!dos", gameZip)
+            if os.path.exists(updateZipPath):
+                self.logger.log("  found an update for the game")
+                self.unzipGame(gameZip, updateZipPath, localGameOutputDir, game)
 
             self.copyGameFiles(game, localGameOutputDir, metadata)
             self.confConverter.process(game, localGameOutputDir, genre)
@@ -183,10 +189,10 @@ class ExoDOSConverter:
         self.logger.log("")
 
     # Unzip game zip
-    def unzipGame(self, gameZip, localGameOutputDir, game):
-        with ZipFile(os.path.join(self.exoDosDir, "eXoDOS", gameZip), 'r') as zipFile:
+    def unzipGame(self, gameZip, gameZipPath, localGameOutputDir, game):
+        with ZipFile(gameZipPath, 'r') as zipFile:
             # Extract all the contents of zip file in current directory
-            self.logger.log("  unzipping " + gameZip)
+            self.logger.log("  unzipping " + gameZipPath)
             zipFile.extractall(path=localGameOutputDir)
         # Check folder name // !dos folder, if not the same rename it to the !dos one
         unzippedDirs = [file for file in os.listdir(localGameOutputDir) if
