@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=LEAH843NKNG72)
+
 # ExoDOSConverter
 
 a custom converter of the ExoDOS collection v5 to several EmulationStation and/or Linux based distributions format : 
@@ -95,3 +97,5 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues)
 ### Licences, shoutouts
 
 ExoDOSConverter uses python code from [MobyGamer's Total DOS Launcher](https://github.com/MobyGamer/total-dos-launcher)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?hosted_button_id=LEAH843NKNG72)
