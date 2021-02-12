@@ -13,18 +13,13 @@ This is my very first Python project.  All mockery and jeers can be
 directed to trixter@oldskool.org, although it would be more helpful
 to the project if you could fix my novice coding and make this program better.
 
-TODO:
-- import argparse and accept multiple source arguments properly
-- search-as-you-type index generation
-- "fill to xxMB or xxGB" option, either via alpha, random, or best-fit
-- remove duplicate filenames (ie. same file exists in multiple input paths)
 """
 import sys
 import os
 import shutil
 import struct
 import hashlib
-import string
+import re
 from zipfile import ZipFile
 
 
@@ -37,10 +32,18 @@ def scantree_files(path):
             yield entry
 
 
-def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
-    sourceDir = os.path.join(outputDir,'games')
-    destDir = os.path.join(outputDir,'tdlprocessed')
-    gamesDataTempDir = os.path.join(outputDir,'games-data')
+# Cleans filenames for safer matching
+def clean_name(name):
+    # Replace any number of spaces with _
+    name = re.sub(r'\s+', '_', name)
+    # Allow letters, numbers, and meaningful punctuation
+    return re.sub(r'[^a-zA-Z0-9_!$]', '', name)
+
+
+def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, logger):
+    sourceDir = os.path.join(outputDir, 'games')
+    destDir = os.path.join(outputDir, 'tdlprocessed')
+    gamesDataTempDir = os.path.join(outputDir, 'games-data')
     distroDir = os.path.join(scriptDir, 'data', 'mister', 'distro')
     filesIDX = distroDir + '/FILES.IDX'
     titlesIDX = distroDir + '/TITLES.IDX'
@@ -97,73 +100,27 @@ def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
     #     # logger.log(titles[-5:],"\n")
 
     logger.log("  Converting to DOS-friendly 8.3 filenames")
-    """
-    Currently, this uses titleid as the short name for simplicity and testing.
-    Later versions will use a funging function to generate human-readable
-    filenames (ie. "Wizard's Crown (1985)" will become "WIZARDSC", etc.
-    (Or maybe just discard vowels, like "WZRDSCRW"?)
-    (One unsolved challenge is how to elegantly detect and resolve collisions.)
-    """
-    translation_table = dict.fromkeys(map(ord, ' [](),.~!@#$%^&*{}:'), None)
-
-    """
-    Handle long-to-short collisions by changing the last letter of the filename.
-    This allows us up to 35 collisions before we give up.  Back-of-the-napkin
-    analysis shows we should never get to that point under normal circumstances,
-    but if we do, die and inform the user to complain to the programmer.
-    
-    BTW: We are forcing letters and numbers in ASCII order instead of incrementing
-    the last character because that is less likely to confuse the inquisitive
-    end-user who wants to use the 8.3 files manually.  If we incremented the last
-    character, we'd have stuff like filename, filenamf, filenamg, (or filenam0,
-    filenam1, filenam2) which may imply a relationship between the files that does
-    not exist.
-    
-    BTW2: Filenames can't have any unicode in them to be universally compatible
-    with FAT12 filesystems, so we mangle the unicode out of them.
-    """
     dosNameToLongname = dict()
     for idx, longname in enumerate(baseFiles):
-        # FAT12 doesn't support unicode - avert thine eyes
-        dname = longname.encode('ascii', 'ignore').decode()
-        # Truncate basename while keeping extension
-        if len(longname) > 12:
-            dname = dname.translate(translation_table)[0:8] + longname[-4:]
-        dname = str.upper(dname)
-        collided = dname
-        if isDebug:
-            logger.log("  Starting check for " + dname)
-        # Do we have a collision?
-        if dname in DOSnames:
-            for i in string.ascii_uppercase + string.digits:
-                dname = longname.translate(translation_table)[0:7] + i + longname[-4:]
-                dname = str.upper(dname)
-                if dname not in DOSnames:
-                    break
+        base_name = longname.replace('.zip', '')
+        if base_name.startswith('-'):
+            # For 'custom' files starting with -, we just remove all the bits of the filename that aren't
+            # valid DOS chars. We assume there won't be any conflicts here.
+            cleaned_name = '-' + re.sub(r'[^a-zA-Z0-9]', '', base_name).upper()
+            if len(cleaned_name) > 8:
+                cleaned_name = cleaned_name[0:8]
+            DOSnames.append(f"{cleaned_name}.ZIP")
+            dosNameToLongname[f"{cleaned_name}.ZIP"] = longname
+        else:
+            if base_name not in fullnameToGameDir:
+                logger.log("    Unknown game %s no corresponding shortname found" % longname, logger.ERROR)
             else:
-                # If we still have a collision, we need to mangle the name some more
-                for i in string.ascii_uppercase + string.digits:
-                    for j in string.ascii_uppercase + string.digits:
-                        oldname = dname
-                        dname = longname.translate(translation_table)[0:6] + i + j + longname[-4:]
-                        dname = str.upper(dname)
-                        if isDebug:
-                            logger.log("    Extra mangling:" + oldname + " to " + dname)
-                        if dname not in DOSnames:
-                            if isDebug:
-                                logger.log("    Success:" + collided + " " + dname)
-                            break
-                    if dname not in DOSnames:
-                        break
+                DOSnames.append(f"{fullnameToGameDir[base_name].upper()}.ZIP")
+                dosNameToLongname[f"{fullnameToGameDir[base_name].upper()}.ZIP"] = longname
 
-        # If we got here, too many collisions (need more code!)
-        if dname in DOSnames:
-            logger.log("    Namespace collision converting" + longname + " to " + dname)
-            logger.log("    Ask the programmer to enhance the collision algorithm.")
-            return
+        # DOSnames.append(dname)
+        # dosNameToLongname[dname] = longname
 
-        DOSnames.append(dname)
-        dosNameToLongname[dname] = longname
     # if isDebug:
     #     logger.log("  first 5 DOS-friendly filenames are:")
     #     logger.log("  " + DOSnames[0:5] + "\n")
@@ -237,7 +194,8 @@ def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
     Also copy the TDL itself, the index files, tools needed, etc.
     """
     if os.path.exists(filesDir):
-        logger.log('  Output directory %s already exists.\nPlease specify a non-existent directory for the destination.' % destDir)
+        logger.log(
+            '  Output directory %s already exists.\nPlease specify a non-existent directory for the destination.' % destDir)
         sys.exit(1)
     logger.log("  Copying games zip from " + sourceDir + " to " + destDir + ", this might take a while...")
     shutil.copytree(distroDir, destDir)
@@ -259,7 +217,7 @@ def index(outputDir, scriptDir, isDebug, preExtractGames, logger):
     if preExtractGames:
         # Move content of games/game.pc dir to destDir/games
         for dosZipName in dosNameToLongname:
-            if dosZipName not in ['-MANUALL.ZIP','-UTILITI.ZIP']:
+            if dosZipName not in ['-MANUALL.ZIP', '-UTILITI.ZIP']:
                 longCleanName = dosNameToLongname[dosZipName]
                 gameDataDir = os.path.join(gamesDataTempDir, os.path.splitext(longCleanName)[0])
                 if os.path.exists(gameDataDir):

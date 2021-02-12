@@ -30,6 +30,7 @@ class ExoDOSConverter:
         self.confConverter = ConfConverter(self.games, self.outputDir, self.useGenreSubFolders,
                                            self.conversionType, self.conversionConf, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
+        self.misterCleanNameToGameDir = dict()
         self.postProcess = postProcess
 
     # Loops on all games to convert them
@@ -83,7 +84,7 @@ class ExoDOSConverter:
                     shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilities and System Files.zip'), gamesDir)
                     # Call Total DOS Launcher Indexer, delete top level games folder after
                     self.logger.log('Total DOS Indexer for ' + self.conversionType)
-                    TDLindexer.index(self.outputDir, self.scriptDir, self.conversionConf['useDebugMode'],
+                    TDLindexer.index(self.outputDir, self.scriptDir, self.misterCleanNameToGameDir, self.conversionConf['useDebugMode'],
                                      self.conversionConf['preExtractGames'], self.logger)
                     os.rename(os.path.join(self.outputDir,'tdlprocessed'), os.path.join(self.outputDir,'TDL_VHD'))
                     if not self.conversionConf['useDebugMode'] or self.conversionConf['preExtractGames']:
@@ -331,6 +332,8 @@ class ExoDOSConverter:
         misterCleanName = util.getCleanGameID(metadata, '').replace('+', '').replace("'", '').replace('µ','mu')\
             .replace('¿','').replace('é', 'e').replace('á', '').replace('ō', 'o').replace('#', '').replace('½', '')\
             .replace('$','').replace('à', 'a').replace('&', 'and').replace(',', '')
+
+        self.misterCleanNameToGameDir[misterCleanName] = game
 
         if not os.path.exists(os.path.join(self.outputDir, 'games')):
             os.mkdir(os.path.join(self.outputDir, 'games'))
