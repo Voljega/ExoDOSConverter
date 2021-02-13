@@ -6,13 +6,14 @@ import util
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
 
-    def __init__(self, games, outputDir, useGenreSubFolders, conversionType, conversionConf, logger):
+    def __init__(self, games, outputDir, useGenreSubFolders, conversionType, conversionConf, collectionVersion, logger):
         self.games = games
         self.logger = logger
         self.outputDir = outputDir
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionType = conversionType
         self.conversionConf = conversionConf
+        self.collectionVersion = collectionVersion
         self.commandHandler = CommandHandler(self.outputDir, self.logger)
 
     # Handle Parameter in ExpertMod
@@ -22,7 +23,7 @@ class ConfConverter:
         else:
             return defaultValue
 
-    # Converts exoDos dosbox.conf to dosbox.cfg and dosbox.bat
+    # Converts exo collection dosbox.conf to dosbox.cfg and dosbox.bat
     def process(self, game, localGameOutputDir, genre):
         self.logger.log("  create dosbox.bat")
         exoDosboxConf = open(os.path.join(localGameOutputDir, game, "dosbox.conf"), 'r')  # original
@@ -97,7 +98,7 @@ class ConfConverter:
                 whereWeAt.append('game')
                 # remove cd to gamedir as it is already done, but keep others cd
             elif cmdline.lower().startswith("cd "):
-                path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '), game)
+                path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '), game, self.collectionVersion)
                 if path.lower() == game.lower() and not os.path.exists(
                         os.path.join(localGameOutputDir, game, path)):
                     self.logger.log("    cd command: '%s' -> path is game name and no existing subpath, removed"
@@ -107,7 +108,7 @@ class ConfConverter:
                     retroDosboxBat.write(cmdline)
                     whereWeAt.append(path)
             elif cmdline.lower().startswith("imgmount "):
-                retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir))
+                retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir, self.collectionVersion))
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
@@ -115,13 +116,13 @@ class ConfConverter:
             elif cmdline.lower().startswith("mount "):
                 retroDosboxBat.write(self.commandHandler.handleMount(cmdline, game, localGameOutputDir, genre,
                                                                      self.useGenreSubFolders, self.conversionType,
-                                                                     self.conversionConf))
+                                                                     self.conversionConf, self.collectionVersion))
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
                     retroDosboxBat.write("\n")
             elif cmdline.lower().startswith("boot "):
-                retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, genre,
+                retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, self.collectionVersion, genre,
                                                                     self.useGenreSubFolders, self.conversionType))
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
@@ -190,7 +191,7 @@ class ConfConverter:
                 cmdline = cmdline.lstrip('@ ')
                 if cmdline.lower().startswith("imgmount "):
                     if cmdline not in handled:
-                        handled[cmdline] = self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir, True)
+                        handled[cmdline] = self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir, self.collectionVersion, True)
                     runFileClone.write(handled[cmdline])
                     if self.conversionConf['useDebugMode']:
                         runFileClone.write("\npause\n")

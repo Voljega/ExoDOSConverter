@@ -19,15 +19,16 @@ class CommandHandler:
                 return False
         return True
 
-    # Removes eXoDOS parts from exoDos paths
-    def reducePath(self, path, game, inside=False):
+    # Removes eXo collection games folder parts from exo collection paths
+    def reducePath(self, path, game, collectionVersion, inside=False):
         #        self.logger.log("    PATH CONVERT: %s" %path)
-        if path.lower().startswith(".\\exodos") or path.lower().startswith("\\exodos") \
-                or path.lower().startswith("exodos"):
+        exoToken = util.getCollectionGamesDirToken(collectionVersion).lower()
+        if path.lower().startswith(".\\" + exoToken) or path.lower().startswith("\\" + exoToken) \
+                or path.lower().startswith(exoToken):
             pathList = path.split('\\')
             if pathList[0] == '.':
                 pathList = pathList[1:]
-            if len(pathList) > 1 and pathList[0].lower() == 'exodos':  # and pathList[1].lower()==game.lower() :
+            if len(pathList) > 1 and pathList[0].lower() == exoToken:  # and pathList[1].lower()==game.lower() :
                 if not inside:
                     path = ".\\" + "\\".join(pathList[1:])
                 else:
@@ -54,7 +55,7 @@ class CommandHandler:
         return command[startIndex + 1:endIndex], command, startIndex, endIndex
 
     # Converts imgmount command line    
-    def handleImgmount(self, line, game, localGameOutputDir, inside=False):
+    def handleImgmount(self, line, game, localGameOutputDir, collectionVersion, inside=False):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
                                                                           startTokens=['a', 'b', 'c', 'd', 'e', 'f',
                                                                                        'g', 'h', 'i', 'j', 'k', 'y', '0', '2'],
@@ -62,7 +63,7 @@ class CommandHandler:
 
         prString = ""
         if len(paths) == 1:
-            path = self.reducePath(paths[0].replace('"', ""), game,inside)
+            path = self.reducePath(paths[0].replace('"', ""), game, collectionVersion, inside)
             self.logger.log("    clean single imgmount")
             path = self.cleanCDname(path.rstrip('\n'), localGameOutputDir, game, None, inside)
             prString = prString + " " + path
@@ -73,7 +74,7 @@ class CommandHandler:
             if countChar == 2:
                 # Single path with space
                 # TESTCASE: Take Back / CSS
-                path = self.reducePath(redoPath.replace('"', ""), game, inside)
+                path = self.reducePath(redoPath.replace('"', ""), game, collectionVersion, inside)
                 self.logger.log("    clean single imgmount")
                 path = self.cleanCDname(path, localGameOutputDir, game, None, inside)
                 prString = prString + " " + path
@@ -103,7 +104,7 @@ class CommandHandler:
 
                 cdCount = 1
                 for path in paths:
-                    path = self.reducePath(path.replace('"', ""), game, inside)
+                    path = self.reducePath(path.replace('"', ""), game, collectionVersion, inside)
                     path = self.cleanCDname(path, localGameOutputDir, game, cdCount, inside)
                     prString = prString + " " + '"' + path + '"'
                     cdCount = cdCount + 1
@@ -113,7 +114,7 @@ class CommandHandler:
         return fullString.rstrip(' ')
 
     # Converts mount command line
-    def handleBoot(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType):
+    def handleBoot(self, line, game, localGameOutputDir, collectionVersion, genre, useGenreSubFolders, conversionType):
         bootPath = line.replace('boot ', '').replace('BOOT ', '').rstrip(' \n\r')
         if bootPath != '-l c' and bootPath != '-l c>null':
             # reduce except for boot -l c
@@ -123,7 +124,7 @@ class CommandHandler:
                     paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
                 paths = [" ".join(paths)]
                 path = paths[0].replace('"', '')
-                path = self.reducePath(path, game)
+                path = self.reducePath(path, game, collectionVersion)
                 imgPath = os.path.dirname(path)
                 imgFullLocalPath = os.path.join(localGameOutputDir, util.localOutputPath(imgPath))
                 imgFile = ntpath.basename(path)
@@ -136,7 +137,7 @@ class CommandHandler:
             else:
                 for path in paths:
                     if path not in ['-l', 'a', 'a:']:
-                        path = self.reducePath(path.replace('"', ""), game)
+                        path = self.reducePath(path.replace('"', ""), game, collectionVersion)
                         # Verify path
                         postfix = path.find('-l')
                         chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
@@ -155,7 +156,7 @@ class CommandHandler:
         return fullString
 
     # Converts mount command line
-    def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType, conversionConf):
+    def handleMount(self, line, game, localGameOutputDir, genre, useGenreSubFolders, conversionType, conversionConf, collectionVersion):
         paths, command, startIndex, endIndex = self.pathListInCommandLine(line,
                                                                           startTokens=['a', 'b', 'd', 'e', 'f', 'g',
                                                                                        'h', 'i', 'j', 'k'],
@@ -164,20 +165,20 @@ class CommandHandler:
         prString = ""
         if len(paths) == 1:
             # TESTCASE: Sidewalk (1987) / Sidewalk
-            path = self.reducePath(paths[0].replace('"', ""), game)
+            path = self.reducePath(paths[0].replace('"', ""), game, collectionVersion)
             prString = prString + " " + path
         else:
             # See if path contains ""
             redoPath = " ".join(paths)
             countChar = redoPath.count('"')
             if countChar == 2:
-                path = self.reducePath(paths[0].replace('"', ""), game)
+                path = self.reducePath(paths[0].replace('"', ""), game, collectionVersion)
                 prString = prString + " " + path
             else:
                 self.logger.log("    <ERROR> MULTIPATH/MULTISPACE", self.logger.ERROR)
                 self.logger.logList("    paths", paths)
                 for path in paths:
-                    path = self.reducePath(path.replace('"', ""), game)
+                    path = self.reducePath(path.replace('"', ""), game, collectionVersion)
                     prString = prString + " " + path
 
         # Mount command needs to be absolute linux path

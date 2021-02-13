@@ -22,11 +22,37 @@ retrobat = 'Retrobat'
 emuelec = 'Emuelec'
 conversionTypes = [batocera, recalbox, retropie, retrobat, emuelec, simplemenu, esoteric, mister]
 
-exodosVersions = ['eXoDOS v5']
+EXODOS = 'eXoDOS v5'
+EXOWIN3X = 'eXoWin3x v2'
+exoVersions = [EXODOS, EXOWIN3X]
+
+exoCollectionsDirs = {EXODOS: {'gamesDir': 'eXoDOS', 'gamesConfDir': '!dos', 'metadataId': 'MS-DOS'},
+                      EXOWIN3X: {'gamesDir': 'eXoWin3x', 'gamesConfDir': '!win3x', 'metadataId': 'Windows 3x'}}
 
 mappers = ['No', 'RG350']
 
 theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
+
+
+def getCollectionGamesDirToken(collection):
+    return exoCollectionsDirs[collection]['gamesDir']
+
+
+def getCollectionGamesDir(collectionDir, collection):
+    return os.path.join(collectionDir, 'eXo', getCollectionGamesDirToken(collection))
+
+
+def getCollectionGamesConfDir(collectionDir, collection):
+    return os.path.join(getCollectionGamesDir(collectionDir, collection),
+                        exoCollectionsDirs[collection]['gamesConfDir'])
+
+
+def getCollectionUpdateDir(collectionDir, collection):
+    return os.path.join(collectionDir, 'eXo', 'Update', exoCollectionsDirs[collection]['gamesConfDir'])
+
+
+def getCollectionMetadataID(collection):
+    return exoCollectionsDirs[collection]['metadataId']
 
 
 def getKeySetString(string, setKey):
@@ -46,7 +72,8 @@ def getGuiStringsFilename(setKey):
 
 
 def downloadZip(gameZip, gameZipPath, logger):
-    response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True, headers={'User-agent': 'Mozilla/5.0'})
+    response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
+                            headers={'User-agent': 'Mozilla/5.0'})
     totalSize = int(response.headers.get('content-length'))
     rightSize = totalSize
     typeSize = ['b', 'kb', 'mb', 'gb']
@@ -109,7 +136,9 @@ def resize(imgPath):
 
 # Return full clean game name
 def getCleanGameID(metadata, ext):
-    cleanGameName = metadata.name.replace(':', ' -').replace('?', '').replace('!', '').replace('/', '-').replace('\\','-').replace('*','_').replace('í','i')
+    cleanGameName = metadata.name.replace(':', ' -').replace('?', '').replace('!', '').replace('/', '-').replace('\\',
+                                                                                                                 '-').replace(
+        '*', '_').replace('í', 'i')
     return cleanGameName + ' (' + str(metadata.year) + ')' + ext
 
 
@@ -132,16 +161,17 @@ def getRomsFolderPrefix(conversionType, conversionConf):
 
 
 # Checks validity of the collection path and its content
-def validCollectionPath(collectionPath):
-    return os.path.isdir(collectionPath) and os.path.exists(os.path.join(collectionPath, 'eXo')) and os.path.exists(
-        os.path.join(collectionPath, 'eXo', 'eXoDOS')) and os.path.exists(
-        os.path.join(collectionPath, 'xml')) and os.path.exists(os.path.join(collectionPath, 'Images'))
+def validCollectionPath(collectionPath, collection):
+    return os.path.isdir(collectionPath) and os.path.exists(getCollectionGamesDir(collectionPath, collection)) \
+           and os.path.exists(getCollectionGamesConfDir(collectionPath, collection)) \
+           and os.path.exists(os.path.join(collectionPath, 'xml')) \
+           and os.path.exists(os.path.join(collectionPath, 'Images'))
 
 
 # Parse the collection static cache file to generate list of games
-def fullnameToGameDir(scriptDir):
+def fullnameToGameDir(scriptDir, collectionVersion):
     gameDict = dict()
-    collectFile = open(os.path.join(scriptDir,'data','eXoDOSv5.csv'),'r', encoding='utf-8')
+    collectFile = open(os.path.join(scriptDir, 'data', collectionVersion.replace(' ','')+'.csv'), 'r', encoding='utf-8')
     for line in collectFile.readlines():
         strings = line.split(';')
         gameDict[strings[0]] = strings[1].rstrip('\n\r')
@@ -149,14 +179,14 @@ def fullnameToGameDir(scriptDir):
 
 
 # Build games csv for a new/updated collection
-def buildCollectionCSV(scriptDir, gamesDosDir, logger):
+def buildCollectionCSV(scriptDir, gamesConfDir, logger):
     collectFile = open(os.path.join(scriptDir, 'data', 'collec-new.csv'), 'w', encoding='utf-8')
-    logger.log('Listing games in %s' % gamesDosDir, logger.WARNING)
-    games = [file for file in os.listdir(gamesDosDir) if os.path.isdir(os.path.join(gamesDosDir, file))]
+    logger.log('Listing games in %s' % gamesConfDir, logger.WARNING)
+    games = [file for file in os.listdir(gamesConfDir) if os.path.isdir(os.path.join(gamesConfDir, file))]
 
     for game in games:  # games = list of folder in !dos dir
-        if os.path.isdir(os.path.join(gamesDosDir, game)):
-            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesDosDir, game)) if
+        if os.path.isdir(os.path.join(gamesConfDir, game)):
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesConfDir, game)) if
                     os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
                                                                                  0].lower() == 'install']
             # logger.log('  ' + bats[0] + '->' + game, logger.WARNING)
@@ -198,7 +228,7 @@ def buildPicCache(imageFolder, picCache, logger):
     picCacheFile = open(picCache, 'w')
     cache = dict()
     if os.path.exists(imageFolder):
-        rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(os.path.join(imageFolder,file))]
+        rootImages = [file for file in os.listdir(imageFolder) if not os.path.isdir(os.path.join(imageFolder, file))]
         subFolders = [file for file in os.listdir(imageFolder) if os.path.isdir(os.path.join(imageFolder, file))]
         for image in rootImages:
             cache[image] = os.path.join(imageFolder, image)
@@ -241,25 +271,25 @@ def cleanCache(scriptDir):
     # Builds or loads all three pic caches
 
 
-def buildCache(scriptDir, collectionDir, logger):
+def buildCache(scriptDir, collectionDir, collection, logger):
     cacheDir = os.path.join(scriptDir, 'cache')
     if not os.path.exists(cacheDir):
         os.mkdir(cacheDir)
 
     frontPicCacheFile = os.path.join(cacheDir, '.frontPicCache')
     frontPicCache = loadPicCache(frontPicCacheFile, logger) if os.path.exists(frontPicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', 'MS-DOS', 'Box - Front'), frontPicCacheFile, logger)
+        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Box - Front'), frontPicCacheFile, logger)
     logger.log("frontPicCache: %i entities" % len(frontPicCache.keys()))
 
     titlePicCacheFile = os.path.join(cacheDir, '.titlePicCache')
     titlePicCache = loadPicCache(titlePicCacheFile, logger) if os.path.exists(titlePicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', 'MS-DOS', 'Screenshot - Game Title'), titlePicCacheFile, logger)
+        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Screenshot - Game Title'), titlePicCacheFile, logger)
     logger.log("titlePicCache: %i entities" % len(titlePicCache.keys()))
 
     gameplayPicCacheFile = os.path.join(cacheDir, '.gameplayPicCache')
     gameplayPicCache = loadPicCache(gameplayPicCacheFile, logger) if os.path.exists(
         gameplayPicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', 'MS-DOS', 'Screenshot - Gameplay'), gameplayPicCacheFile, logger)
+        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Screenshot - Gameplay'), gameplayPicCacheFile, logger)
     logger.log("gameplayPicCache: %i entities" % len(gameplayPicCache.keys()))
 
     return frontPicCache, titlePicCache, gameplayPicCache

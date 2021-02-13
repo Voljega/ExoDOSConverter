@@ -9,7 +9,7 @@ import os
 import shutil
 import platform
 from datetime import datetime
-from exodosconverter import ExoDOSConverter
+from exoconverter import ExoConverter
 from functools import partial
 import _thread
 
@@ -29,8 +29,7 @@ class ExoGUI:
             os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)))
         self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
-        # TODO will need to reload that when changing version
-        self.fullnameToGameDir = util.fullnameToGameDir(scriptDir)
+        self.fullnameToGameDir = util.fullnameToGameDir(scriptDir, self.configuration['collectionVersion'])
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
@@ -84,8 +83,8 @@ class ExoGUI:
         self.leftFrame = None
         self.leftListLabel = None
         self.selectAllGamesButton = None
-        self.exodosGamesValues = None
-        self.exodosGamesListbox = None
+        self.exoGamesValues = None
+        self.exoGamesListbox = None
         self.buttonsColumnFrame = None
         self.selectGameButton = None
         self.deselectGameButton = None
@@ -186,6 +185,23 @@ class ExoGUI:
     def changeConversionType(self, event):
         self.handleComponentsState(False)
 
+    # Handle conversion version change
+    def changeCollectionVersion(self, event):
+        self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
+        # Empty filter
+        self.guiVars['filter'].set('')
+        # Empty right textarea
+        self.selectedGamesListbox.selection_clear(0, Tk.END)
+        self.selectedGamesValues.set([])
+        self.rightListLabel.set(
+            self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
+        # Fill left textarea with new values
+        self.exoGamesListbox.selection_clear(0, Tk.END)
+        self.exoGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
+        self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
+        # Regenerate cache using collection folder refresh
+        self.handleCollectionFolder()
+
     # Configuration Frame    
     def drawConfigurationFrame(self):
         self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", padx=10, pady=5)
@@ -200,7 +216,8 @@ class ExoGUI:
         self.conversionTypeLabel.grid(column=0, row=0, sticky="W", pady=5)
         self.guiVars['conversionType'] = Tk.StringVar()
         self.guiVars['conversionType'].set(self.configuration['conversionType'])
-        self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly", textvariable=self.guiVars['conversionType'])
+        self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
+                                                   textvariable=self.guiVars['conversionType'])
         self.conversionTypeComboBox.bind('<<ComboboxSelected>>', self.changeConversionType)
         self.conversionTypeComboBox.grid(column=1, row=0, sticky="W", pady=5, padx=5)
         self.conversionTypeValues = util.conversionTypes.copy()
@@ -213,14 +230,17 @@ class ExoGUI:
         self.guiVars['collectionVersion'].set(self.configuration['collectionVersion'])
         self.collectionVersionComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
                                                       textvariable=self.guiVars['collectionVersion'])
+        self.collectionVersionComboBox.bind('<<ComboboxSelected>>', self.changeCollectionVersion)
         self.collectionVersionComboBox.grid(column=3, row=0, sticky="W", pady=5, padx=5)
-        self.collectionVersionValues = util.exodosVersions.copy()
+        self.collectionVersionValues = util.exoVersions.copy()
         self.collectionVersionComboBox['values'] = self.collectionVersionValues
 
         self.guiVars['downloadOnDemand'] = Tk.IntVar()
         self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
-        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.collectionFrame, text=self.guiStrings['downloadOnDemand'].label,
-                                                          variable=self.guiVars['downloadOnDemand'], onvalue=1, offvalue=0)
+        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.collectionFrame,
+                                                          text=self.guiStrings['downloadOnDemand'].label,
+                                                          variable=self.guiVars['downloadOnDemand'], onvalue=1,
+                                                          offvalue=0)
         wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
         self.downloadOnDemandCheckButton.grid(column=4, row=0, sticky="E", pady=5)
 
@@ -355,12 +375,12 @@ class ExoGUI:
     # Listener for collection path modifications
     def handleCollectionFolder(self, *args):
         collectionDir = self.guiVars['collectionDir'].get()
+        collectionVersion = self.guiVars['collectionVersion'].get()
 
-        # TODO better test here with all subfolders and differenciation between DOS v5 and future Win3x v2 ?
-        # and maybe an error message somewhere
-        if not util.validCollectionPath(collectionDir):
+        if not util.validCollectionPath(collectionDir, collectionVersion):
             self.logger.log(
-                "\n%s is not a directory, doesn't exist, or is not a valid ExoDOS Collection directory" % collectionDir, self.logger.ERROR)
+                "\n%s is not a directory, doesn't exist, or is not a valid %s Collection directory" % (
+                collectionDir, collectionVersion), self.logger.ERROR)
             self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
             # Do not rebuild cache on first refresh of the value
@@ -370,17 +390,19 @@ class ExoGUI:
                 util.cleanCache(self.scriptDir)
             else:
                 self.needsCacheRefresh = True
-            self.cache = util.buildCache(self.scriptDir, collectionDir, self.logger)
+            self.cache = util.buildCache(self.scriptDir, collectionDir, collectionVersion, self.logger)
 
         self.handleComponentsState(False)
+        # TODO collection version should always be enabled for now, until it is automatic and not a combo box anymore ?
+        self.setComponentState(self.collectionVersionComboBox, 'normal')
 
     # Listener for filter entry modification
     def filterGamesList(self, *args):
         filterValue = self.guiVars['filter'].get()
         filteredGameslist = [g for g in self.fullnameToGameDir.keys() if filterValue.lower() in g.lower()]
-        self.exodosGamesListbox.selection_clear(0, Tk.END)
-        self.exodosGamesValues.set(sorted(filteredGameslist))
-        self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exodosGamesValues.get())) + ')')
+        self.exoGamesListbox.selection_clear(0, Tk.END)
+        self.exoGamesValues.set(sorted(filteredGameslist))
+        self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
 
     # Selection Frame
     def drawSelectionFrame(self):
@@ -438,20 +460,19 @@ class ExoGUI:
         wckToolTips.register(self.selectAllGamesButton, self.guiStrings['selectall'].help)
         self.selectAllGamesButton.grid(column=2, row=0, sticky='E')
 
-        self.exodosGamesValues = Tk.Variable(value=[])
-        self.exodosGamesListbox = Tk.Listbox(self.leftFrame, listvariable=self.exodosGamesValues,
-                                             selectmode=Tk.EXTENDED, width=70)
-        self.exodosGamesListbox.grid(column=0, row=1, sticky="W", pady=5)
-        self.exodosGamesListbox.grid_rowconfigure(0, weight=3)
+        self.exoGamesValues = Tk.Variable(value=[])
+        self.exoGamesListbox = Tk.Listbox(self.leftFrame, listvariable=self.exoGamesValues,
+                                          selectmode=Tk.EXTENDED, width=70)
+        self.exoGamesListbox.grid(column=0, row=1, sticky="W", pady=5)
+        self.exoGamesListbox.grid_rowconfigure(0, weight=3)
 
-        # TODO will need to refresh that when changing exodos version
-        self.exodosGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
+        self.exoGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
         self.leftListLabel.set(
             self.guiStrings['leftList'].label + ' (' + str(len(self.fullnameToGameDir.keys())) + ')')
 
-        scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exodosGamesListbox.yview)
+        scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exoGamesListbox.yview)
         scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S), )
-        self.exodosGamesListbox['yscrollcommand'] = scrollbarLeft.set
+        self.exoGamesListbox['yscrollcommand'] = scrollbarLeft.set
 
         # Selection Buttons Frame
         self.buttonsColumnFrame = Tk.Frame(self.selectionFrame, padx=10)
@@ -542,7 +563,7 @@ class ExoGUI:
             selectedGames = []
             for line in file.readlines():
                 game = line.rstrip(' \n\r')
-                if game in self.exodosGamesValues.get():
+                if game in self.exoGamesValues.get():
                     selectedGames.append(game)
             file.close()
             self.logger.log('Loaded selection File "%s" with %i games' % (customSelectionFile, len(selectedGames)))
@@ -562,14 +583,14 @@ class ExoGUI:
 
     # Listener to add all games to the selection
     def selectAll(self):
-        selectedAll = self.exodosGamesValues.get()
+        selectedAll = self.exoGamesValues.get()
         alreadyOnRight = self.selectedGamesValues.get()
         for sel in selectedAll:
             if sel not in alreadyOnRight:
                 self.selectedGamesListbox.insert(Tk.END, sel)
         self.selectedGamesValues.set(sorted(self.selectedGamesValues.get()))
 
-        self.exodosGamesListbox.selection_clear(0, Tk.END)
+        self.exoGamesListbox.selection_clear(0, Tk.END)
         self.rightListLabel.set(
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
@@ -581,14 +602,14 @@ class ExoGUI:
 
     # Listener to add selected game to selection
     def clickRight(self):
-        selectedOnLeft = [self.exodosGamesListbox.get(int(item)) for item in self.exodosGamesListbox.curselection()]
+        selectedOnLeft = [self.exoGamesListbox.get(int(item)) for item in self.exoGamesListbox.curselection()]
         alreadyOnRight = self.selectedGamesValues.get()
         for sel in selectedOnLeft:
             if sel not in alreadyOnRight:
                 self.selectedGamesListbox.insert(Tk.END, sel)
         self.selectedGamesValues.set(sorted(self.selectedGamesValues.get()))
 
-        self.exodosGamesListbox.selection_clear(0, Tk.END)
+        self.exoGamesListbox.selection_clear(0, Tk.END)
         self.rightListLabel.set(
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
@@ -632,7 +653,8 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir', 'selectCollectionDir', 'selectSelectionPath']:
+                              'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir',
+                              'selectCollectionDir', 'selectSelectionPath']:
                 if key.help:
                     confFile.write('# ' + key.help.replace('#n', '\n# ') + '\n')
                 if key.id == 'images':
@@ -652,7 +674,8 @@ class ExoGUI:
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
-                              'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir', 'selectCollectionDir', 'selectSelectionPath']:
+                              'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir',
+                              'selectCollectionDir', 'selectSelectionPath']:
                 if key.id == 'images':
                     imagesValue = self.guiVars[self.guiStrings['images'].label + ' #1'].get()
                     if self.guiStrings['images'].label + ' #2' in self.guiVars:
@@ -683,6 +706,7 @@ class ExoGUI:
 
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
+        collectionVersion = self.guiVars['collectionVersion'].get()
         conversionType = self.guiVars['conversionType'].get()
         useGenreSubFolders = True if self.guiVars['genreSubFolders'].get() == 1 else False
         outputDir = self.guiVars['outputDir'].get()
@@ -697,9 +721,7 @@ class ExoGUI:
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
         conversionConf['preExtractGames'] = True if self.guiVars['preExtractGames'].get() == 1 else False
         conversionConf['downloadOnDemand'] = True if self.guiVars['downloadOnDemand'].get() == 1 else False
-        # TODO better move this to converter when v5 is released and properly handle it, or move it to verify ? Also use messagebox
-        gamesDir = os.path.join(collectionDir, "eXo", "eXoDOS")
-        gamesDosDir = os.path.join(gamesDir, "!dos")
+
         games = [self.fullnameToGameDir.get(name) for name in self.selectedGamesValues.get()]
 
         for g in self.selectedGamesValues.get():
@@ -709,19 +731,14 @@ class ExoGUI:
                     self.logger.ERROR)
 
         self.logger.log(str(len(games)) + ' game(s) selected for conversion')
-        # TODO we could go from list of full game names now, as 'games' short names from !dos folder should correspond to dir in the zip of each game
 
-        # Uncomment only when new collection is released
-        # self.logger.log("Generating CSV for new collection in %s" % os.path.join(self.scriptDir,'data'), self.logger.WARNING)
-        # util.buildCollectionCSV(self.scriptDir, gamesDosDir, self.logger)
-
-        if not os.path.isdir(gamesDir) or not os.path.isdir(gamesDosDir):
-            self.logger.log("%s doesn't seem to be a valid ExoDOSCollection folder" % collectionDir)
+        if not util.validCollectionPath(collectionDir, collectionVersion):
+            self.logger.log("%s doesn't seem to be a valid %s collection folder" % (collectionDir, collectionVersion))
         else:
-            exoDOSConverter = ExoDOSConverter(games, self.cache, self.scriptDir, collectionDir, gamesDosDir, outputDir,
-                                              conversionType,
-                                              useGenreSubFolders, conversionConf, self.fullnameToGameDir, partial(self.postProcess), self.logger)
-            _thread.start_new(exoDOSConverter.convertGames, ())
+            exoConverter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
+                                        conversionType, useGenreSubFolders, conversionConf, self.fullnameToGameDir,
+                                        partial(self.postProcess), self.logger)
+            _thread.start_new(exoConverter.convertGames, ())
 
     # Set enabled/disabled state for a component
     def setComponentState(self, component, state):
@@ -731,26 +748,35 @@ class ExoGUI:
     # Handles state of all the components based on UI status
     def handleComponentsState(self, clickedProcess):
         collectionDir = self.guiVars['collectionDir'].get()
+        collectionVersion = self.guiVars['collectionVersion'].get()
         mainButtons = [self.verifyButton, self.saveButton, self.proceedButton]
-        entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton, self.selectOutputDirButton]
-        expertComponents = [self.mountPrefixEntry, self.fullResolutionCfgEntry, self.rendererCfgEntry, self.outputCfgEntry]
-        otherComponents = [self.exodosGamesListbox, self.selectedGamesListbox, self.selectGameButton,
-                           self.deselectGameButton, self.selectAllGamesButton, self.unselectAllGamesButton, self.filterEntry,
-                           self.conversionTypeComboBox, self.collectionVersionComboBox, self.useGenreSubFolderCheckButton,
-                           self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton, self.expertModeCheckButton,
-                           self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry, self.selectSelectionPathButton,
+        entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton,
+                           self.selectOutputDirButton]
+        expertComponents = [self.mountPrefixEntry, self.fullResolutionCfgEntry, self.rendererCfgEntry,
+                            self.outputCfgEntry]
+        otherComponents = [self.exoGamesListbox, self.selectedGamesListbox, self.selectGameButton,
+                           self.deselectGameButton, self.selectAllGamesButton, self.unselectAllGamesButton,
+                           self.filterEntry,
+                           self.conversionTypeComboBox, self.collectionVersionComboBox,
+                           self.useGenreSubFolderCheckButton,
+                           self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton,
+                           self.expertModeCheckButton,
+                           self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry,
+                           self.selectSelectionPathButton,
                            self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton]
 
-        if clickedProcess or not util.validCollectionPath(collectionDir):
+        if clickedProcess or not util.validCollectionPath(collectionDir, collectionVersion):
             [self.setComponentState(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
             [self.setComponentState(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
         else:
-            [self.setComponentState(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in expertComponents]
+            [self.setComponentState(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
+             expertComponents]
             [self.setComponentState(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
             self.setComponentState(self.preExtractGamesCheckButton,
                                    'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
             self.setComponentState(self.mapperComboBox,
-                                   'normal' if self.guiVars['conversionType'].get() in [util.esoteric, util.simplemenu] else 'disabled')
+                                   'normal' if self.guiVars['conversionType'].get() in [util.esoteric,
+                                                                                        util.simplemenu] else 'disabled')
 
     def postProcess(self):
         self.unselectAll()
@@ -789,7 +815,7 @@ class ExoGUI:
         previousLine = self.logTest.get('end-1c linestart', 'end-1c')
         # handle progress bar
         if msg[1] and previousLine.startswith('    [') and previousLine.endswith(']'):
-            self.logTest.delete('end-1c linestart','end')
+            self.logTest.delete('end-1c linestart', 'end')
 
         if self.logTest.index('end-1c') != '1.0':
             self.logTest.insert('end', '\n')

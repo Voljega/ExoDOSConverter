@@ -11,7 +11,7 @@ conversionType;Conversion Type;Choose your conversion type
 collectionVersion;Collection version;Your collection version
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
-downloadOnDemand;Download on demand;Activate direct download on demand
+downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
 preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
 expertMode;Expert mode;Allows overriding of generated configuration
@@ -25,7 +25,7 @@ selectall;Select all;Add all games to your selection
 unselectall;Unselect all;Remove all games from your selection
 left;Deselect game;Remove game(s) from selection
 right;Select game;Add game(s) to your selection
-leftList;ExoDOS Games;Full list of ExoDOS games
+leftList;Exo Collection Games;Full list of Exo Collection games
 rightList;Your Selection;Games you have selected
 verify;Verify;Check that your paths are okay
 save;Save;Save your configuration to file

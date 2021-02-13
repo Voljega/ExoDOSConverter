@@ -12,23 +12,25 @@ import TDLindexer
 
 
 # Main Converter
-class ExoDOSConverter:
+class ExoConverter:
 
-    def __init__(self, games, cache, scriptDir, collectionDir, gamesDosDir, outputDir, conversionType,
+    def __init__(self, games, cache, scriptDir, collectionVersion, collectionDir, outputDir, conversionType,
                  useGenreSubFolders, conversionConf, fullnameToGameDir, postProcess, logger):
         self.games = games
         self.cache = cache
         self.scriptDir = scriptDir
-        self.exoDosDir = os.path.join(collectionDir, 'eXo')
+        self.collectionVersion = collectionVersion
+        self.exoCollectionDir = collectionDir
         self.logger = logger
-        self.gamesDosDir = gamesDosDir
+        self.collectionGamesDir = util.getCollectionGamesDir(collectionDir, collectionVersion)
+        self.collectionGamesConfDir = util.getCollectionGamesConfDir(collectionDir, collectionVersion)
         self.outputDir = outputDir
         self.conversionType = conversionType
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionConf = conversionConf
-        self.metadataHandler = MetadataHandler(collectionDir, self.cache, self.logger)
+        self.metadataHandler = MetadataHandler(collectionDir, collectionVersion, self.cache, self.logger)
         self.confConverter = ConfConverter(self.games, self.outputDir, self.useGenreSubFolders,
-                                           self.conversionType, self.conversionConf, self.logger)
+                                           self.conversionType, self.conversionConf, self.collectionVersion, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
         self.misterCleanNameToGameDir = dict()
         self.postProcess = postProcess
@@ -158,12 +160,12 @@ class ExoDOSConverter:
             # unzip game (xxxx).zip from unzip line in game/install.bat
             # following options should be set in dosbox.conf / actually do it later in converter
             # fullscreen = true, output=overlay, aspect=true
-            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(self.gamesDosDir, game)) if
+            bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(self.collectionGamesConfDir, game)) if
                     os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
                                                                                  0].lower() == 'install']
             gameZip = bats[0] + '.zip'
             if gameZip is not None:
-                gameZipPath = os.path.join(self.exoDosDir, "eXoDOS", gameZip)
+                gameZipPath = os.path.join(os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion)), gameZip)
                 if not os.path.exists(gameZipPath):
                     self.logger.log('  <WARNING> %s not found' % gameZipPath, self.logger.WARNING)
                     if self.conversionConf['downloadOnDemand']:
@@ -172,11 +174,11 @@ class ExoDOSConverter:
                         self.logger.log('  <WARNING> Activate Download on demand if you want to download missing games', self.logger.WARNING)
                 self.unzipGame(gameZip, gameZipPath, localGameOutputDir, game)
             else:
-                self.logger.log("  ERROR while trying to find zip file for " + os.path.join(self.gamesDosDir, game), self.logger.ERROR)
+                self.logger.log("  ERROR while trying to find zip file for " + os.path.join(self.collectionGamesConfDir, game), self.logger.ERROR)
             self.logger.log("  unzipped")
 
             # Handle game update if it exists
-            updateZipPath = os.path.join(self.exoDosDir, "Update", "!dos", gameZip)
+            updateZipPath = os.path.join(util.getCollectionUpdateDir(self.exoCollectionDir, self.collectionVersion), gameZip)
             if os.path.exists(updateZipPath):
                 self.logger.log("  found an update for the game")
                 self.unzipGame(gameZip, updateZipPath, localGameOutputDir, game)
@@ -207,7 +209,7 @@ class ExoDOSConverter:
         localGameDataOutputDir = os.path.join(localGameOutputDir, game)
         self.logger.log("  copy dosbox conf")
         # Copy dosbox.conf in game.pc
-        shutil.copy2(os.path.join(self.exoDosDir, "eXoDOS", "!dos", game, "dosbox.conf"),
+        shutil.copy2(os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), game, "dosbox.conf"),
                      os.path.join(localGameDataOutputDir, "dosbox.conf"))
         # Create blank file with full game name        
         f = open(os.path.join(localGameOutputDir, util.getCleanGameID(metadata, '.txt')), 'w', encoding='utf8')
@@ -229,12 +231,12 @@ class ExoDOSConverter:
         if game in needsFirstGame:
             for previousGameZip in needsFirstGame[game]:
                 # unzip game dependency
-                with ZipFile(os.path.join(self.exoDosDir, "eXoDOS", previousGameZip), 'r') as zipFile:
+                with ZipFile(os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion), previousGameZip), 'r') as zipFile:
                     # Extract all the contents of zip file in current directory
                     self.logger.log("  unzipping previous game" + previousGameZip)
-                    zipFile.extractall(path=os.path.join(self.exoDosDir, "eXoDOS"))
+                    zipFile.extractall(path=util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion))
                 # copy its directory or directory part to the inside of the second game dir
-                shutil.move(os.path.join(self.exoDosDir, "eXoDOS", self.fullnameToGameDir.get(os.path.splitext(previousGameZip)[0])),
+                shutil.move(os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion), self.fullnameToGameDir.get(os.path.splitext(previousGameZip)[0])),
                             os.path.join(localGameOutputDir))
 
     # Post-conversion operations for a given game for various conversion types

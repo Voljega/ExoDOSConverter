@@ -14,8 +14,9 @@ DosGame = collections.namedtuple('DosGame',
 # Metadata exporting
 class MetadataHandler:
 
-    def __init__(self, exoDosDir, cache, logger):
-        self.exoDosDir = exoDosDir
+    def __init__(self, exoCollectionDir, collectionVersion, cache, logger):
+        self.exoCollectionDir = exoCollectionDir
+        self.collectionVersion = collectionVersion
         self.cache = cache
         self.logger = logger
         self.metadatas = dict()
@@ -42,16 +43,16 @@ class MetadataHandler:
         with open(os.path.join(outputDir, "gamelist.xml"), "wb") as f:
             f.write(xmlstr.encode('utf-8'))
 
-    # Parse exoDos metadata file    
+    # Parse exo collection metadata file
     def parseXmlMetadata(self):
-        xmlPath = os.path.join(self.exoDosDir, 'xml', 'MS-DOS.xml')
+        xmlPath = os.path.join(self.exoCollectionDir, 'xml', util.getCollectionMetadataID(self.collectionVersion) + '.xml')
         metadatas = dict()
         if os.path.exists(xmlPath):
             parser = etree.XMLParser(encoding="utf-8")
             games = etree.parse(xmlPath, parser=parser).findall(".//Game")
             for g in games:
                 name = self.get(g, 'Title')
-                if name != 'eXoDOS':
+                if name not in list(map(lambda x: util.exoCollectionsDirs[x]['gamesDir'], list(util.exoCollectionsDirs.keys()))):
                     try:
                         path = self.get(g, 'ApplicationPath').split("\\")
                         dosname = path[-2]
@@ -63,7 +64,7 @@ class MetadataHandler:
                         publisher = self.get(g, 'Publisher')
                         genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
                         manual = self.get(g, 'ManualPath')
-                        manualpath = util.localOutputPath(os.path.join(self.exoDosDir, manual)) if manual is not None else None
+                        manualpath = util.localOutputPath(os.path.join(self.exoCollectionDir, manual)) if manual is not None else None
                         frontPic = util.findPics(name, self.cache)
                         metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
                                            manualpath, desc)
@@ -75,7 +76,7 @@ class MetadataHandler:
         self.metadatas = metadatas
         return metadatas
 
-    # Retrieve exoDos metadata for a given game
+    # Retrieve exo collection metadata for a given game
     def handleMetadata(self, game):
         dosGame = self.metadatas.get(game.lower())
         self.logger.log("  Metadata: %s (%s), genres: %s" % (dosGame.name, dosGame.year, " | ".join(dosGame.genres)))
@@ -131,7 +132,7 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'manual').text = manual
             etree.SubElement(gameElt, 'image').text = frontPic
 
-    # Convert multi genres exodos format to a single one
+    # Convert multi genres exo collection format to a single one
     def buildGenre(self, dosGame):
         if dosGame is not None and dosGame.genres is not None:
             if 'Flight Simulator' in dosGame.genres or 'Vehicle Simulation' in dosGame.genres:
