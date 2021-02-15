@@ -33,6 +33,15 @@ class ExoConverter:
 
     # Loops on all games to convert them
     def convertGames(self):
+        # Pre-checks
+        if len(self.games) == 0:
+            self.postProcess()
+            return
+        if self.conversionType == util.mister and os.path.exists(os.path.join(self.outputDir, 'TDL_VHD')):
+            self.logger.log("\nFound a previous MiSTeR conversion in output folder, please move or delete it before processing with a new one\n", self.logger.ERROR)
+            self.postProcess()
+            return
+
         self.logger.log("Loading metadatas...")
         self.metadataHandler.parseXmlMetadata()
         self.logger.log("")
@@ -61,7 +70,7 @@ class ExoConverter:
         self.metadataHandler.writeXml(self.outputDir, gamelist)
 
         self.logger.log('\n<--------- Post-conversion --------->')
-        self.postConverion()
+        self.postConversion()
 
         self.logger.log('\n<--------- Finished Process --------->')
 
@@ -164,7 +173,7 @@ class ExoConverter:
             os.rename(os.path.join(gGator.getLocalGameOutputDir(), unzippedDirs[0]), os.path.join(gGator.getLocalGameOutputDir(), gGator.game))
 
     # specific convertion type treatments after converting all games
-    def postConverion(self):
+    def postConversion(self):
         # Cleaning for some conversions
         if self.conversionType in [util.esoteric, util.simplemenu, util.mister]:
             self.logger.log('Post cleaning for ' + self.conversionType)
