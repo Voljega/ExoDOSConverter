@@ -8,7 +8,7 @@ selectSelectionPath;Select;Select your selection file
 loadCustom;Load;Load your custom selection from file
 saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
-collectionVersion;Collection version;Your collection version
+collectionVersion;Collection version;Your collection version (automatically set)
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
 downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
@@ -25,7 +25,7 @@ selectall;Select all;Add all games to your selection
 unselectall;Unselect all;Remove all games from your selection
 left;Deselect game;Remove game(s) from selection
 right;Select game;Add game(s) to your selection
-leftList;Exo Collection Games;Full list of Exo Collection games
+leftList;Collection Games;Full list of this Collection games
 rightList;Your Selection;Games you have selected
 verify;Verify;Check that your paths are okay
 save;Save;Save your configuration to file

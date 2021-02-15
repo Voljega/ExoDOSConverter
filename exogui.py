@@ -53,11 +53,10 @@ class ExoGUI:
         self.selectOutputDirButton = None
         self.configurationFrame = None
         self.collectionFrame = None
+        self.versionFrame = None
+        self.collectionVersionLabel = None
         self.conversionTypeComboBox = None
         self.conversionTypeValues = None
-        self.collectionVersionLabel = None
-        self.collectionVersionComboBox = None
-        self.collectionVersionValues = None
         self.downloadOnDemandCheckButton = None
         self.mapperLabel = None
         self.mapperComboBox = None
@@ -185,32 +184,28 @@ class ExoGUI:
     def changeConversionType(self, event):
         self.handleComponentsState(False)
 
-    # Handle conversion version change
-    def changeCollectionVersion(self, event):
-        self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
-        # Empty filter
-        self.guiVars['filter'].set('')
-        # Empty right textarea
-        self.selectedGamesListbox.selection_clear(0, Tk.END)
-        self.selectedGamesValues.set([])
-        self.rightListLabel.set(
-            self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
-        # Fill left textarea with new values
-        self.exoGamesListbox.selection_clear(0, Tk.END)
-        self.exoGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
-        self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
-        # Regenerate cache using collection folder refresh
-        self.handleCollectionFolder()
-
-    # Configuration Frame    
+    # Configuration Frame
     def drawConfigurationFrame(self):
         self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", padx=10, pady=5)
         self.configurationFrame.grid(column=0, row=1, sticky="EW", pady=5)
         self.configurationFrame.columnconfigure(0, weight=1)
 
+        self.versionFrame = Tk.Frame(self.configurationFrame)
+        self.versionFrame.grid(column=0, row=0, padx=5, sticky="EW")
+        self.guiVars['collectionVersion'] = Tk.StringVar()
+        self.guiVars['collectionVersion'].set(self.configuration['collectionVersion'])
+        self.guiVars['collectionVersionLabel'] = Tk.StringVar()
+        self.guiVars['collectionVersionLabel'].set(
+            self.guiStrings['collectionVersion'].label + ' : ' + self.guiVars['collectionVersion'].get())
+        self.collectionVersionLabel = Tk.Label(self.versionFrame,
+                                               textvariable=self.guiVars['collectionVersionLabel'])
+        wckToolTips.register(self.collectionVersionLabel, self.guiStrings['collectionVersion'].help)
+        self.collectionVersionLabel.grid(column=0, row=0, sticky="W")
+
         # Collection parameters
         self.collectionFrame = Tk.Frame(self.configurationFrame)
-        self.collectionFrame.grid(column=0, row=0, padx=5, sticky="EW")
+        self.collectionFrame.grid(column=0, row=1, padx=5, sticky="EW")
+
         self.conversionTypeLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['conversionType'].label)
         wckToolTips.register(self.conversionTypeLabel, self.guiStrings['conversionType'].help)
         self.conversionTypeLabel.grid(column=0, row=0, sticky="W", pady=5)
@@ -223,18 +218,6 @@ class ExoGUI:
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
 
-        self.collectionVersionLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['collectionVersion'].label)
-        wckToolTips.register(self.collectionVersionLabel, self.guiStrings['collectionVersion'].help)
-        self.collectionVersionLabel.grid(column=2, row=0, sticky="W", pady=5)
-        self.guiVars['collectionVersion'] = Tk.StringVar()
-        self.guiVars['collectionVersion'].set(self.configuration['collectionVersion'])
-        self.collectionVersionComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
-                                                      textvariable=self.guiVars['collectionVersion'])
-        self.collectionVersionComboBox.bind('<<ComboboxSelected>>', self.changeCollectionVersion)
-        self.collectionVersionComboBox.grid(column=3, row=0, sticky="W", pady=5, padx=5)
-        self.collectionVersionValues = util.exoVersions.copy()
-        self.collectionVersionComboBox['values'] = self.collectionVersionValues
-
         self.guiVars['downloadOnDemand'] = Tk.IntVar()
         self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
         self.downloadOnDemandCheckButton = Tk.Checkbutton(self.collectionFrame,
@@ -242,7 +225,7 @@ class ExoGUI:
                                                           variable=self.guiVars['downloadOnDemand'], onvalue=1,
                                                           offvalue=0)
         wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
-        self.downloadOnDemandCheckButton.grid(column=4, row=0, sticky="E", pady=5)
+        self.downloadOnDemandCheckButton.grid(column=3, row=0, sticky="E", pady=5)
 
         self.guiVars['preExtractGames'] = Tk.IntVar()
         self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
@@ -251,14 +234,14 @@ class ExoGUI:
                                                          variable=self.guiVars['preExtractGames'], onvalue=1,
                                                          offvalue=0)
         wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
-        self.preExtractGamesCheckButton.grid(column=6, row=0, sticky="W", pady=5)
+        self.preExtractGamesCheckButton.grid(column=5, row=0, sticky="W", pady=5)
 
-        ttk.Separator(self.configurationFrame, orient=Tk.HORIZONTAL).grid(column=0, row=1, padx=5, pady=0,
+        ttk.Separator(self.configurationFrame, orient=Tk.HORIZONTAL).grid(column=0, row=2, padx=5, pady=0,
                                                                           sticky="EW")
 
         # Conversion parameters
         self.conversionFrame = Tk.Frame(self.configurationFrame)
-        self.conversionFrame.grid(column=0, row=2, padx=5, sticky="EW")
+        self.conversionFrame.grid(column=0, row=3, padx=5, sticky="EW")
         self.conversionFrame.columnconfigure(0, weight=1)
 
         self.conversionFirstLineFrame = Tk.Frame(self.conversionFrame)
@@ -375,14 +358,28 @@ class ExoGUI:
     # Listener for collection path modifications
     def handleCollectionFolder(self, *args):
         collectionDir = self.guiVars['collectionDir'].get()
-        collectionVersion = self.guiVars['collectionVersion'].get()
+        collectionVersion = util.validCollectionPath(collectionDir)
+        self.guiVars['collectionVersion'].set(collectionVersion)
+        self.guiVars['collectionVersionLabel'].set(self.guiStrings['collectionVersion'].label + ': ' + self.guiVars['collectionVersion'].get())
 
-        if not util.validCollectionPath(collectionDir, collectionVersion):
+        if collectionVersion is None:
             self.logger.log(
-                "\n%s is not a directory, doesn't exist, or is not a valid %s Collection directory" % (
-                collectionDir, collectionVersion), self.logger.ERROR)
+                "\n%s is not a directory, doesn't exist, or is not a valid exo Collection directory" % collectionDir, self.logger.ERROR)
             self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
+            self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
+            # Empty filter
+            self.guiVars['filter'].set('')
+            # Empty right textarea
+            self.selectedGamesListbox.selection_clear(0, Tk.END)
+            self.selectedGamesValues.set([])
+            self.rightListLabel.set(
+                self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
+            # Fill left textarea with new values
+            self.exoGamesListbox.selection_clear(0, Tk.END)
+            self.exoGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
+            self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
+
             # Do not rebuild cache on first refresh of the value
             if self.needsCacheRefresh is True:
                 self.logger.log("\nRebuild image caches, this is gonna take a while ...")
@@ -393,8 +390,6 @@ class ExoGUI:
             self.cache = util.buildCache(self.scriptDir, collectionDir, collectionVersion, self.logger)
 
         self.handleComponentsState(False)
-        # TODO collection version should always be enabled for now, until it is automatic and not a combo box anymore ?
-        self.setComponentState(self.collectionVersionComboBox, 'normal')
 
     # Listener for filter entry modification
     def filterGamesList(self, *args):
@@ -732,8 +727,9 @@ class ExoGUI:
 
         self.logger.log(str(len(games)) + ' game(s) selected for conversion')
 
-        if not util.validCollectionPath(collectionDir, collectionVersion):
-            self.logger.log("%s doesn't seem to be a valid %s collection folder" % (collectionDir, collectionVersion))
+        collectionVersion = util.validCollectionPath(collectionDir)
+        if collectionVersion is None:
+            self.logger.log("%s doesn't seem to be a valid collection folder" % collectionDir)
         else:
             exoConverter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
                                         conversionType, useGenreSubFolders, conversionConf, self.fullnameToGameDir,
@@ -747,7 +743,6 @@ class ExoGUI:
 
     # Handles state of all the components based on UI status
     def handleComponentsState(self, clickedProcess):
-        collectionDir = self.guiVars['collectionDir'].get()
         collectionVersion = self.guiVars['collectionVersion'].get()
         mainButtons = [self.verifyButton, self.saveButton, self.proceedButton]
         entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton,
@@ -757,7 +752,7 @@ class ExoGUI:
         otherComponents = [self.exoGamesListbox, self.selectedGamesListbox, self.selectGameButton,
                            self.deselectGameButton, self.selectAllGamesButton, self.unselectAllGamesButton,
                            self.filterEntry,
-                           self.conversionTypeComboBox, self.collectionVersionComboBox,
+                           self.conversionTypeComboBox,
                            self.useGenreSubFolderCheckButton,
                            self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton,
                            self.expertModeCheckButton,
@@ -765,7 +760,7 @@ class ExoGUI:
                            self.selectSelectionPathButton,
                            self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton]
 
-        if clickedProcess or not util.validCollectionPath(collectionDir, collectionVersion):
+        if clickedProcess or collectionVersion == 'None':
             [self.setComponentState(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
             [self.setComponentState(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
         else:
@@ -787,7 +782,7 @@ class ExoGUI:
         self.consoleFrame = Tk.Frame(self.root, padx=10)
         self.consoleFrame.grid(column=0, row=5, sticky="EW", pady=5)
         self.consoleFrame.grid_columnconfigure(0, weight=1)
-        self.logTest = Tk.Text(self.consoleFrame, height=25, state='disabled', wrap='word', background='black',
+        self.logTest = Tk.Text(self.consoleFrame, height=22, state='disabled', wrap='word', background='black',
                                foreground='yellow')
         self.logTest.grid(column=0, row=0, sticky="EW")
         self.logTest.tag_config('ERROR', background='black', foreground='red')

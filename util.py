@@ -35,6 +35,7 @@ theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
 
 misterCleanNameToGameDir = dict()
 
+
 def isWin3x(collectionVersion):
     return collectionVersion == EXOWIN3X
 
@@ -166,11 +167,20 @@ def getRomsFolderPrefix(conversionType, conversionConf):
 
 
 # Checks validity of the collection path and its content
-def validCollectionPath(collectionPath, collection):
+def isCollectionPath(collectionPath, collection):
     return os.path.isdir(collectionPath) and os.path.exists(getCollectionGamesDir(collectionPath, collection)) \
            and os.path.exists(getCollectionGamesConfDir(collectionPath, collection)) \
            and os.path.exists(os.path.join(collectionPath, 'xml')) \
            and os.path.exists(os.path.join(collectionPath, 'Images'))
+
+
+def validCollectionPath(collectionPath):
+    if isCollectionPath(collectionPath, EXODOS):
+        return EXODOS
+    elif isCollectionPath(collectionPath, EXOWIN3X):
+        return EXOWIN3X
+    else:
+        return None
 
 
 # Parse the collection static cache file to generate list of games
