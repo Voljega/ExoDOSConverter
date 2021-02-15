@@ -547,6 +547,8 @@ class ExoGUI:
         if not os.path.exists(customSelectionFile):
             self.logger.log('Selection File "%s" does not exist' % customSelectionFile, self.logger.ERROR)
         else:
+            # Empty filter
+            self.guiVars['filter'].set('')
             file = open(customSelectionFile, 'r', encoding='utf-8')
             selectedGames = []
             for line in file.readlines():
