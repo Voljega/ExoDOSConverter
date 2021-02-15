@@ -6,15 +6,16 @@ import util
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
 
-    def __init__(self, games, outputDir, useGenreSubFolders, conversionType, conversionConf, collectionVersion, logger):
-        self.games = games
-        self.logger = logger
-        self.outputDir = outputDir
-        self.useGenreSubFolders = useGenreSubFolders
-        self.conversionType = conversionType
-        self.conversionConf = conversionConf
-        self.collectionVersion = collectionVersion
-        self.commandHandler = CommandHandler(self.outputDir, self.logger)
+    def __init__(self, gGator):
+        self.logger = gGator.logger
+        self.conversionConf = gGator.conversionConf
+        self.commandHandler = CommandHandler(gGator)
+        # self.outputDir = gGator.outputDir
+        # self.useGenreSubFolders = gGator.useGenreSubFolders
+        # self.conversionType = gGator.conversionType
+        # self.conversionConf = gGator.conversionConf
+        # self.collectionVersion = gGator.collectionVersion
+        # self.commandHandler = CommandHandler(gGator)
 
     # Handle Parameter in ExpertMod
     def getExpertParam(self, parameter, defaultValue):
@@ -24,11 +25,11 @@ class ConfConverter:
             return defaultValue
 
     # Converts exo collection dosbox.conf to dosbox.cfg and dosbox.bat
-    def process(self, game, localGameOutputDir, genre):
+    def process(self, gGator):
         self.logger.log("  create dosbox.bat")
-        exoDosboxConf = open(os.path.join(localGameOutputDir, game, "dosbox.conf"), 'r')  # original
-        retroDosboxCfg = open(os.path.join(localGameOutputDir, "dosbox.cfg"), 'w')  # retroarch dosbox.cfg
-        retroDosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'w')  # retroarch dosbox.bat
+        exoDosboxConf = open(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"), 'r') # original
+        retroDosboxCfg = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.cfg"), 'w')  # retroarch dosbox.cfg
+        retroDosboxBat = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.bat"), 'w')  # retroarch dosbox.bat
 
         count = 0
         lines = exoDosboxConf.readlines()
@@ -36,17 +37,17 @@ class ConfConverter:
             if cmdline.startswith("fullscreen"):
                 retroDosboxCfg.write("fullscreen=true\n")
             elif cmdline.startswith("fullresolution"):
-                if self.conversionType == util.retrobat:
+                if gGator.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
                 else:
                     retroDosboxCfg.write("fullresolution=" + self.getExpertParam("fullresolutionCfg", "desktop") + "\n")
             elif cmdline.startswith("output"):
-                if self.conversionType == util.retrobat:
+                if gGator.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
                 else:
                     retroDosboxCfg.write("output=" + self.getExpertParam("outputCfg", "texture") + "\n")
                 retroDosboxCfg.write("renderer=" + self.getExpertParam("rendererCfg", "auto") + "\n")
-                if self.conversionConf['vsyncCfg']:
+                if gGator.conversionConf['vsyncCfg']:
                     retroDosboxCfg.write("vsync=true\n")
                 else:
                     retroDosboxCfg.write("vsync=false\n")
@@ -63,7 +64,7 @@ class ConfConverter:
                 retroDosboxCfg.write("\n")
             elif cmdline.startswith("[autoexec]"):
                 retroDosboxCfg.write(cmdline)
-                self.createDosboxBat(lines[count + 1:], retroDosboxBat, retroDosboxCfg, game, localGameOutputDir, genre)
+                self.createDosboxBat(lines[count + 1:], retroDosboxBat, retroDosboxCfg, gGator)
                 break
             else:
                 retroDosboxCfg.write(cmdline)
@@ -71,20 +72,20 @@ class ConfConverter:
             count = count + 1
 
         exoDosboxConf.close()
-        os.remove(os.path.join(localGameOutputDir, game, "dosbox.conf"))
+        os.remove(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"))
         retroDosboxCfg.close()
         retroDosboxBat.close()
 
     # Creates dosbox.bat from dosbox.conf [autoexec] part
-    def createDosboxBat(self, cmdlines, retroDosboxBat, retroDosboxCfg, game, localGameOutputDir, genre):
+    def createDosboxBat(self, cmdlines, retroDosboxBat, retroDosboxCfg, gGator):
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
             if self.conversionConf['useDebugMode']:
                 retroDosboxCfg.write("# " + cmdline)
-            self.convertLine(cmdline, retroDosboxBat, game, localGameOutputDir, genre)
+            self.convertLine(cmdline, retroDosboxBat, gGator)
 
     # Convert command line to dosbox.bat
-    def convertLine(self, cmdline, retroDosboxBat, game, localGameOutputDir, genre):
+    def convertLine(self, cmdline, retroDosboxBat, gGator):
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
         # always remove @
         cmdline = cmdline.lstrip('@ ')
@@ -93,14 +94,15 @@ class ConfConverter:
         if self.commandHandler.useLine(cmdline, cutLines):
             if cmdline.lower().startswith("c:"):
                 retroDosboxBat.write(cmdline)
-                # First add move into game subdir
-                retroDosboxBat.write("cd %s\n" % game)
-                whereWeAt.append('game')
-                # remove cd to gamedir as it is already done, but keep others cd
+                if not gGator.isWin3x():
+                    # First add move into game subdir
+                    retroDosboxBat.write("cd %s\n" % gGator.game)
+                    whereWeAt.append('game')
+            # remove cd to gamedir as it is already done, but keep others cd
             elif cmdline.lower().startswith("cd "):
-                path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '), game, self.collectionVersion)
-                if path.lower() == game.lower() and not os.path.exists(
-                        os.path.join(localGameOutputDir, game, path)):
+                path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '))
+                if path.lower() == gGator.game.lower() and not os.path.exists(
+                        os.path.join(gGator.getLocalGameDataOutputDir(), path)):
                     self.logger.log("    cd command: '%s' -> path is game name and no existing subpath, removed"
                                     % cmdline.rstrip('\n\r '))
                 else:
@@ -108,37 +110,34 @@ class ConfConverter:
                     retroDosboxBat.write(cmdline)
                     whereWeAt.append(path)
             elif cmdline.lower().startswith("imgmount "):
-                retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir, self.collectionVersion))
+                retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline.rstrip('\n\r ')))
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
                     retroDosboxBat.write("\n")
             elif cmdline.lower().startswith("mount "):
-                retroDosboxBat.write(self.commandHandler.handleMount(cmdline, game, localGameOutputDir, genre,
-                                                                     self.useGenreSubFolders, self.conversionType,
-                                                                     self.conversionConf, self.collectionVersion))
+                retroDosboxBat.write(self.commandHandler.handleMount(cmdline.rstrip('\n\r ')))
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
                     retroDosboxBat.write("\n")
             elif cmdline.lower().startswith("boot "):
-                retroDosboxBat.write(self.commandHandler.handleBoot(cmdline, game, localGameOutputDir, self.collectionVersion, genre,
-                                                                    self.useGenreSubFolders, self.conversionType))
+                retroDosboxBat.write(self.commandHandler.handleBoot(cmdline.rstrip('\n\r ')))
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
-                if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
+                if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
                             'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'heromm2d']:
-                    self.handleRunBat(game, localGameOutputDir)
-                self.handlePotentialSubFile(cmdline, game, localGameOutputDir)
+                    self.handleRunBat(gGator)
+                self.handlePotentialSubFile(cmdline, gGator)
                 retroDosboxBat.write(cmdline)
             else:
-                self.handlePotentialSubFile(cmdline,game, localGameOutputDir)
+                self.handlePotentialSubFile(cmdline, gGator)
                 retroDosboxBat.write(cmdline)
 
     # Handle potential sub files and problems in it
-    def handlePotentialSubFile(self, subPath, game, localGameOutputDir, handledSubFiles=[]):
+    def handlePotentialSubFile(self, subPath, gGator, handledSubFiles=[]):
         subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
-        subBat = os.path.join(localGameOutputDir, game, subPath.rstrip(' \n\r') + '.bat')
+        subBat = os.path.join(gGator.getLocalGameDataOutputDir(), subPath.rstrip(' \n\r') + '.bat')
         if os.path.exists(subBat) and not os.path.isdir(subBat) and subBat.lower() not in handledSubFiles:
             self.logger.log('    Handle Bat File %s' % subBat, self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
@@ -147,16 +146,18 @@ class ConfConverter:
             for cmdline in subBatFile.readlines():
                 # always remove @
                 cmdline = cmdline.lstrip('@ ')
-                if cmdline.lower().rstrip(' \n\r') == 'c:' and self.conversionType == util.mister:
+                if cmdline.lower().rstrip(' \n\r') == 'c:' and gGator.conversionType == util.mister:
                     self.logger.log('      Remove c: for MiSTeR', self.logger.WARNING)
                 else:
                     if 'c:\\' in cmdline.lower():
-                        if self.conversionType == util.mister:
-                            cmdline = cmdline.replace('c:', 'E:\\GAMES\\' + game).replace('C:', 'E:\\GAMES\\' + game)
+                        if gGator.conversionType == util.mister:
+                            # TODO might need win3x fix
+                            cmdline = cmdline.replace('c:', 'E:\\GAMES\\' + gGator.game).replace('C:', 'E:\\GAMES\\' + gGator.game)
                         else:
-                            cmdline = cmdline.replace('c:','c:\\'+game).replace('C:','C:\\'+game)
+                            if not gGator.isWin3x():
+                                cmdline = cmdline.replace('c:','c:\\'+gGator.game).replace('C:','C:\\'+gGator.game)
                     else:
-                        self.handlePotentialSubFile(cmdline, game, localGameOutputDir, handledSubFiles)
+                        self.handlePotentialSubFile(cmdline, gGator, handledSubFiles)
                     subBatFileClone.write(cmdline)
             subBatFileClone.close()
             subBatFile.close()
@@ -165,8 +166,8 @@ class ConfConverter:
             os.rename(subBat + '1', subBat)
 
     # Treat run.bat command inside game directory
-    def handleRunBat(self, game, localGameOutputDir):
-        runBat = os.path.join(localGameOutputDir, game, 'run.bat')
+    def handleRunBat(self, gGator):
+        runBat = os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat')
         if os.path.exists(runBat):
             runFile = open(runBat, 'r')
             runFileClone = open(runBat + '1', 'w')
@@ -191,7 +192,7 @@ class ConfConverter:
                 cmdline = cmdline.lstrip('@ ')
                 if cmdline.lower().startswith("imgmount "):
                     if cmdline not in handled:
-                        handled[cmdline] = self.commandHandler.handleImgmount(cmdline, game, localGameOutputDir, self.collectionVersion, True)
+                        handled[cmdline] = self.commandHandler.handleImgmount(cmdline, True)
                     runFileClone.write(handled[cmdline])
                     if self.conversionConf['useDebugMode']:
                         runFileClone.write("\npause\n")
@@ -202,8 +203,7 @@ class ConfConverter:
             runFileClone.close()
             runFile.close()
             # Delete runbat and rename runbat clone to runbat
-            os.remove(os.path.join(localGameOutputDir, game, 'run.bat'))
-            os.rename(os.path.join(localGameOutputDir, game, 'run.bat1'),
-                      os.path.join(localGameOutputDir, game, 'run.bat'))
+            os.remove(os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat'))
+            os.rename(os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat1'), os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat'))
         else:
             self.logger.log('      <ERROR> run.bat not found', self.logger.ERROR)

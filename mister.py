@@ -9,7 +9,7 @@ from PIL import ImageDraw
 
 
 # Removed unused CDs
-def removeUnusedCds(game, localGameOutputDir, logger):
+def removeUnusedCds(game, localGameDataOutputDir, logger):
     unusedCds = {
         'heromm2d': '.\\CD\\Heroes of Might and Magic 2.cue',
         'VirtSqua': '.\\cd\\V_SQUAD.CUE',
@@ -20,7 +20,7 @@ def removeUnusedCds(game, localGameOutputDir, logger):
         'WC2DLX': '..\\WC\\cd\\WC.cue'
     }
     if game in unusedCds:
-        cue = os.path.join(localGameOutputDir, game, util.localOutputPath(unusedCds[game]))
+        cue = os.path.join(localGameDataOutputDir, util.localOutputPath(unusedCds[game]))
         cueDir = os.path.dirname(cue)
         cdFiles = [file for file in os.listdir(cueDir) if
                    os.path.splitext(ntpath.basename(cue))[0] == os.path.splitext(file)[0]
@@ -31,31 +31,31 @@ def removeUnusedCds(game, localGameOutputDir, logger):
 
 
 # Creates launch.bat and handles mount and imgmount paths
-def batsAndMounts(game, outputDir, localGameOutputDir, logger):
-    dosboxBat = open(os.path.join(localGameOutputDir, "dosbox.bat"), 'r')
-    launchBat = open(os.path.join(localGameOutputDir, "1_Start.bat"), 'w', newline='\r\n')
+def batsAndMounts(gGator):
+    dosboxBat = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.bat"), 'r')
+    launchBat = open(os.path.join(gGator.getLocalGameOutputDir(), "1_Start.bat"), 'w', newline='\r\n')
     lines = dosboxBat.readlines()
     for line in lines:
         line = line.lstrip('@ ').rstrip(' \n\r')
         if line.lower() != 'c:' and not line.lower().startswith('path=') and not line.lower().startswith('path ='):
             if line.startswith("imgmount"):
-                launchBat.write(convertImgMount(line, game, outputDir, localGameOutputDir, logger))
+                launchBat.write(convertImgMount(line, gGator))
             elif line.startswith("mount") and not line.lower().startswith('mountain'):
-                launchBat.write(convertMount(line, game, outputDir, localGameOutputDir, logger))
+                launchBat.write(convertMount(line, gGator))
             elif line.startswith("boot") and line != 'boots':
                 if line == 'boot -l c':
                     launchBat.write('imgset r\n')
                 elif line != 'boot' and line != 'boot -l a':
-                    launchBat.write(convertBoot(line, game, outputDir, localGameOutputDir, logger))
+                    launchBat.write(convertBoot(line, gGator))
                 else:
-                    logger.log('      <ERROR> Impossible to convert "%s" command' % line, logger.ERROR)
+                    gGator.logger.log('      <ERROR> Impossible to convert "%s" command' % line, gGator.logger.ERROR)
                     launchBat.write(line + '\n')
             elif line.lower() in ['d:', 'f:', 'g:', 'h:', 'i:', 'j:', 'k:']:
                 launchBat.write('f:\n')
             elif line.lower() == 'call run' or line.lower() == 'call run.bat':
-                if game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
-                    handleRunBat(game, localGameOutputDir, outputDir, logger)
+                if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
+                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
+                    handleRunBat(gGator)
                 launchBat.write(line)
             else:
                 launchBat.write(line + '\n')
@@ -64,14 +64,14 @@ def batsAndMounts(game, outputDir, localGameOutputDir, logger):
     # Convert imgmount or mount of floppy to imgset fdd0 /floppy/filename.img
     launchBat.close()
     dosboxBat.close()
-    createSetupBat(localGameOutputDir, game)
-    createEditBat(localGameOutputDir)
-    os.remove(os.path.join(localGameOutputDir, 'dosbox.bat'))
+    createSetupBat(gGator)
+    createEditBat(gGator)
+    os.remove(os.path.join(gGator.getLocalGameOutputDir(), 'dosbox.bat'))
 
 
 # Treat run.bat command inside game directory
-def handleRunBat(game, localGameOutputDir, outputDir, logger):
-    runBat = os.path.join(localGameOutputDir, game, 'run.bat')
+def handleRunBat(gGator):
+    runBat = os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat')
     if os.path.exists(runBat):
         runFile = open(runBat, 'r')
         runFileClone = open(runBat + '1', 'w')
@@ -92,97 +92,99 @@ def handleRunBat(game, localGameOutputDir, outputDir, logger):
             cmdline = cmdline.lstrip('@ ').rstrip(' \n\r')
             if cmdline.lower().startswith("imgmount "):
                 if cmdline not in handled:
-                    handled[cmdline] = convertImgMount(cmdline, game, outputDir, localGameOutputDir, logger)
+                    handled[cmdline] = convertImgMount(cmdline, gGator)
                 runFileClone.write(handled[cmdline] + '\n')
             else:
                 runFileClone.write(cmdline + '\n')
         runFileClone.close()
         runFile.close()
         # Delete runbat and rename runbat clone to runbat
-        os.remove(os.path.join(localGameOutputDir, game, 'run.bat'))
-        os.rename(os.path.join(localGameOutputDir, game, 'run.bat1'), os.path.join(localGameOutputDir, game, 'run.bat'))
+        os.remove(os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat'))
+        os.rename(os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat1'), os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat'))
     else:
-        logger.log('    <ERROR> run.bat not found', logger.ERROR)
+        gGator.logger.log('    <ERROR> run.bat not found', gGator.logger.ERROR)
 
 
 # Convert imgmount command for MiSTeR
-def convertImgMount(line, game, outputDir, localGameOutputDir, logger):
-    return handlesFileType(line, 2, game, outputDir, localGameOutputDir, logger)
+def convertImgMount(line, gGator):
+    return handlesFileType(line, 2, gGator)
 
 
 # Convert mount command for MiSTeR
-def convertMount(line, game, outputDir, localGameOutputDir, logger):
-    return handlesFileType(line, 2, game, outputDir, localGameOutputDir, logger)
+def convertMount(line, gGator):
+    return handlesFileType(line, 2, gGator)
 
 
 # Convert boot command for MiSTeR
-def convertBoot(line, game, outputDir, localGameOutputDir, logger):
-    return handlesFileType(line, 1, game, outputDir, localGameOutputDir, logger)
+def convertBoot(line, gGator):
+    return handlesFileType(line, 1, gGator)
 
 
 # Determine type of files
-def handlesFileType(line, pathPos, game, outputDir, localGameOutputDir, logger):
+def handlesFileType(line, pathPos, gGator):
     params = line.split(' ')
     # TODO Boot command without parameter will crash here, needs to be parsed properly
     path = params[pathPos].replace('"', '')
     if params[0] in ['imgmount', 'mount']:
         if params[-1].rstrip('\n\r ') == 'cdrom' or params[-1].rstrip('\n\r ') == 'iso':
-            localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            misterCommand = convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+            localPath = locateMountedFiles(path, gGator)
+            misterCommand = convertCD(localPath, gGator, params[1])
             # params size > 5 and not extras param like -fs ?
             if len(params) > 5 and params[3] != '-t':
                 i = 3
                 while i < (len(params) - 2):
                     print(params[i])
-                    localPath = locateMountedFiles(params[i].replace('"', ''), params[0], game, outputDir,
-                                                   localGameOutputDir)
+                    localPath = locateMountedFiles(params[i].replace('"', ''), gGator)
                     # Only move the other CDs
-                    convertCD(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+                    convertCD(localPath, gGator, params[1])
                     i = i + 1
             return misterCommand
         elif params[-1].rstrip('\n\r ') == 'floppy':
-            localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-            return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, params[1])
+            localPath = locateMountedFiles(path, gGator)
+            return convertFloppy(localPath, gGator, params[1])
         else:  # Treat default version as cd
-            localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
+            localPath = locateMountedFiles(path, gGator)
             if params[1].rstrip('\n\r ') == 'c':
-                return convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger)
+                return convertBootDisk(localPath, gGator)
             else:
-                return convertCD(localPath, game, outputDir, localGameOutputDir, logger)
+                return convertCD(localPath, gGator)
     else:  # Boot command
-        localPath = locateMountedFiles(path, params[0], game, outputDir, localGameOutputDir)
-        return convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, 'a')
+        localPath = locateMountedFiles(path, gGator)
+        return convertFloppy(localPath, gGator, 'a')
 
 
 # Locate mounted files
-def locateMountedFiles(path, command, game, outputDir, localGameOutputDir):
+def locateMountedFiles(path, gGator):
     if platform.system() == 'Windows':
         path = path.replace('/', '\\')
 
-    localPath = util.localOutputPath(os.path.join(localGameOutputDir, path))
+    localPath = util.localOutputPath(os.path.join(gGator.getLocalGameOutputDir(), path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(localGameOutputDir, game, path))
+        localPath = util.localOutputPath(os.path.join(gGator.getLocalGameDataOutputDir(), path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(outputDir, path))
-    if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(outputDir, game + '.pc', path))
-    if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(outputDir, game + '.pc', game, path))
+        localPath = util.localOutputPath(os.path.join(gGator.outputDir, path))
+    # TODO Same as the first two ifs but without genre ? used ?
+    # if not os.path.exists(localPath):
+    #     localPath = util.localOutputPath(os.path.join(gGator.outputDir, gGator.game + '.pc', path))
+    # if not os.path.exists(localPath):
+    #     localPath = util.localOutputPath(os.path.join(gGator.outputDir, gGator.game + '.pc', gGator.game, path))
     return localPath
 
 
 # Convert cds file
-def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'):
+def convertCD(localPath, gGator, letter='d'):
     # Move cds file
-    if not os.path.exists(os.path.join(outputDir, 'cd')):
-        os.mkdir(os.path.join(outputDir, 'cd'))
+    # TODO see if we can do makedirs below instead
+    if not os.path.exists(os.path.join(gGator.outputDir, 'cd')):
+        os.mkdir(os.path.join(gGator.outputDir, 'cd'))
 
     if os.path.isdir(localPath):
-        return convertMountedFolder('d', localPath, game, outputDir, localGameOutputDir, logger)
+        return convertMountedFolder('d', localPath, gGator)
     else:
+        gameCDDir = os.path.join(gGator.outputDir, 'cd', gGator.game)
         # Move cds file
-        if not os.path.exists(os.path.join(outputDir, 'cd', game)):
-            os.mkdir(os.path.join(outputDir, 'cd', game))
+        if not os.path.exists(gameCDDir):
+            os.mkdir(gameCDDir)
 
         imgmountDir = os.path.dirname(localPath)
 
@@ -190,14 +192,14 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
                    os.path.splitext(ntpath.basename(localPath))[0] == os.path.splitext(file)[0]
                    and os.path.splitext(file)[-1].lower() in ['.ccd', '.sub', '.cue', '.iso', '.img', '.bin']]
         for cdFile in cdFiles:
-            logger.log("      move %s to %s folder" % (cdFile, 'cd'))
-            shutil.move(os.path.join(imgmountDir, cdFile), os.path.join(outputDir, 'cd', game))
+            gGator.logger.log("      move %s to %s folder" % (cdFile, 'cd'))
+            shutil.move(os.path.join(imgmountDir, cdFile), gameCDDir)
         # Move all music files except FLAC an FLA
         musicFiles = [file for file in os.listdir(imgmountDir)
                       if os.path.splitext(file)[-1].lower() in ['.ogg', '.mp3', '.wav']]
         for musicFile in musicFiles:
-            logger.log("      move %s to %s folder" % (musicFile, 'cd'))
-            shutil.move(os.path.join(imgmountDir, musicFile), os.path.join(outputDir, 'cd', game))
+            gGator.logger.log("      move %s to %s folder" % (musicFile, 'cd'))
+            shutil.move(os.path.join(imgmountDir, musicFile), gameCDDir)
         # Delete all FLAC and FLA files
         flacFiles = [file for file in os.listdir(imgmountDir)
                      if os.path.splitext(file)[-1].lower() in ['.flac', '.fla']]
@@ -205,66 +207,71 @@ def convertCD(localPath, game, outputDir, localGameOutputDir, logger, letter='d'
             os.remove(os.path.join(imgmountDir, flacFile))
         # Modify and return command line
         if letter == 'd':
-            return 'imgset ide10 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
+            return 'imgset ide10 "/cd/' + gGator.game + '/' + ntpath.basename(localPath) + '"\n'
         else:
-            return 'imgset ide11 "/cd/' + game + '/' + ntpath.basename(localPath) + '"\n'
+            return 'imgset ide11 "/cd/' + gGator.game + '/' + ntpath.basename(localPath) + '"\n'
 
 
 # Convert floppy file
-def convertFloppy(localPath, game, outputDir, localGameOutputDir, logger, letter):
+def convertFloppy(localPath, gGator, letter):
     # Move bootable file
-    if not os.path.exists(os.path.join(outputDir, 'floppy')):
-        os.mkdir(os.path.join(outputDir, 'floppy'))
+    # TODO see if we can do makedirs below instead
+    if not os.path.exists(os.path.join(gGator.outputDir, 'floppy')):
+        os.mkdir(os.path.join(gGator.outputDir, 'floppy'))
 
     if os.path.isdir(localPath):
-        return convertMountedFolder(letter, localPath, game, outputDir, localGameOutputDir, logger)
+        return convertMountedFolder(letter, localPath, gGator)
     else:
-        if not os.path.exists(os.path.join(outputDir, 'floppy', game)):
-            os.mkdir(os.path.join(outputDir, 'floppy', game))
-        logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'floppy'))
-        shutil.move(localPath, os.path.join(outputDir, 'floppy', game))
+        gameFloppyDir = os.path.join(gGator.outputDir, 'floppy', gGator.game)
+        if not os.path.exists(gameFloppyDir):
+            os.mkdir(gameFloppyDir)
+        gGator.logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'floppy'))
+        shutil.move(localPath, gameFloppyDir)
         # Modify and return command line
-        return 'imgset fdd0 "/floppy/' + game + '/' + ntpath.basename(localPath) + '"\n'
+        return 'imgset fdd0 "/floppy/' + gGator.game + '/' + ntpath.basename(localPath) + '"\n'
 
 
 # Convert bootdisk file
-def convertBootDisk(localPath, game, outputDir, localGameOutputDir, logger):
+def convertBootDisk(localPath, gGator):
     # Move bootable file
-    if not os.path.exists(os.path.join(outputDir, 'bootdisk')):
-        os.mkdir(os.path.join(outputDir, 'bootdisk'))
+    # TODO see if we can do makedirs below instead
+    if not os.path.exists(os.path.join(gGator.outputDir, 'bootdisk')):
+        os.mkdir(os.path.join(gGator.outputDir, 'bootdisk'))
 
     if os.path.isdir(localPath):
-        return convertMountedFolder('c', localPath, game, outputDir, localGameOutputDir, logger)
+        return convertMountedFolder('c', localPath, gGator)
     else:
-        if not os.path.exists(os.path.join(outputDir, 'bootdisk', game)):
-            os.mkdir(os.path.join(outputDir, 'bootdisk', game))
-        logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'bootdisk'))
+        gameBootDiskDir = os.path.join(gGator.outputDir, 'bootdisk', gGator.game)
+        if not os.path.exists(gameBootDiskDir):
+            os.mkdir(gameBootDiskDir)
+        gGator.logger.log("      move %s to %s folder" % (ntpath.basename(localPath), 'bootdisk'))
         shutil.move(localPath,
-                    os.path.join(outputDir, 'bootdisk', game, os.path.splitext(ntpath.basename(localPath))[0] + '.vhd'))
+                    os.path.join(gameBootDiskDir, os.path.splitext(ntpath.basename(localPath))[0] + '.vhd'))
         # Modify and return command line
-        return 'imgset ide00 "/bootdisk/' + game + '/' + os.path.splitext(ntpath.basename(localPath))[
+        return 'imgset ide00 "/bootdisk/' + gGator.game + '/' + os.path.splitext(ntpath.basename(localPath))[
             0] + '.vhd' + '"\n'
 
 
 # Convert mounted or imgmounted folder
-def convertMountedFolder(letter, localPath, game, outputDir, localGameOutputDir, logger):
+def convertMountedFolder(letter, localPath, gGator):
     if localPath.endswith('\\'):
         localPath = localPath[:-1]
     # TODO game\basename is not good either, path is lost !! needs reduction of the path instead / missing parts
-    logger.log("      subst folder %s as %s:" % (ntpath.basename(localPath), letter))
-    return 'subst ' + letter + ': /d\nsubst ' + letter + ': ' + game + '\\' + ntpath.basename(localPath)
+    gGator.logger.log("      subst folder %s as %s:" % (ntpath.basename(localPath), letter))
+    return 'subst ' + letter + ': /d\nsubst ' + letter + ': ' + gGator.game + '\\' + ntpath.basename(localPath)
 
 
 # Create Setup.bat file
-def createSetupBat(localGameOutputDir, game):
-    setupBat = open(os.path.join(localGameOutputDir, "3_Setup.bat"), 'w', newline='\r\n')
+def createSetupBat(gGator):
+    setupBat = open(os.path.join(gGator.getLocalGameOutputDir(), "3_Setup.bat"), 'w', newline='\r\n')
     setupBat.write('@echo off\n')
-    setupBat.write('cd %s\n' % game)
-    setupFiles = [file.lower() for file in os.listdir(os.path.join(localGameOutputDir, game)) if file.lower() in
-                  [game.lower(), 'setsound.exe', 'sound.exe', 'sound.com', 'install.exe', 'install.com',
+    if not gGator.isWin3x:
+        setupBat.write('cd %s\n' % gGator.game)
+    setupFiles = [file.lower() for file in os.listdir(gGator.getLocalGameDataOutputDir()) if file.lower() in
+                  [gGator.game.lower(), 'setsound.exe', 'sound.exe', 'sound.com', 'install.exe', 'install.com',
                    'setup.exe', 'setup.com']]
-    if len(setupFiles) <= 1 and os.path.exists(os.path.join(localGameOutputDir, game, game)):
-        setupBat.write('cd %s\n' % game)
+    if len(setupFiles) <= 1 and os.path.exists(os.path.join(gGator.getLocalGameDataOutputDir(), gGator.game)):
+        setupBat.write('cd %s\n' % gGator.game)
     setupBat.write('\n')
     setupBat.write('IF EXIST setsound.exe goto :sound1\n')
     setupBat.write('IF EXIST sound.exe goto :sound2\n')
@@ -313,8 +320,8 @@ def createSetupBat(localGameOutputDir, game):
 
 
 # Create Edit.bat file
-def createEditBat(localGameOutputDir):
-    editBat = open(os.path.join(localGameOutputDir, "4_Edit.bat"), 'w', newline='\r\n')
+def createEditBat(gGator):
+    editBat = open(os.path.join(gGator.getLocalGameOutputDir(), "4_Edit.bat"), 'w', newline='\r\n')
     editBat.write('@echo off\nedit 1_Start.bat\n')
     editBat.close()
 

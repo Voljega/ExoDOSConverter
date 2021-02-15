@@ -33,6 +33,11 @@ mappers = ['No', 'RG350']
 
 theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
 
+misterCleanNameToGameDir = dict()
+
+def isWin3x(collectionVersion):
+    return collectionVersion == EXOWIN3X
+
 
 def getCollectionGamesDirToken(collection):
     return exoCollectionsDirs[collection]['gamesDir']
