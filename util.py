@@ -247,43 +247,27 @@ def buildPicCache(imageFolder, picCache, logger):
         subFolders = [file for file in os.listdir(imageFolder) if os.path.isdir(os.path.join(imageFolder, file))]
         for image in rootImages:
             cache[image] = os.path.join(imageFolder, image)
-            picCacheFile.write(image + "=" + os.path.join(imageFolder, image) + '\n')
+            picCacheFile.write(image + "=" + image + '\n')
         for subFolder in subFolders:
             subFolderImages = [file for file in os.listdir(os.path.join(imageFolder, subFolder)) if
                                not os.path.isdir(file)]
             for image in subFolderImages:
                 cache[image] = os.path.join(imageFolder, subFolder, image)
-                picCacheFile.write(image + "=" + os.path.join(imageFolder, subFolder, image) + '\n')
+                picCacheFile.write(image + "=" + os.path.join(subFolder, image) + '\n')
     picCacheFile.close()
     return cache
 
 
 # Loads a specific pic cache
-def loadPicCache(picCache, logger):
+def loadPicCache(picCache, imageFolder, logger):
     logger.log("Loading cache %s" % picCache)
     picCacheFile = open(picCache, 'r')
     cache = dict()
     for line in picCacheFile.readlines():
         tokens = line.split("=")
-        cache[tokens[0]] = tokens[1].rstrip('\n\r ')
+        cache[tokens[0]] = os.path.join(imageFolder, localOutputPath(tokens[1].rstrip('\n\r ')))
     picCacheFile.close()
     return cache
-
-
-# Clean all three pic caches
-def cleanCache(scriptDir):
-    cacheDir = os.path.join(scriptDir, 'cache')
-    frontPicCacheFile = os.path.join(cacheDir, '.frontPicCache')
-    if os.path.exists(frontPicCacheFile):
-        os.remove(frontPicCacheFile)
-    titlePicCacheFile = os.path.join(cacheDir, '.titlePicCache')
-    if os.path.exists(titlePicCacheFile):
-        os.remove(titlePicCacheFile)
-    gameplayPicCacheFile = os.path.join(cacheDir, '.gameplayPicCache')
-    if os.path.exists(gameplayPicCacheFile):
-        os.remove(gameplayPicCacheFile)
-
-    # Builds or loads all three pic caches
 
 
 def buildCache(scriptDir, collectionDir, collection, logger):
@@ -291,20 +275,23 @@ def buildCache(scriptDir, collectionDir, collection, logger):
     if not os.path.exists(cacheDir):
         os.mkdir(cacheDir)
 
-    frontPicCacheFile = os.path.join(cacheDir, '.frontPicCache')
-    frontPicCache = loadPicCache(frontPicCacheFile, logger) if os.path.exists(frontPicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Box - Front'), frontPicCacheFile, logger)
+    frontPicCacheFile = os.path.join(cacheDir, '.%s-frontPicCache' % getCollectionGamesDirToken(collection))
+    frontPicImgFolder = os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Box - Front')
+    frontPicCache = loadPicCache(frontPicCacheFile, frontPicImgFolder, logger) if os.path.exists(frontPicCacheFile) \
+        else buildPicCache(frontPicImgFolder, frontPicCacheFile, logger)
     logger.log("frontPicCache: %i entities" % len(frontPicCache.keys()))
 
-    titlePicCacheFile = os.path.join(cacheDir, '.titlePicCache')
-    titlePicCache = loadPicCache(titlePicCacheFile, logger) if os.path.exists(titlePicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Screenshot - Game Title'), titlePicCacheFile, logger)
+    titlePicCacheFile = os.path.join(cacheDir, '.%s-titlePicCache' % getCollectionGamesDirToken(collection))
+    titlePicImgFolder = os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Screenshot - Game Title')
+    titlePicCache = loadPicCache(titlePicCacheFile, titlePicImgFolder, logger) if os.path.exists(titlePicCacheFile) \
+        else buildPicCache(titlePicImgFolder, titlePicCacheFile, logger)
     logger.log("titlePicCache: %i entities" % len(titlePicCache.keys()))
 
-    gameplayPicCacheFile = os.path.join(cacheDir, '.gameplayPicCache')
-    gameplayPicCache = loadPicCache(gameplayPicCacheFile, logger) if os.path.exists(
-        gameplayPicCacheFile) else buildPicCache(
-        os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection), 'Screenshot - Gameplay'), gameplayPicCacheFile, logger)
+    gameplayPicCacheFile = os.path.join(cacheDir, '.%s-gameplayPicCache' % getCollectionGamesDirToken(collection))
+    gameplayPicImgFolder = os.path.join(collectionDir, 'Images', getCollectionMetadataID(collection),
+                                        'Screenshot - Gameplay')
+    gameplayPicCache = loadPicCache(gameplayPicCacheFile, gameplayPicImgFolder, logger) if os.path.exists(gameplayPicCacheFile) \
+        else buildPicCache(gameplayPicImgFolder, gameplayPicCacheFile, logger)
     logger.log("gameplayPicCache: %i entities" % len(gameplayPicCache.keys()))
 
     return frontPicCache, titlePicCache, gameplayPicCache

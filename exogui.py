@@ -22,7 +22,6 @@ class ExoGUI:
         self.scriptDir = scriptDir
         self.setKey = 'exo'
         self.cache = None
-        self.needsCacheRefresh = False
         self.loading = True
         # TODO create conf file from guiStrings if it doesn't exist and do not ship it with tool anymore 
         self.configuration = conf.loadConf(
@@ -380,13 +379,7 @@ class ExoGUI:
             self.exoGamesValues.set(sorted(list(self.fullnameToGameDir.keys())))
             self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
 
-            # Do not rebuild cache on first refresh of the value
-            if self.needsCacheRefresh is True:
-                self.logger.log("\nRebuild image caches, this is gonna take a while ...")
-                self.updateConsoleFromQueue()
-                util.cleanCache(self.scriptDir)
-            else:
-                self.needsCacheRefresh = True
+            self.logger.log("\nBuild/Load image caches, this might take a while ...")
             self.cache = util.buildCache(self.scriptDir, collectionDir, collectionVersion, self.logger)
 
         self.handleComponentsState(False)
