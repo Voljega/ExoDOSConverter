@@ -20,7 +20,7 @@ def removeUnusedCds(game, localGameDataOutputDir, logger):
         'WC2DLX': '..\\WC\\cd\\WC.cue'
     }
     if game in unusedCds:
-        cue = os.path.join(localGameDataOutputDir, util.localOutputPath(unusedCds[game]))
+        cue = os.path.join(localGameDataOutputDir, util.localOSPath(unusedCds[game]))
         cueDir = os.path.dirname(cue)
         cdFiles = [file for file in os.listdir(cueDir) if
                    os.path.splitext(ntpath.basename(cue))[0] == os.path.splitext(file)[0]
@@ -158,11 +158,11 @@ def locateMountedFiles(path, gGator):
     if platform.system() == 'Windows':
         path = path.replace('/', '\\')
 
-    localPath = util.localOutputPath(os.path.join(gGator.getLocalGameOutputDir(), path))
+    localPath = util.localOSPath(os.path.join(gGator.getLocalGameOutputDir(), path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(gGator.getLocalGameDataOutputDir(), path))
+        localPath = util.localOSPath(os.path.join(gGator.getLocalGameDataOutputDir(), path))
     if not os.path.exists(localPath):
-        localPath = util.localOutputPath(os.path.join(gGator.outputDir, path))
+        localPath = util.localOSPath(os.path.join(gGator.outputDir, path))
     # TODO Same as the first two ifs but without genre ? used ?
     # if not os.path.exists(localPath):
     #     localPath = util.localOutputPath(os.path.join(gGator.outputDir, gGator.game + '.pc', path))

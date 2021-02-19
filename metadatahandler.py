@@ -64,7 +64,7 @@ class MetadataHandler:
                         publisher = self.get(g, 'Publisher')
                         genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
                         manual = self.get(g, 'ManualPath')
-                        manualpath = util.localOutputPath(os.path.join(self.exoCollectionDir, manual)) if manual is not None else None
+                        manualpath = util.localOSPath(os.path.join(self.exoCollectionDir, manual)) if manual is not None else None
                         frontPic = util.findPics(name, self.cache)
                         metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
                                            manualpath, desc)

@@ -123,7 +123,7 @@ def loadUIStrings(scriptDir, guiStringsFile):
 
 
 # Handle os escaping of path in local output dir
-def localOutputPath(path):
+def localOSPath(path):
     if platform.system() == 'Windows':
         return path
     else:
@@ -265,7 +265,7 @@ def loadPicCache(picCache, imageFolder, logger):
     cache = dict()
     for line in picCacheFile.readlines():
         tokens = line.split("=")
-        cache[tokens[0]] = os.path.join(imageFolder, localOutputPath(tokens[1].rstrip('\n\r ')))
+        cache[tokens[0]] = os.path.join(imageFolder, localOSPath(tokens[1].rstrip('\n\r ')))
     picCacheFile.close()
     return cache
 

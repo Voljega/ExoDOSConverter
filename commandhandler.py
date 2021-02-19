@@ -29,8 +29,8 @@ class CommandHandler:
         source = os.path.join(path, originalFile)
         targetTemp = os.path.join(path, fileName + "1" + fileExt)
         target = os.path.join(path, fileName + fileExt)
-        os.rename(util.localOutputPath(source), util.localOutputPath(targetTemp))
-        os.rename(util.localOutputPath(targetTemp), util.localOutputPath(target))
+        os.rename(util.localOSPath(source), util.localOSPath(targetTemp))
+        os.rename(util.localOSPath(targetTemp), util.localOSPath(target))
         return fileName
 
     # Checks if a command line should be kept or not
@@ -142,12 +142,13 @@ class CommandHandler:
             cleanedPath = []
             if paths[0].startswith('"') and (
                     paths[-1].lower().endswith('.ima"') or paths[-1].lower().endswith('.img"')):
+                # TEST CASE : Grand Prix Tennis 87 (GPTen87)
                 paths = [" ".join(paths)]
                 path = paths[0].replace('"', '')
                 path = self.reducePath(path)
-                imgPath = os.path.dirname(path)
-                imgFullLocalPath = os.path.join(self.gGator.getLocalGameOutputDir(), util.localOutputPath(imgPath))
-                imgFile = ntpath.basename(path)
+                imgPath = os.path.dirname(util.localOSPath(path))
+                imgFullLocalPath = os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(imgPath))
+                imgFile = ntpath.basename(util.localOSPath(path))
                 oldImgFilename = os.path.splitext(imgFile)[0]
                 imgFileExt = os.path.splitext(imgFile)[-1]
                 newImgFilename = self.dosRename(imgFullLocalPath, imgFile, oldImgFilename, imgFileExt, None)
@@ -162,19 +163,19 @@ class CommandHandler:
                         postfix = path.find('-l')
                         chkPath = path[:postfix].rstrip(' ') if postfix != -1 else path
                         if not os.path.exists(
-                                os.path.join(self.gGator.getLocalGameOutputDir(), util.localOutputPath(chkPath))):
+                                os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(chkPath))):
                             if not os.path.exists(
                                     os.path.join(self.gGator.getLocalGameDataOutputDir(),
-                                                 util.localOutputPath(chkPath))):
+                                                 util.localOSPath(chkPath))):
                                 self.logger.log("      <ERROR> path %s doesn't exist"
                                                 % os.path.join(self.gGator.getLocalGameOutputDir(),
-                                                               util.localOutputPath(chkPath)),
+                                                               util.localOSPath(chkPath)),
                                                 self.logger.ERROR)
                     cleanedPath.append(path)
 
             bootPath = " ".join(cleanedPath)
 
-        fullString = "boot " + bootPath + "\n"
+        fullString = "boot " + bootPath.replace('/', '\\') + "\n"
         self.logger.log("    boot path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
         return fullString
 
@@ -191,9 +192,9 @@ class CommandHandler:
             if self.gGator.isWin3x():
                 path = path.replace('\\' + self.gGator.game, '')
 
-            if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), path)):
+            if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                 self.logger.log("    <ERROR> path %s doesn't exist"
-                                % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), path)),
+                                % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))),
                                 self.logger.ERROR)
             prString = prString + " " + path
         else:
@@ -205,9 +206,9 @@ class CommandHandler:
                 if self.gGator.isWin3x():
                     path = path.replace('\\' + self.gGator.game, '')
 
-                if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), path)):
+                if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                     self.logger.log("    <ERROR> path %s doesn't exist"
-                                    % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), path)),
+                                    % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))),
                                     self.logger.ERROR)
                 prString = prString + " " + path
             else:
@@ -218,9 +219,9 @@ class CommandHandler:
                     if self.gGator.isWin3x():
                         path = path.replace('\\' + self.gGator.game, '')
 
-                    if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), path)):
+                    if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                         self.logger.log("    <ERROR> path %s doesn't exist"
-                                        % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), path)),
+                                        % os.path.join(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))),
                                         self.logger.ERROR)
                     prString = prString + " " + path
 
@@ -246,8 +247,8 @@ class CommandHandler:
 
         cdFileFullPath = os.path.join(self.gGator.getLocalGameOutputDir(), path) \
             if not gameInternalBatFile else os.path.join(self.gGator.getLocalGameDataOutputDir(), path)
-        if os.path.exists(util.localOutputPath(cdFileFullPath)):
-            if os.path.isdir(util.localOutputPath(cdFileFullPath)):
+        if os.path.exists(util.localOSPath(cdFileFullPath)):
+            if os.path.isdir(util.localOSPath(cdFileFullPath)):
                 return path
             else:
                 pathList = path.split('\\')
@@ -266,7 +267,7 @@ class CommandHandler:
                     self.cleanCue(cdsPath, cdFilename, cdCount)
 
                 # Clean remaining ccd and sub file which might have the same name as the cue file
-                otherCdFiles = [file for file in os.listdir(util.localOutputPath(cdsPath)) if
+                otherCdFiles = [file for file in os.listdir(util.localOSPath(cdsPath)) if
                                 os.path.splitext(file)[0].lower() == oldCdFilename and os.path.splitext(file)[
                                     -1].lower() in ['.ccd', '.sub']]
                 for otherCdFile in otherCdFiles:
@@ -278,15 +279,15 @@ class CommandHandler:
                 #                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else:
-            if not os.path.exists(os.path.join(self.gGator.getLocalGameDataOutputDir(), util.localOutputPath(path))):
-                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOutputPath(cdFileFullPath),
+            if not os.path.exists(os.path.join(self.gGator.getLocalGameDataOutputDir(), util.localOSPath(path))):
+                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOSPath(cdFileFullPath),
                                 self.logger.ERROR)
             return path
 
     # Cleans cue files content to dos compatible 8 char name
     def cleanCue(self, path, fileName, cdCount):
-        oldFile = open(os.path.join(util.localOutputPath(path), fileName + ".cue"), 'r')
-        newFile = open(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"), 'w')
+        oldFile = open(os.path.join(util.localOSPath(path), fileName + ".cue"), 'r')
+        newFile = open(os.path.join(util.localOSPath(path), fileName + "-fix.cue"), 'w')
         modifiedFirstLine = False
         for line in oldFile.readlines():
             if line.startswith("FILE"):
@@ -305,8 +306,8 @@ class CommandHandler:
                     params = line.split('"')
                     if '\\' in params[1]:
                         musicParams = params[1].split('\\')  # Assume there are only two music file path components
-                        shutil.move(os.path.join(util.localOutputPath(path), musicParams[0], musicParams[1]),
-                                    os.path.join(util.localOutputPath(path), musicParams[1]))
+                        shutil.move(os.path.join(util.localOSPath(path), musicParams[0], musicParams[1]),
+                                    os.path.join(util.localOSPath(path), musicParams[1]))
                         self.logger.log("      move music %s from %s to . -> " % (musicParams[1], musicParams[0]))
                         params[1] = musicParams[1]
                         line = '"'.join(params)
@@ -316,7 +317,7 @@ class CommandHandler:
         oldFile.close()
         newFile.close()
         # Remove readonly attribute if present before deleting
-        os.chmod(os.path.join(util.localOutputPath(path), fileName + ".cue"), stat.S_IWRITE)
-        os.remove(os.path.join(util.localOutputPath(path), fileName + ".cue"))
-        os.rename(os.path.join(util.localOutputPath(path), fileName + "-fix.cue"),
-                  os.path.join(util.localOutputPath(path), fileName + ".cue"))
+        os.chmod(os.path.join(util.localOSPath(path), fileName + ".cue"), stat.S_IWRITE)
+        os.remove(os.path.join(util.localOSPath(path), fileName + ".cue"))
+        os.rename(os.path.join(util.localOSPath(path), fileName + "-fix.cue"),
+                  os.path.join(util.localOSPath(path), fileName + ".cue"))
