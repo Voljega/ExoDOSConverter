@@ -7,6 +7,7 @@ A custom converter of the eXoDOS v5 and eXoWin3x collections to several Emulatio
  - Batocera
  - Retrobat
  - Retropie
+ - Emuelec  
  - OpenDingux (both SimpleMenu / Esoteric flavours) with mapping for RG350
  - MiSTer
 
