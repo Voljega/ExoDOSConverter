@@ -184,7 +184,7 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
     # For example, it would be a good idea to not put any "porn" or "adult"
     # games on a system at a show/convention or out on the museum floor.
 
-    f = open("name_mapping.txt", 'w')
+    f = open("name_mapping.txt", 'w', newline='\r\n')
     for idx, shortn in enumerate(DOSnames):
         f.write(shortn + ' ;' + titles[idx] + '\n')
     f.close()

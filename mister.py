@@ -74,7 +74,7 @@ def handleRunBat(gGator):
     runBat = os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat')
     if os.path.exists(runBat):
         runFile = open(runBat, 'r')
-        runFileClone = open(runBat + '1', 'w')
+        runFileClone = open(runBat + '1', 'w', newline='\r\n')
         # Clone run.bat and only modify imgmount lines
         # Add some hardcoded lines which are impossible to handle
         handled = {

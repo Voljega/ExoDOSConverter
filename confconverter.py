@@ -142,7 +142,7 @@ class ConfConverter:
             self.logger.log('    Handle Bat File %s' % subBat, self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
             subBatFile = open(subBat, 'r')
-            subBatFileClone = open(subBat + '1', 'w')
+            subBatFileClone = open(subBat + '1', 'w', newline='\r\n')
             for cmdline in subBatFile.readlines():
                 # always remove @
                 cmdline = cmdline.lstrip('@ ')
@@ -170,7 +170,7 @@ class ConfConverter:
         runBat = os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat')
         if os.path.exists(runBat):
             runFile = open(runBat, 'r')
-            runFileClone = open(runBat + '1', 'w')
+            runFileClone = open(runBat + '1', 'w', newline='\r\n')
             # Clone run.bat and only modify imgmount lines
             # Add some hardcoded lines which are impossible to handle
             handled = {
