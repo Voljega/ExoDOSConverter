@@ -138,14 +138,17 @@ class MetadataHandler:
             if 'Flight Simulator' in dosGame.genres or 'Vehicle Simulation' in dosGame.genres:
                 return 'Simulation'
             elif "Education" in dosGame.genres or "Quiz" in dosGame.genres:
-                return 'Misc'
+                if "Adventure" in dosGame.genres or "Visual Novel" in dosGame.genres:
+                    return "Adventure-Visual"
+                else:
+                    return 'Misc'
             elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
                 return "Race"
             elif 'Sports' in dosGame.genres:
                 return 'Sports'
             elif 'Pinball' in dosGame.genres:
                 return 'Pinball'
-            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres or "Casino" in dosGame.genres:
+            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres or "Casino" in dosGame.genres or 'Cards / Tiles' in dosGame.genres:
                 return "Puzzle"
             elif 'Shooter' in dosGame.genres:
                 return 'ShootEmUp'
@@ -163,7 +166,7 @@ class MetadataHandler:
                 return "Adventure-Visual"
             elif "Adventure" in dosGame.genres and "Action" in dosGame.genres:
                 return "Action-Adventure"
-            elif "Adventure" in dosGame.genres:
+            elif "Adventure" in dosGame.genres or "Visual Novel" in dosGame.genres:
                 return "Adventure-Visual"
             elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres:
                 return 'Strategy-Gestion'
@@ -175,8 +178,10 @@ class MetadataHandler:
                 return 'ShootEmUp'
             elif 'Action' in dosGame.genres:
                 return 'Action-Adventure'
-            elif 'Arcade' in dosGame.genres:
+            elif 'Arcade' in dosGame.genres or 'Life Simulation' in dosGame.genres:
                 return 'Misc'
+            elif 'Creativity' in dosGame.genres or 'App' in dosGame.genres or 'Reference' in dosGame.genres:
+                return 'Tools'
             else:
                 return 'Unknown'
         else:

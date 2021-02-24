@@ -16,7 +16,7 @@ preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
 expertMode;Expert mode;Allows overriding of generated configuration
 mountPrefix;Mount prefix; Mount command prefix
-fullresolutionCfg;fulllResolution;DOSBox fullresolution parameter
+fullresolutionCfg;fullResolution;DOSBox fullresolution parameter
 rendererCfg;renderer;DOSBox renderer parameter
 outputCfg;output;DOSBox output parameter
 vsyncCfg;vsync;DOSBox vsync parameter

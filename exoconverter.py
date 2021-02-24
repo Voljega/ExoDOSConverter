@@ -153,11 +153,14 @@ class ExoConverter:
         # For win3x games, all files / dir / etc in game.pc/game should be moved to game.pc/ and sub game.pc/game deleted
         # do not use getLocalGameDataOutputDir as game data are in subdir at that point
         if self.isWin3x:
-            for gameFile in os.listdir(os.path.join(gGator.getLocalGameOutputDir(), gGator.game)):
-                shutil.move(os.path.join(gGator.getLocalGameOutputDir(), gGator.game, gameFile), gGator.getLocalGameOutputDir())
+            # Needs to rename sub game dir first then move content to .pc folder , then delete sub game dir
+            subDirTempName = gGator.game + '-tempEDC'
+            os.rename(os.path.join(gGator.getLocalGameOutputDir(), gGator.game), os.path.join(gGator.getLocalGameOutputDir(), subDirTempName))
+            for gameFile in os.listdir(os.path.join(gGator.getLocalGameOutputDir(), subDirTempName)):
+                shutil.move(os.path.join(gGator.getLocalGameOutputDir(), subDirTempName, gameFile), gGator.getLocalGameOutputDir())
             # Check if it's empty !! a subdir might be named the same
-            if len(os.listdir(os.path.join(gGator.getLocalGameOutputDir(), gGator.game))) == 0:
-                shutil.rmtree(os.path.join(gGator.getLocalGameOutputDir(), gGator.game))
+            if len(os.listdir(os.path.join(gGator.getLocalGameOutputDir(), subDirTempName))) == 0:
+                shutil.rmtree(os.path.join(gGator.getLocalGameOutputDir(), subDirTempName))
 
     # Unzip game zip
     def unzipGame(self, gameZipPath, gGator):

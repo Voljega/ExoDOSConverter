@@ -190,7 +190,10 @@ class CommandHandler:
             # TESTCASE: Sidewalk (1987) / Sidewalk
             path = self.reducePath(paths[0].replace('"', ""))
             if self.gGator.isWin3x():
-                path = path.replace('\\' + self.gGator.game, '')
+                # Find first game sub path and replace it
+                gameSubPathIndex = path.lower().find('\\' + self.gGator.game.lower())
+                gameSubPathLength = len('\\' + self.gGator.game)
+                path = path[:gameSubPathIndex] + path[gameSubPathIndex + gameSubPathLength:]
 
             if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                 self.logger.log("    <ERROR> path %s doesn't exist"
@@ -204,7 +207,10 @@ class CommandHandler:
             if countChar == 2:
                 path = self.reducePath(paths[0].replace('"', ""))
                 if self.gGator.isWin3x():
-                    path = path.replace('\\' + self.gGator.game, '')
+                    # Find first game sub path and replace it
+                    gameSubPathIndex = path.lower().find('\\' + self.gGator.game.lower())
+                    gameSubPathLength = len('\\' + self.gGator.game)
+                    path = path[:gameSubPathIndex] + path[gameSubPathIndex + gameSubPathLength:]
 
                 if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                     self.logger.log("    <ERROR> path %s doesn't exist"
@@ -217,7 +223,10 @@ class CommandHandler:
                 for path in paths:
                     path = self.reducePath(path.replace('"', ""))
                     if self.gGator.isWin3x():
-                        path = path.replace('\\' + self.gGator.game, '')
+                        # Find first game sub path and replace it
+                        gameSubPathIndex = path.lower().find('\\' + self.gGator.game.lower())
+                        gameSubPathLength = len('\\' + self.gGator.game)
+                        path = path[:gameSubPathIndex] + path[gameSubPathIndex + gameSubPathLength:]
 
                     if not os.path.exists(os.path.join(self.gGator.getLocalGameOutputDir(), util.localOSPath(path))):
                         self.logger.log("    <ERROR> path %s doesn't exist"
@@ -243,7 +252,10 @@ class CommandHandler:
     # Cleans cd names to a dos compatible 8 char name
     def cleanCDname(self, path, cdCount=None, gameInternalBatFile=False):
         if self.gGator.isWin3x():
-            path = path.replace('\\'+self.gGator.game,'')
+            # Find first game sub path and replace it
+            gameSubPathIndex = path.lower().find('\\'+self.gGator.game.lower())
+            gameSubPathLength = len('\\'+self.gGator.game)
+            path = path[:gameSubPathIndex] + path[gameSubPathIndex + gameSubPathLength:]
 
         cdFileFullPath = os.path.join(self.gGator.getLocalGameOutputDir(), path) \
             if not gameInternalBatFile else os.path.join(self.gGator.getLocalGameDataOutputDir(), path)
