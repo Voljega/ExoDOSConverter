@@ -148,7 +148,8 @@ class MetadataHandler:
                 return 'Sports'
             elif 'Pinball' in dosGame.genres:
                 return 'Pinball'
-            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres or "Casino" in dosGame.genres or 'Cards / Tiles' in dosGame.genres:
+            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres \
+                    or "Casino" in dosGame.genres or 'Cards / Tiles' in dosGame.genres or 'Game Show' in dosGame.genres:
                 return "Puzzle"
             elif 'Shooter' in dosGame.genres:
                 return 'ShootEmUp'
@@ -156,7 +157,7 @@ class MetadataHandler:
                 return 'Platform'
             elif 'FPS' in dosGame.genres or 'First Person Shooter' in dosGame.genres:
                 return 'Gun-FPS'
-            elif 'Fighting' in dosGame.genres:
+            elif 'Fighting' in dosGame.genres or 'Beat \'em Up' in dosGame.genres:
                 return 'BeatEmUp'
             elif 'Strategy' in dosGame.genres and "Puzzle" not in dosGame.genres:
                 return 'Strategy-Gestion'
