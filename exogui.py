@@ -295,6 +295,7 @@ class ExoGUI:
         wckToolTips.register(self.vsyncCfgCheckButton, self.guiStrings['vsyncCfg'].help)
         self.vsyncCfgCheckButton.grid(column=0, row=1, sticky="W")
 
+        # TODO add better mapper handling, based on chosen conversion, with warning messages and all
         self.mapperLabel = Tk.Label(self.conversionSecondLineFrame, text=self.guiStrings['mapper'].label)
         wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
         self.mapperLabel.grid(column=1, row=1, sticky="E", pady=5)

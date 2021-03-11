@@ -112,6 +112,8 @@ class GameGenerator:
             self.postConversionForMister()
         elif self.conversionType == util.recalbox:
             self.postConversionForRecalbox()
+        elif self.conversionType == util.batocera:
+            self.postConversionForBatocera()
         elif self.conversionType == util.emuelec:
             self.postConversionForEmuelec()
 
@@ -169,6 +171,16 @@ class GameGenerator:
             p2kFile.write(line.replace('{GameID}', self.metadata.name))
         p2kFile.close()
         p2kTemplate.close()
+
+    def postConversionForBatocera(self):
+        self.logger.log("  Batocera post-conversion")
+        pad2key = os.path.join(self.scriptDir, 'data', 'padto.keys')
+        shutil.copy2(pad2key, self.getLocalGameOutputDir())
+        # TODO handle mapper type joy / nojoy
+        # TODO load keyb2joypad file
+        # TODO convert pad2key chosen file from json to python object
+        # TODO replace modified controls in pad2key file
+        # TODO needs to add mapping for ctrl + F4 in pad2key
 
     # Post-conversion for MiSTeR for a given game
     def postConversionForMister(self):
