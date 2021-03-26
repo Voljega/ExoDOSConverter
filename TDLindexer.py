@@ -115,11 +115,8 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
             if base_name not in fullnameToGameDir:
                 logger.log("    Unknown game %s no corresponding shortname found" % longname, logger.ERROR)
             else:
-                dname = fullnameToGameDir[base_name].upper()
-                if len(dname) < 8:
-                    dname = dname.ljust(8, '_')
-                DOSnames.append(f"{dname}.ZIP")
-                dosNameToLongname[f"{dname}.ZIP"] = longname
+                DOSnames.append(f"{fullnameToGameDir[base_name].upper()}.ZIP")
+                dosNameToLongname[f"{fullnameToGameDir[base_name].upper()}.ZIP"] = longname
 
         # DOSnames.append(dname)
         # dosNameToLongname[dname] = longname
