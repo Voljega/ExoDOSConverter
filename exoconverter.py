@@ -195,8 +195,8 @@ class ExoConverter:
                     for genreDir in dirs:
                         shutil.rmtree(os.path.join(self.outputDir, genreDir))
                     # copy mister zips
-                    shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Manually Added Games.zip'), gamesDir)
-                    shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '-Utilities and System Files.zip'),
+                    shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '(Manually Added Games).zip'), gamesDir)
+                    shutil.copy2(os.path.join(self.scriptDir, 'data', 'mister', '(Utilities and System Files).zip'),
                                  gamesDir)
                     # Call Total DOS Launcher Indexer, delete top level games folder after
                     self.logger.log('Total DOS Indexer for ' + self.conversionType)
