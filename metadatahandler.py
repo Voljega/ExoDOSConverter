@@ -71,9 +71,6 @@ GENRE_MAPPER = {
     'Vehicle Simulation':   Genre.SIMULATION,
     'Visual Novel':         Genre.ADVENTURE_VISUAL,
 }    
-   # unique, sort, get first then apply special
-   
-
          
          
 
