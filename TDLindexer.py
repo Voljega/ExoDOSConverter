@@ -103,7 +103,7 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
     dosNameToLongname = dict()
     for idx, longname in enumerate(baseFiles):
         base_name = longname.replace('.zip', '')
-        if base_name.startswith('-'):
+        if base_name.startswith('('):
             # For 'custom' files starting with -, we just remove all the bits of the filename that aren't
             # valid DOS chars. We assume there won't be any conflicts here.
             cleaned_name = '-' + re.sub(r'[^a-zA-Z0-9]', '', base_name).upper()
@@ -116,8 +116,6 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
                 logger.log("    Unknown game %s no corresponding shortname found" % longname, logger.ERROR)
             else:
                 dname = fullnameToGameDir[base_name].upper()
-                if len(dname) < 8:
-                    dname = dname.ljust(8, '_')
                 DOSnames.append(f"{dname}.ZIP")
                 dosNameToLongname[f"{dname}.ZIP"] = longname
 
@@ -220,7 +218,7 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
     if preExtractGames:
         # Move content of games/game.pc dir to destDir/games
         for dosZipName in dosNameToLongname:
-            if dosZipName not in ['-MANUALL.ZIP', '-UTILITI.ZIP']:
+            if dosZipName not in ['(MANUALL.ZIP', '(UTILITI.ZIP']:
                 longCleanName = dosNameToLongname[dosZipName]
                 gameDataDir = os.path.join(gamesDataTempDir, os.path.splitext(longCleanName)[0])
                 if os.path.exists(gameDataDir):
