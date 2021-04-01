@@ -113,7 +113,6 @@ class MetadataHandler:
     def parseXmlMetadata(self):
         xmlPath = os.path.join(self.exoCollectionDir, 'xml', util.getCollectionMetadataID(self.collectionVersion) + '.xml')
         metadatas = dict()
-        print (xmlPath)
         if os.path.exists(xmlPath):
             parser = etree.XMLParser(encoding="utf-8")
             games = etree.parse(xmlPath, parser=parser).findall(".//Game")
@@ -132,7 +131,7 @@ class MetadataHandler:
                         genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
                         manual = self.get(g, 'ManualPath')
                         manualpath = util.localOSPath(os.path.join(self.exoCollectionDir, manual)) if manual is not None else None
-                        frontPic = None #util.findPics(name, self.cache)
+                        frontPic = util.findPics(name, self.cache)
                         metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
                                            manualpath, desc)
                         metadatas[metadata.dosname.lower()] = metadata
