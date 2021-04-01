@@ -106,7 +106,7 @@ def index(outputDir, scriptDir, fullnameToGameDir, isDebug, preExtractGames, log
         if base_name.startswith('('):
             # For 'custom' files starting with -, we just remove all the bits of the filename that aren't
             # valid DOS chars. We assume there won't be any conflicts here.
-            cleaned_name = '-' + re.sub(r'[^a-zA-Z0-9]', '', base_name).upper()
+            cleaned_name = '(' + re.sub(r'[^a-zA-Z0-9]', '', base_name).upper()
             if len(cleaned_name) > 8:
                 cleaned_name = cleaned_name[0:8]
             DOSnames.append(f"{cleaned_name}.ZIP")
