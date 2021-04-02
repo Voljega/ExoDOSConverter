@@ -71,8 +71,30 @@ GENRE_MAPPER = {
     'Vehicle Simulation':   Genre.SIMULATION,
     'Visual Novel':         Genre.ADVENTURE_VISUAL,
 }    
-         
-         
+
+# as above, but applies for combined genres (used for overides)
+MULTI_GENRE_MAPPER = {
+    "['Action', 'Arcade']":                   Genre.ACTION_ADVENTURE,
+    "['Action', 'Adventure']":                Genre.ACTION_ADVENTURE,
+    "['Action', 'Adventure', 'Fighting']":    Genre.BEATEMUP,
+    "['Action', 'Adventure', 'Platform']":    Genre.PLATFORM,
+    "['Action', 'Adventure', 'Text-Based']":  Genre.ACTION_ADVENTURE,
+    "['Action', 'Adventure', 'Simulation']":  Genre.ACTION_ADVENTURE,
+    "['Action', 'Fighting', 'Role-Playing']": Genre.BEATEMUP,
+    "['Action', 'Platform', 'Role-Playing']": Genre.PLATFORM,
+    "['Action', 'Adventure', 'Shooter']":     Genre.SHMUP,
+    "['Action', 'Adventure', 'Platform', 'Puzzle']": Genre.PUZZLE,
+    "['Action', 'Fighting', 'Shooter']":      Genre.SHMUP,
+    "['Action', 'Fighting', 'Platform']":     Genre.PLATFORM,
+    "['Action', 'Platform', 'Shooter']":      Genre.SHMUP,
+    "['Action', 'Role-Playing', 'Shooter']":  Genre.SHMUP,
+    "['Action', 'Adventure', 'Platform', 'Shooter']": Genre.SHMUP,
+    "['Adventure', 'Fighting']":              Genre.BEATEMUP,
+    "['Adventure', 'Platform']":              Genre.PLATFORM,
+    "['Adventure', 'Simulation']":            Genre.ADVENTURE_VISUAL,
+    "['Board / Party Game', 'Role-Playing', 'Strategy']": Genre.PUZZLE,
+    "['Platform', 'Shooter']":                Genre.SHMUP, 
+}
 
 # Metadata exporting
 class MetadataHandler:
@@ -204,7 +226,12 @@ class MetadataHandler:
         # list unique genres and sort them - precedence is alphabetical unless overridden
         # (e.g. "Managerial" + "Simulation" -> "Managerial")
         genres = sorted([g.strip() for g in list(set(dosGame.genres))])
+
+        # first check for  multi-genre overrides
+        if str(genres) in MULTI_GENRE_MAPPER:
+            return MULTI_GENRE_MAPPER.get(str(genres)).value
         
+        # classifies about ~90 games, the simulation aspect is more prominent
         if 'Vehicle Simulation' in genres or 'Flight Simulator' in genres:
             return Genre.SIMULATION.value  
             
@@ -213,57 +240,18 @@ class MetadataHandler:
             if 'Adventure' in genres or 'Visual Novel' in genres:
                 return Genre.ADVENTURE_VISUAL.value
             return Genre.MISC.value
-            
+        
+        # debatable, affects only a few games but usually the FPS aspect is more prominent than the rest
         if 'First Person Shooter' in genres:
             return Genre.FPS.value
-            
-        if 'Board / Party Game' in genres:
-            return Genre.PUZZLE.value
-        
-        # RPG takes precedence over adventure
+
+        # RPG takes precedence over adventure and others for ~60 games
         if 'RPG' in genres or 'Role-Playing' in genres:
-            # but give precedence to these other tags
-            if 'Shooter' in genres:
-                return Genre.SHMUP.value
-            if 'Fighting' in genres:
-                return Genre.BEATEMUP.value
-            if 'Platform' in genres:
-                return Genre.PLATFORM.value
             return Genre.RPG.value
-
-        if genres == ['Action']:
-            return Genre.ACTION_ADVENTURE.value
-
-        if genres == ['Action', 'Arcade']:
-            return Genre.ACTION_ADVENTURE.value
-        
-        if genres == ['Action', 'Adventure']:
-            return Genre.ACTION_ADVENTURE.value
-         
-        if genres == ['Action', 'Adventure', 'Text-Based']:
-            return Genre.ACTION_ADVENTURE.value
-        
-        if genres == ['Action', 'Adventure', 'Simulation']:
-            return Genre.ACTION_ADVENTURE.value
-        
-        if genres == ['Adventure', 'Simulation']:
-            return Genre.ADVENTURE_VISUAL.value
         
         # puzzle takes precedence for ~50 games e.g. lrunn2, jetpack, oddworld
         if 'Puzzle' in genres:
             return Genre.PUZZLE.value
-        
-        # debarable - this makes platform/shooters come up as shmup (e.g. turrican, duken12)
-        if 'Shooter' in genres:
-           return Genre.SHMUP.value
-        
-        # platform takes precedence over fighting and adventure
-        if 'Platform' in genres:
-            return Genre.PLATFORM.value
-        
-        # reclassify cotsword, sidewalk, batret, qeye, spidssix
-        if 'Fighting' in genres:
-            return Genre.BEATEMUP.value
         
         # from here on, ignore 'Action' or 'Arcade' if there are subgenres defined, 
         # otherwise they always take precedence
