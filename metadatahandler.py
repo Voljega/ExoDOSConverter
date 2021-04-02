@@ -219,9 +219,10 @@ class MetadataHandler:
             
         if 'Board / Party Game' in genres:
             return Genre.PUZZLE.value
-            
-        # separate RPGs of any type
+        
+        # RPG takes precedence over adventure
         if 'RPG' in genres or 'Role-Playing' in genres:
+            # but give precedence to these other tags
             if 'Shooter' in genres:
                 return Genre.SHMUP.value
             if 'Fighting' in genres:
@@ -229,51 +230,54 @@ class MetadataHandler:
             if 'Platform' in genres:
                 return Genre.PLATFORM.value
             return Genre.RPG.value
-        
-        # remove action/adventure if more tags are defined
-        if 'Adventure' in genres and 'Action' in genres:
-            if len(genres) == 2:
-                return Genre.ACTION_ADVENTURE.value
-            else:
-                if genres == ['Action', 'Adventure', 'Text-Based']:
-                    return Genre.ACTION_ADVENTURE.value
-                genres.pop(genres.index('Action'))
-                genres.pop(genres.index('Adventure'))
-        
-        # prevent categorization as 'adventure' as these usually aren't arcade
-        if 'Arcade' in genres and 'Adventure' in genres:
+
+        if genres == ['Action']:
             return Genre.ACTION_ADVENTURE.value
-        
+
         if genres == ['Action', 'Arcade']:
             return Genre.ACTION_ADVENTURE.value
         
-        # prioritize these categories over others from here on
+        if genres == ['Action', 'Adventure']:
+            return Genre.ACTION_ADVENTURE.value
+         
+        if genres == ['Action', 'Adventure', 'Text-Based']:
+            return Genre.ACTION_ADVENTURE.value
+        
+        if genres == ['Action', 'Adventure', 'Simulation']:
+            return Genre.ACTION_ADVENTURE.value
+        
+        if genres == ['Adventure', 'Simulation']:
+            return Genre.ADVENTURE_VISUAL.value
+        
+        # puzzle takes precedence for ~50 games e.g. lrunn2, jetpack, oddworld
         if 'Puzzle' in genres:
             return Genre.PUZZLE.value
-
-        if 'Shooter' in genres:
-            return Genre.SHMUP.value
         
+        # debarable - this makes platform/shooters come up as shmup (e.g. turrican, duken12)
+        if 'Shooter' in genres:
+           return Genre.SHMUP.value
+        
+        # platform takes precedence over fighting and adventure
         if 'Platform' in genres:
             return Genre.PLATFORM.value
         
+        # reclassify cotsword, sidewalk, batret, qeye, spidssix
         if 'Fighting' in genres:
             return Genre.BEATEMUP.value
         
-        # from here on, ignore 'Action' if there are subgenres defined
+        # from here on, ignore 'Action' or 'Arcade' if there are subgenres defined, 
+        # otherwise they always take precedence
         if len(genres) > 1 and genres[0] == 'Action':
             genres.pop(0)
-        
-        # same logic for Arcade
         if len(genres) > 1 and genres[0] == 'Arcade':
             genres.pop(0)
-                
-        # if not in special cases, return the first mapped genre found
+        
+        # returns the first genre found, alphabetically
         for genre in genres:
             output = GENRE_MAPPER.get(genre, Genre.UNKNOWN)
             if output != Genre.UNKNOWN:
                 return output.value
         
-        # fallback - probably no genres defined
+        # fallback - there are probably no genres defined (or Exo added a new genre name)
         return Genre.UNKNOWN.value
         
