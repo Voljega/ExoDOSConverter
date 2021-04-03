@@ -1,15 +1,16 @@
-import os
-import shutil
 import collections
-import sys
+import os
 import platform
+import util
+import shutil
+import sys
 import xml.etree.ElementTree as etree
 from xml.dom import minidom
-import util
+
+from genre_mapping import mapGenres, Genre
 
 DosGame = collections.namedtuple('DosGame',
                                  'dosname metadataname name genres publisher developer year frontPic manual desc')
-
 
 # Metadata exporting
 class MetadataHandler:
@@ -134,56 +135,11 @@ class MetadataHandler:
 
     # Convert multi genres exo collection format to a single one
     def buildGenre(self, dosGame):
-        if dosGame is not None and dosGame.genres is not None:
-            if 'Flight Simulator' in dosGame.genres or 'Vehicle Simulation' in dosGame.genres:
-                return 'Simulation'
-            elif "Education" in dosGame.genres or "Quiz" in dosGame.genres:
-                if "Adventure" in dosGame.genres or "Visual Novel" in dosGame.genres:
-                    return "Adventure-Visual"
-                else:
-                    return 'Misc'
-            elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
-                return "Race"
-            elif 'Sports' in dosGame.genres:
-                return 'Sports'
-            elif 'Pinball' in dosGame.genres:
-                return 'Pinball'
-            elif "Puzzle" in dosGame.genres or "Board" in dosGame.genres or "Board / Party Game" in dosGame.genres \
-                    or "Casino" in dosGame.genres or 'Cards / Tiles' in dosGame.genres or 'Game Show' in dosGame.genres:
-                return "Puzzle"
-            elif 'Shooter' in dosGame.genres:
-                return 'ShootEmUp'
-            elif 'Platform' in dosGame.genres:
-                return 'Platform'
-            elif 'FPS' in dosGame.genres or 'First Person Shooter' in dosGame.genres:
-                return 'Gun-FPS'
-            elif 'Fighting' in dosGame.genres or 'Beat \'em Up' in dosGame.genres:
-                return 'BeatEmUp'
-            elif 'Strategy' in dosGame.genres and "Puzzle" not in dosGame.genres:
-                return 'Strategy-Gestion'
-            elif 'RPG' in dosGame.genres or 'Role-Playing' in dosGame.genres:
-                return 'RPG'
-            elif 'Interactive Fiction' in dosGame.genres:
-                return "Adventure-Visual"
-            elif "Adventure" in dosGame.genres and "Action" in dosGame.genres:
-                return "Action-Adventure"
-            elif "Adventure" in dosGame.genres or "Visual Novel" in dosGame.genres:
-                return "Adventure-Visual"
-            elif 'Simulation' in dosGame.genres and 'Managerial' in dosGame.genres:
-                return 'Strategy-Gestion'
-            elif 'Construction and Management Simulation' in dosGame.genres:
-                return 'Strategy-Gestion'
-            elif 'Simulation' in dosGame.genres:
-                return 'Simulation'
-            elif 'Shooter' in dosGame.genres:
-                return 'ShootEmUp'
-            elif 'Action' in dosGame.genres:
-                return 'Action-Adventure'
-            elif 'Arcade' in dosGame.genres or 'Life Simulation' in dosGame.genres:
-                return 'Misc'
-            elif 'Creativity' in dosGame.genres or 'App' in dosGame.genres or 'Reference' in dosGame.genres:
-                return 'Tools'
-            else:
-                return 'Unknown'
-        else:
-            return 'Unknown'
+        
+        if dosGame is None or dosGame.genres is None:
+            return Genre.UNKNOWN.value
+        
+        return mapGenres(dosGame.genres)
+        
+        
+        
