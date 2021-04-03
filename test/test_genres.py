@@ -2,7 +2,8 @@
 
 import pandas as pd
 from logger import Logger
-from metadatahandler import MetadataHandler, GENRE_MAPPER
+from metadatahandler import MetadataHandler
+from genre_mapping import GENRE_MAPPER
 from util import buildCache
 from tabulate import tabulate
 
