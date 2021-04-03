@@ -7,7 +7,7 @@ import sys
 import xml.etree.ElementTree as etree
 from xml.dom import minidom
 
-from genre_mapping import Genre, GENRE_MAPPER, MULTI_GENRE_MAPPER
+from genre_mapping import mapGenres, Genre
 
 DosGame = collections.namedtuple('DosGame',
                                  'dosname metadataname name genres publisher developer year frontPic manual desc')
@@ -139,49 +139,7 @@ class MetadataHandler:
         if dosGame is None or dosGame.genres is None:
             return Genre.UNKNOWN.value
         
-        # list unique genres and sort them - precedence is alphabetical unless overridden
-        # (e.g. "Managerial" + "Simulation" -> "Managerial")
-        genres = sorted([g.strip() for g in list(set(dosGame.genres))])
-
-        # first check for  multi-genre overrides
-        if str(genres) in MULTI_GENRE_MAPPER:
-            return MULTI_GENRE_MAPPER.get(str(genres)).value
+        return mapGenres(dosGame.genres)
         
-        # classifies about ~90 games, the simulation aspect is more prominent
-        if 'Vehicle Simulation' in genres or 'Flight Simulator' in genres:
-            return Genre.SIMULATION.value  
-            
-        # recategorize education games
-        if 'Education' in genres or 'Quiz' in genres:
-            if 'Adventure' in genres or 'Visual Novel' in genres:
-                return Genre.ADVENTURE_VISUAL.value
-            return Genre.MISC.value
         
-        # debatable, affects only a few games but usually the FPS aspect is more prominent than the rest
-        if 'First Person Shooter' in genres:
-            return Genre.FPS.value
-
-        # RPG takes precedence over adventure and others for ~60 games
-        if 'RPG' in genres or 'Role-Playing' in genres:
-            return Genre.RPG.value
-        
-        # puzzle takes precedence for ~50 games e.g. lrunn2, jetpack, oddworld
-        if 'Puzzle' in genres:
-            return Genre.PUZZLE.value
-        
-        # from here on, ignore 'Action' or 'Arcade' if there are subgenres defined, 
-        # otherwise they always take precedence
-        if len(genres) > 1 and genres[0] == 'Action':
-            genres.pop(0)
-        if len(genres) > 1 and genres[0] == 'Arcade':
-            genres.pop(0)
-        
-        # returns the first genre found, alphabetically
-        for genre in genres:
-            output = GENRE_MAPPER.get(genre, Genre.UNKNOWN)
-            if output != Genre.UNKNOWN:
-                return output.value
-        
-        # fallback - there are probably no genres defined (or Exo added a new genre name)
-        return Genre.UNKNOWN.value
         
