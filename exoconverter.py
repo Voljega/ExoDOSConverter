@@ -231,6 +231,11 @@ class ExoConverter:
                     self.logger.log(
                         '  Some critical errors seems to have happened during process.\n  Skipping Total Indexer phase',
                         self.logger.ERROR)
+                # clean data/distro dir if it exists
+                distroUnzippedDir = os.path.join(self.scriptDir, 'data', 'mister', 'distro')
+                if os.path.exists(distroUnzippedDir) and os.path.isdir(distroUnzippedDir):
+                    shutil.rmtree(distroUnzippedDir)
+
         elif self.conversionType == util.emuelec:
             self.logger.log('Post cleaning for ' + self.conversionType)
             # move gamelist downloaded_images, manuals
