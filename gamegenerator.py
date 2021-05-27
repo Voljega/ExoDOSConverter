@@ -231,8 +231,16 @@ class GameGenerator:
             os.mkdir(os.path.join(self.outputDir, 'games'))
 
         if self.conversionConf['preExtractGames']:
-            # Create zero sized zip as the game will be pre-extracted
-            open(os.path.join(self.outputDir, 'games', misterCleanName + '.zip'), 'w').close()
+            # As the game will be pre-extracted, create empty zip, only containing a warning missing.bat file
+            warningBat = open(os.path.join(self.outputDir, 'games', 'missing.bat'), 'w')
+            warningBat.write('@echo off\nECHO You have used a pre-extracted games pack but the game data '
+                             'files in your games directory are missing or corrupted .\n'
+                             'Please regenerate your game data using the ExoDOSConverter,'
+                             ' drop the game folder into E:\\GAMES\\GAMENAME and re-launch the game.\n')
+            warningBat.close()
+            with ZipFile(os.path.join(self.outputDir, 'games', misterCleanName + '.zip'), 'w') as zf:
+                zf.write(os.path.join(self.outputDir, 'games', 'missing.bat'), 'missing.bat')
+            os.remove(os.path.join(self.outputDir, 'games', 'missing.bat'))
             # Move game.pc folder to games-data
             if not os.path.exists(os.path.join(self.outputDir, 'games-data')):
                 os.mkdir(os.path.join(self.outputDir, 'games-data'))
