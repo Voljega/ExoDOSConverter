@@ -45,7 +45,7 @@ class Mapping:
         if 'useKeyb2Joypad' in self.conversionConf and self.conversionConf['useKeyb2Joypad'] and self.game in self.gamesConf:
             gameMappings = dict(self.gamesConf[self.game])
             if 'mapSticks' not in self.conversionConf or not self.conversionConf['mapSticks']:
-                stickKeys = list(map(lambda k: 'Stick' in k, gameMappings.keys()))
+                stickKeys = list(filter(lambda k: 'stick' in k.lower(), gameMappings.keys()))
                 for key in stickKeys:
                     del gameMappings[key]
             for key in gameMappings.keys():
@@ -82,7 +82,7 @@ class Mapping:
                 p2kFile.write('            ],\n')
             else:
                 p2kFile.write('            "trigger": "%s",\n' % key)
-            # TODO following if/elif/else migth be simplified. might.
+            # TODO following if/elif/else might be simplified. might.
             if keyMapping['type'] == 'kp':
                 p2kFile.write('            "type": "key",\n')
                 target = 'key_' + keyMapping['type'] + keyMapping['key']

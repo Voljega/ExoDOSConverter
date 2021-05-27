@@ -166,19 +166,21 @@ class GameGenerator:
     # Post-conversion for Recalbox for a given game
     def postConversionForRecalbox(self):
         self.logger.log("  Recalbox post-conversion")
-        p2kTemplate = open(os.path.join(self.scriptDir, 'data', 'P2K.template.txt'), 'r')
-        p2kFile = open(os.path.join(self.getLocalParentOutputDir(), self.game + '.pc.p2k.cfg'), 'w',
-                       encoding='utf-8')
-        for line in p2kTemplate.readlines():
-            p2kFile.write(line.replace('{GameID}', self.metadata.name))
-        p2kFile.close()
-        p2kTemplate.close()
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+            p2kTemplate = open(os.path.join(self.scriptDir, 'data', 'P2K.template.txt'), 'r')
+            p2kFile = open(os.path.join(self.getLocalParentOutputDir(), self.game + '.pc.p2k.cfg'), 'w',
+                           encoding='utf-8')
+            for line in p2kTemplate.readlines():
+                p2kFile.write(line.replace('{GameID}', self.metadata.name))
+            p2kFile.close()
+            p2kTemplate.close()
 
     def postConversionForBatocera(self):
         self.logger.log("  Batocera post-conversion")
-        # TODO Remove included padt2.keys when new full generation well tested by users
-        Mapping(self.keyb2joypad.gamesConf, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
-                self.conversionConf, self.logger).mapForBatocera()
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+            # TODO Remove included padt2.keys when new full generation well tested by users
+            Mapping(self.keyb2joypad.gamesConf, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
+                    self.conversionConf, self.logger).mapForBatocera()
 
     # Post-conversion for MiSTeR for a given game
     def postConversionForMister(self):
@@ -264,23 +266,24 @@ class GameGenerator:
             os.mkdir(dosboxBatPicPath)
         shutil.copy2(os.path.join(distPicPath, self.game + '.pc.png'),
                      os.path.join(dosboxBatPicPath, 'dosbox.png'))
-        # Generate RG350 mapper
-        mapper = open(os.path.join(self.getLocalGameOutputDir(), "mapper.map"), 'w')
-        mapper.write('key_space "key 308"\n')
-        mapper.write('key_lshift "key 32"\n')
-        mapper.write('key_lctrl "key 304"\n')
-        mapper.write('key_lalt "key 306"\n')
-        mapper.write('key_esc "key 27"\n')
-        mapper.write('key_enter "key 13"\n')
-        mapper.write('key_up "key 273"\n')
-        mapper.write('key_down "key 274"\n')
-        mapper.write('key_right "key 275"\n')
-        mapper.write('key_left "key 276"\n')
-        mapper.write('key_n "key 9"\n')
-        mapper.write('key_y "key 8"\n')
-        mapper.close()
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+            # Generate RG350 mapper
+            mapper = open(os.path.join(self.getLocalGameOutputDir(), "mapper.map"), 'w')
+            mapper.write('key_space "key 308"\n')
+            mapper.write('key_lshift "key 32"\n')
+            mapper.write('key_lctrl "key 304"\n')
+            mapper.write('key_lalt "key 306"\n')
+            mapper.write('key_esc "key 27"\n')
+            mapper.write('key_enter "key 13"\n')
+            mapper.write('key_up "key 273"\n')
+            mapper.write('key_down "key 274"\n')
+            mapper.write('key_right "key 275"\n')
+            mapper.write('key_left "key 276"\n')
+            mapper.write('key_n "key 9"\n')
+            mapper.write('key_y "key 8"\n')
+            mapper.close()
 
-    # POst-conversion for Retropie for a given game
+    # Post-conversion for Retropie for a given game
     def postConversionForRetropie(self):
         self.logger.log("  retropie post-conversion")
         dosboxCfg = open(os.path.join(self.getLocalGameOutputDir(), "dosbox.cfg"), 'a')

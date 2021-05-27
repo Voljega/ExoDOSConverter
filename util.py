@@ -29,7 +29,7 @@ exoVersions = [EXODOS, EXOWIN3X]
 exoCollectionsDirs = {EXODOS: {'gamesDir': 'eXoDOS', 'gamesConfDir': '!dos', 'metadataId': 'MS-DOS'},
                       EXOWIN3X: {'gamesDir': 'eXoWin3x', 'gamesConfDir': '!win3x', 'metadataId': 'Windows 3x'}}
 
-mappers = ['No', 'RG350']
+mappers = ['Yes', 'No']
 
 theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
 

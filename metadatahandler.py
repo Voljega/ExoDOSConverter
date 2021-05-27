@@ -12,6 +12,7 @@ from genre_mapping import mapGenres, Genre
 DosGame = collections.namedtuple('DosGame',
                                  'dosname metadataname name genres publisher developer year frontPic manual desc')
 
+
 # Metadata exporting
 class MetadataHandler:
 
@@ -135,11 +136,7 @@ class MetadataHandler:
 
     # Convert multi genres exo collection format to a single one
     def buildGenre(self, dosGame):
-        
         if dosGame is None or dosGame.genres is None:
             return Genre.UNKNOWN.value
         
         return mapGenres(dosGame.genres)
-        
-        
-        

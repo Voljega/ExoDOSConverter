@@ -10,9 +10,9 @@ saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
 collectionVersion;Collection version;Your collection version (automatically set)
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
-mapper;Mapper;Mapper for controls mapping
-useKeyb2Joypad;Use Keyb2Joypad;Check to use keyp2joypad mappings
-mapSticks; Map Analog Sticks;Check to map controler analog sticks
+mapper;Mapper;Use controls mapping
+useKeyb2Joypad;Use Keyb2Joypad;Use keyb2joypad mappings
+mapSticks; Map Analog Sticks;Map controler analog sticks
 downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
 preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
@@ -21,7 +21,7 @@ mountPrefix;Mount prefix; Mount command prefix
 fullresolutionCfg;fullResolution;DOSBox fullresolution parameter
 rendererCfg;renderer;DOSBox renderer parameter
 outputCfg;output;DOSBox output parameter
-vsyncCfg;vsync;DOSBox vsync parameter
+vsyncCfg;vsync;DOSBox vsync parameter (costly if activated)
 filter;Filter games;Filter games
 selectall;Select all;Add all games to your selection
 unselectall;Unselect all;Remove all games from your selection
