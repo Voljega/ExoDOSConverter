@@ -1,14 +1,16 @@
 {
-    "actions_player1": [        
+    "actions_player1": [
         {
             "trigger": "l2",
             "type": "key",
-            "target": "KEY_KP1"
+            "target": "KEY_KP1",
+            "description": "1"
         },
         {
             "trigger": "r2",
             "type": "key",
-            "target": "KEY_KP2"
+            "target": "KEY_KP2",
+            "description": "2"
         },
         {
             "trigger": [
@@ -19,77 +21,92 @@
             "target": [
                 "KEY_LEFTCTRL",
                 "KEY_F9"
-            ]
+            ],
+            "description": "Quit to ES"
         },
         {
             "trigger": "up",
             "type": "key",
-            "target": "KEY_UP"
+            "target": "KEY_UP",
+            "description": "Up"
         },
         {
             "trigger": "down",
             "type": "key",
-            "target": "KEY_DOWN"
+            "target": "KEY_DOWN",
+            "description": "Down"
         },
         {
             "trigger": "left",
             "type": "key",
-            "target": "KEY_LEFT"
+            "target": "KEY_LEFT",
+            "description": "Left"
         },
         {
             "trigger": "right",
             "type": "key",
-            "target": "KEY_RIGHT"
+            "target": "KEY_RIGHT",
+            "description": "Right"
         },
         {
             "trigger": "start",
             "type": "key",
-            "target": "KEY_ENTER"
+            "target": "KEY_ENTER",
+            "description": "Enter"
         },
         {
             "trigger": "select",
             "type": "key",
-            "target": "KEY_ESC"
+            "target": "KEY_ESC",
+            "description": "Esc"
         },
         {
             "trigger": "a",
             "type": "key",
-            "target": "KEY_LEFTALT"
+            "target": "KEY_LEFTALT",
+            "description": "Left Alt"
         },
         {
             "trigger": "b",
             "type": "key",
-            "target": "KEY_LEFTCTRL"
+            "target": "KEY_LEFTCTRL",
+            "description": "Let Ctrl"
         },
         {
             "trigger": "x",
             "type": "key",
-            "target": "KEY_LEFTSHIFT"
+            "target": "KEY_LEFTSHIFT",
+            "description": "Left Shift"
         },
         {
             "trigger": "y",
             "type": "key",
-            "target": "KEY_SPACE"
-        },        
+            "target": "KEY_SPACE",
+            "description": "Space"
+        },
         {
             "trigger": "pageup",
             "type": "key",
-            "target": "BTN_LEFT"
+            "target": "BTN_LEFT",
+            "description": "Left Mouse Click"
         },
         {
             "trigger": "pagedown",
             "type": "key",
-            "target": "BTN_RIGHT"
+            "target": "BTN_RIGHT",
+            "description": "Right Mouse Click"
         },
         {
             "trigger": "l3",
             "type": "key",
-            "target": "KEY_Y"
+            "target": "KEY_Y",
+            "description": "Y"
         },
         {
             "trigger": "r3",
             "type": "key",
             "target": "KEY_N"
+            "description": "N"
         }
     ]
 }

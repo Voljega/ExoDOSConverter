@@ -15,11 +15,11 @@ A custom converter of the eXoDOS v5 and eXoWin3x collections to several Emulatio
 
 https://www.retro-exo.com
 
-eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.
+eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.  
 It is based on Launchbox and Windows only though
 
-eXoDOS supported in its V5 full and lite versions only for eXoDOS, V4 support has been dropped
-eXOWin3x is supported in its latest V2 version.
+eXoDOS is supported in its V5 full and lite versions, V4 support has been dropped  
+eXoWin3x is supported in its latest V2 version.
 
 If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye
 
@@ -35,6 +35,7 @@ As the project evolved it now covers diffrent distributions and/or formats.
 The conversion should cover the following :
  - conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
  - scrapping of the game metadata, including front boxart, metada and manual
+ - when possible, custom or generic controller configuration
 
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 
@@ -45,12 +46,12 @@ This is due to the exe python packager `pyInstaller` and it's safe to exclude th
 
 ## State of development
 
-For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.
+For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.  
 This will be corrected when possible
 
 Fully supported distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
 
-MiSTer compatibility is still beeing worked on at the moment and is already at a pretty advanced stage.
+MiSTer compatibility is still beeing worked on at the moment but is already at a pretty advanced stage, espeically for DOS games.
 
 ### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)

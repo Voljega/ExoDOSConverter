@@ -3,6 +3,7 @@ import shutil
 import sys
 import traceback
 from metadatahandler import MetadataHandler
+from keyb2joypad import Keyb2Joypad
 import util
 from zipfile import ZipFile
 import TDLindexer
@@ -28,6 +29,7 @@ class ExoConverter:
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionConf = conversionConf
         self.metadataHandler = MetadataHandler(collectionDir, collectionVersion, self.cache, self.logger)
+        self.keyb2joypad = Keyb2Joypad(self.scriptDir, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
         self.postProcess = postProcess
 
@@ -44,11 +46,14 @@ class ExoConverter:
 
         self.logger.log("Loading metadatas...")
         self.metadataHandler.parseXmlMetadata()
-        self.logger.log("")
         if not os.path.exists(os.path.join(self.outputDir, 'downloaded_images')):
             os.mkdir(os.path.join(self.outputDir, 'downloaded_images'))
         if not os.path.exists(os.path.join(self.outputDir, 'manuals')):
             os.mkdir(os.path.join(self.outputDir, 'manuals'))
+
+        self.logger.log("Loading keyb2joypad configurations")
+        self.keyb2joypad.load()
+        self.logger.log("")
 
         gamelist = self.metadataHandler.initXml(self.outputDir)
 
@@ -98,7 +103,8 @@ class ExoConverter:
                                                     self.conversionType)
 
         gGator = GameGenerator(game, genre, self.outputDir, self.collectionVersion, self.useGenreSubFolders, metadata,
-                               self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir, self.scriptDir, self.logger)
+                               self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir,
+                               self.scriptDir, self.keyb2joypad, self.logger)
 
         if not os.path.exists(gGator.getLocalGameOutputDir()):
             self.copyGameDataToOutputDir(gGator)

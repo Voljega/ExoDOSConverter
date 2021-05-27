@@ -11,6 +11,8 @@ conversionType;Conversion Type;Choose your conversion type
 collectionVersion;Collection version;Your collection version (automatically set)
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Mapper for controls mapping
+useKeyb2Joypad;Use Keyb2Joypad;Check to use keyp2joypad mappings
+mapSticks; Map Analog Sticks;Check to map controler analog sticks
 downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
 preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg

@@ -5,13 +5,14 @@ import ntpath
 import mister
 from zipfile import ZipFile
 from confconverter import ConfConverter
+from mapping import Mapping
 
 
 # contains all data and conf about generating a given game
 class GameGenerator:
 
     def __init__(self, game, genre, outputDir, collectionVersion, useGenreSubFolders, metadata, conversionType,
-                 conversionConf, exoCollectionDir, fullnameToGameDir, scriptDir, logger):
+                 conversionConf, exoCollectionDir, fullnameToGameDir, scriptDir, keyb2joypad, logger):
         self.game = game
         self.collectionVersion = collectionVersion
         self.genre = genre
@@ -25,6 +26,7 @@ class GameGenerator:
         self.conversionConf = conversionConf
         self.scriptDir = scriptDir
         self.confConverter = ConfConverter(self)
+        self.keyb2joypad = keyb2joypad
 
     ##### Utils functions ####
 
@@ -174,13 +176,9 @@ class GameGenerator:
 
     def postConversionForBatocera(self):
         self.logger.log("  Batocera post-conversion")
-        pad2key = os.path.join(self.scriptDir, 'data', 'padto.keys')
-        shutil.copy2(pad2key, self.getLocalGameOutputDir())
-        # TODO handle mapper type joy / nojoy
-        # TODO load keyb2joypad file
-        # TODO convert pad2key chosen file from json to python object
-        # TODO replace modified controls in pad2key file
-        # TODO needs to add mapping for ctrl + F4 in pad2key
+        # TODO Remove included padt2.keys when new full generation well tested by users
+        Mapping(self.keyb2joypad.gamesConf, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
+                self.conversionConf, self.logger).mapForBatocera()
 
     # Post-conversion for MiSTeR for a given game
     def postConversionForMister(self):

@@ -705,6 +705,11 @@ class ExoGUI:
         conversionConf = dict()
         conversionConf['useDebugMode'] = True if self.guiVars['debugMode'].get() == 1 else False
         conversionConf['useExpertMode'] = True if self.guiVars['expertMode'].get() == 1 else False
+        # TODO use real conf mappings after adding new params to the interface
+        # conversionConf['useKeyb2Joypad'] = True if self.guiVars['useKeyb2Joypad'].get() == 1 else False
+        # conversionConf['mapSticks'] = True if self.guiVars['mapSticks'].get() == 1 else False
+        conversionConf['useKeyb2Joypad'] = True
+        conversionConf['mapSticks'] = True
         conversionConf['mountPrefix'] = self.guiVars['mountPrefix'].get()
         conversionConf['fullresolutionCfg'] = self.guiVars['fullresolutionCfg'].get()
         conversionConf['rendererCfg'] = self.guiVars['rendererCfg'].get()
