@@ -53,12 +53,12 @@ class GameGenerator:
 
     # Converts game
     def convertGame(self):
-        self.copyGameFiles()
+        self.__copyGameFiles__()
         self.confConverter.process(self)
-        self.postConversion()
+        self.__postConversion__()
 
     # Copy game files and game dosbox.conf to output dir
-    def copyGameFiles(self):
+    def __copyGameFiles__(self):
         self.logger.log("  copy dosbox conf")
         # Copy dosbox.conf in game.pc
         shutil.copy2(
@@ -105,22 +105,22 @@ class GameGenerator:
     ###### Post-conversion functions #####
 
     # Post-conversion operations for a given game for various conversion types
-    def postConversion(self):
+    def __postConversion__(self):
         if self.conversionType == util.retropie:
-            self.postConversionForRetropie()
+            self.__postConversionForRetropie__()
         elif self.conversionType in [util.esoteric, util.simplemenu]:
-            self.postConversionForOpenDingux()
+            self.__postConversionForOpenDingux__()
         elif self.conversionType == util.mister:
-            self.postConversionForMister()
+            self.__postConversionForMister__()
         elif self.conversionType == util.recalbox:
-            self.postConversionForRecalbox()
+            self.__postConversionForRecalbox__()
         elif self.conversionType == util.batocera:
-            self.postConversionForBatocera()
+            self.__postConversionForBatocera__()
         elif self.conversionType == util.emuelec:
-            self.postConversionForEmuelec()
+            self.__postConversionForEmuelec__()
 
     # Post-conversion for Emuelec for a given game
-    def postConversionForEmuelec(self):
+    def __postConversionForEmuelec__(self):
         self.logger.log("  Emuelec post-conversion")
         # create pcdata and pc subfolders in outputdir
         if not os.path.exists(os.path.join(self.outputDir, 'pcdata')):
@@ -167,7 +167,7 @@ class GameGenerator:
         os.remove(os.path.join(emuelecConfOutputDir, "dosbox.bat"))
 
     # Post-conversion for Recalbox for a given game
-    def postConversionForRecalbox(self):
+    def __postConversionForRecalbox__(self):
         self.logger.log("  Recalbox post-conversion")
         if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
             p2kTemplate = open(os.path.join(self.scriptDir, 'data', 'P2K.template.txt'), 'r')
@@ -178,7 +178,7 @@ class GameGenerator:
             p2kFile.close()
             p2kTemplate.close()
 
-    def postConversionForBatocera(self):
+    def __postConversionForBatocera__(self):
         self.logger.log("  Batocera post-conversion")
         if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
             # TODO Remove included padt2.keys when new full generation well tested by users
@@ -186,7 +186,7 @@ class GameGenerator:
                     self.conversionConf, self.logger).mapForBatocera()
 
     # Post-conversion for MiSTeR for a given game
-    def postConversionForMister(self):
+    def __postConversionForMister__(self):
         self.logger.log("  MiSTer post-conversion")
         # Remove any C: from dosbox.bat, rename to launch.bat, remove dosbox.cfg
         os.remove(os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg'))
@@ -261,7 +261,7 @@ class GameGenerator:
                         os.path.join(self.outputDir, 'games'))
 
     # Post-conversion for openDingux for a given game
-    def postConversionForOpenDingux(self):
+    def __postConversionForOpenDingux__(self):
         self.logger.log("  opendingux post-conversion")
         openDinguxPicDir = '.previews' if self.conversionType == util.esoteric else '.media'
         # Copy image to opendingux img folder for game.pc
@@ -295,7 +295,7 @@ class GameGenerator:
             mapper.close()
 
     # Post-conversion for Retropie for a given game
-    def postConversionForRetropie(self):
+    def __postConversionForRetropie__(self):
         self.logger.log("  retropie post-conversion")
         dosboxCfg = open(os.path.join(self.getLocalGameOutputDir(), "dosbox.cfg"), 'a')
         # add mount c at end of dosbox.cfg

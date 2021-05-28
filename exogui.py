@@ -38,7 +38,7 @@ class ExoGUI:
         if platform.system() == 'Windows':
             self.window.iconbitmap('exodosicon.ico')
 
-        self.setFontSize(self.startFontSize)
+        self.__setFontSize__(self.startFontSize)
         self.window.title(title)
         self.logger = logger
 
@@ -107,10 +107,10 @@ class ExoGUI:
     def draw(self):
         self.root = Tk.Frame(self.window, padx=10, pady=5)
         self.root.grid(column=0, row=0)
-        self.drawMainframe()
+        self.__drawMainframe__()
         self.window.mainloop()
 
-    def setFontSize(self, value):
+    def __setFontSize__(self, value):
         fontSize = value if value is not None else self.startFontSize
         default_font = Font.nametofont("TkDefaultFont")
         default_font.configure(size=fontSize)
@@ -120,18 +120,18 @@ class ExoGUI:
         fixed_font.configure(size=fontSize)
 
     # Main mama Frame    
-    def drawMainframe(self):
+    def __drawMainframe__(self):
         self.mainFrame = Tk.Frame(self.root, padx=10, pady=0)
         self.mainFrame.grid(column=0, row=1, sticky="EW", pady=5)
         self.mainFrame.grid_columnconfigure(0, weight=1)
-        self.drawPathsFrame()
-        self.drawConfigurationFrame()
-        self.drawSelectionFrame()
-        self.drawButtonsFrame()
-        self.drawConsole()
+        self.__drawPathsFrame__()
+        self.__drawConfigurationFrame__()
+        self.__drawSelectionFrame__()
+        self.__drawButtonsFrame__()
+        self.__drawConsole__()
 
     # File Explorer for various vars
-    def openFileExplorer(self, openDir, var, fileType):
+    def __openFileExplorer__(self, openDir, var, fileType):
         if openDir:
             result = filedialog.askdirectory(initialdir=self.guiVars[var].get(),
                                              title="Select your " + self.guiStrings[var].label)
@@ -144,13 +144,13 @@ class ExoGUI:
         if result != '':
             if platform.system() == 'Windows':
                 result = result.replace('/', '\\')
-            self.updateConsoleFromQueue()
+            self.__updateConsoleFromQueue__()
             self.guiVars[var].set(result)
             if not openDir and var == 'selectionPath':
-                self.loadCustom()
+                self.__loadCustom__()
 
     # Paths frame    
-    def drawPathsFrame(self):
+    def __drawPathsFrame__(self):
         self.pathsFrame = Tk.LabelFrame(self.mainFrame, text="Your Paths", padx=10, pady=5)
         self.pathsFrame.grid(column=0, row=0, sticky="EW", pady=5)
         self.pathsFrame.grid_columnconfigure(1, weight=1)
@@ -161,11 +161,11 @@ class ExoGUI:
         label.grid(column=0, row=setRow, padx=5, sticky="W")
         self.guiVars['collectionDir'] = Tk.StringVar()
         self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
-        self.guiVars['collectionDir'].trace_add("write", self.handleCollectionFolder)
+        self.guiVars['collectionDir'].trace_add("write", self.__handleCollectionFolder__)
         self.collectionEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
         self.collectionEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
         self.selectCollectionDirButton = Tk.Button(self.pathsFrame, text=self.guiStrings['selectCollectionDir'].label,
-                                                   command=lambda: self.openFileExplorer(True, 'collectionDir', None))
+                                                   command=lambda: self.__openFileExplorer__(True, 'collectionDir', None))
         self.selectCollectionDirButton.grid(column=2, row=setRow, padx=5, sticky="WE")
         wckToolTips.register(self.selectCollectionDirButton, self.guiStrings['selectCollectionDir'].help)
         setRow = setRow + 1
@@ -178,23 +178,23 @@ class ExoGUI:
         self.outputEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
         self.outputEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
         self.selectOutputDirButton = Tk.Button(self.pathsFrame, text=self.guiStrings['selectOutputDir'].label,
-                                               command=lambda: self.openFileExplorer(True, 'outputDir', None))
+                                               command=lambda: self.__openFileExplorer__(True, 'outputDir', None))
         self.selectOutputDirButton.grid(column=2, row=setRow, padx=5, sticky="WE")
         wckToolTips.register(self.selectOutputDirButton, self.guiStrings['selectOutputDir'].help)
 
     # Handle conversion type change
-    def changeConversionType(self, event):
-        self.handleComponentsState(False)
+    def __changeConversionType__(self, event):
+        self.__handleComponentsState__(False)
 
     # Configuration Frame
-    def drawConfigurationFrame(self):
-        self.drawGenericConfigurationFrame()
-        self.drawExpertConfigurationFrame()
-        self.drawMapperConfigurationFrame()
-        self.checkExpertMode()
+    def __drawConfigurationFrame__(self):
+        self.__drawGenericConfigurationFrame__()
+        self.__drawExpertConfigurationFrame__()
+        self.__drawMapperConfigurationFrame__()
+        self.__checkExpertMode__()
         self.loading = False
 
-    def drawGenericConfigurationFrame(self):
+    def __drawGenericConfigurationFrame__(self):
         self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", padx=10, pady=5)
         self.configurationFrame.grid(column=0, row=1, sticky="EW", pady=5)
         self.configurationFrame.columnconfigure(0, weight=1)
@@ -222,7 +222,7 @@ class ExoGUI:
         self.guiVars['conversionType'].set(self.configuration['conversionType'])
         self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
                                                    textvariable=self.guiVars['conversionType'])
-        self.conversionTypeComboBox.bind('<<ComboboxSelected>>', self.changeConversionType)
+        self.conversionTypeComboBox.bind('<<ComboboxSelected>>', self.__changeConversionType__)
         self.conversionTypeComboBox.grid(column=1, row=0, sticky="W", pady=5, padx=5)
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
@@ -283,7 +283,7 @@ class ExoGUI:
         wckToolTips.register(self.vsyncCfgCheckButton, self.guiStrings['vsyncCfg'].help)
         self.vsyncCfgCheckButton.grid(column=4, row=0, sticky="W")
 
-    def drawExpertConfigurationFrame(self):
+    def __drawExpertConfigurationFrame__(self):
         self.expertConversionFrame = Tk.Frame(self.conversionFrame)
         self.expertConversionFrame.grid(column=0, row=1, sticky="EW")
 
@@ -292,7 +292,7 @@ class ExoGUI:
         self.expertModeCheckButton = Tk.Checkbutton(self.expertConversionFrame,
                                                     text=self.guiStrings['expertMode'].label,
                                                     variable=self.guiVars['expertMode'], onvalue=1,
-                                                    offvalue=0, command=self.checkExpertMode)
+                                                    offvalue=0, command=self.__checkExpertMode__)
         wckToolTips.register(self.expertModeCheckButton, self.guiStrings['expertMode'].help)
         self.expertModeCheckButton.grid(column=0, row=0, sticky="W")
 
@@ -333,7 +333,7 @@ class ExoGUI:
         self.outputCfgEntry = Tk.Entry(self.expertConversionFrame, textvariable=self.guiVars['outputCfg'], width=11)
         self.outputCfgEntry.grid(column=8, row=0, sticky="W")
 
-    def drawMapperConfigurationFrame(self):
+    def __drawMapperConfigurationFrame__(self):
         ttk.Separator(self.conversionFrame, orient=Tk.HORIZONTAL).grid(column=0, row=2, pady=5,
                                                                           sticky="EW")
         self.mapperConversionFrame = Tk.Frame(self.conversionFrame)
@@ -352,25 +352,22 @@ class ExoGUI:
 
         self.guiVars['mapSticks'] = Tk.IntVar()
         self.guiVars['mapSticks'].set(self.configuration['mapSticks'])
-        self.mapSticksCheckButton = Tk.Checkbutton(self.mapperConversionFrame,
-                                                    text=self.guiStrings['mapSticks'].label,
-                                                    variable=self.guiVars['mapSticks'], onvalue=1,
-                                                    offvalue=0)
+        self.mapSticksCheckButton = Tk.Checkbutton(self.mapperConversionFrame, text=self.guiStrings['mapSticks'].label,
+                                                   variable=self.guiVars['mapSticks'], onvalue=1, offvalue=0)
         wckToolTips.register(self.mapSticksCheckButton, self.guiStrings['mapSticks'].help)
         self.mapSticksCheckButton.grid(column=3, row=1, sticky="W")
 
         self.guiVars['useKeyb2Joypad'] = Tk.IntVar()
         self.guiVars['useKeyb2Joypad'].set(self.configuration['useKeyb2Joypad'])
         self.useKeyb2JoypadCheckButton = Tk.Checkbutton(self.mapperConversionFrame,
-                                                   text=self.guiStrings['useKeyb2Joypad'].label,
-                                                   variable=self.guiVars['useKeyb2Joypad'], onvalue=1,
-                                                   offvalue=0)
+                                                        text=self.guiStrings['useKeyb2Joypad'].label,
+                                                        variable=self.guiVars['useKeyb2Joypad'], onvalue=1, offvalue=0)
         wckToolTips.register(self.useKeyb2JoypadCheckButton, self.guiStrings['useKeyb2Joypad'].help)
         self.useKeyb2JoypadCheckButton.grid(column=4, row=1, sticky="W")
 
     # Listener for Expert Mode Check
-    def checkExpertMode(self):
-        self.handleComponentsState(False)
+    def __checkExpertMode__(self):
+        self.__handleComponentsState__(False)
         if self.guiVars['expertMode'].get() == 1:
             self.logger.log(
                 '\nOnly use Expert Mode if you know what you are doing!\nCheck the github wiki for more information',
@@ -380,7 +377,7 @@ class ExoGUI:
                                        'Only use Expert Mode if you know what you are doing!\nCheck the github wiki for more information')
 
     # Listener for collection path modifications
-    def handleCollectionFolder(self, *args):
+    def __handleCollectionFolder__(self, *args):
         collectionDir = self.guiVars['collectionDir'].get()
         collectionVersion = util.validCollectionPath(collectionDir)
         self.guiVars['collectionVersion'].set(collectionVersion)
@@ -407,10 +404,10 @@ class ExoGUI:
             self.logger.log("\nBuild/Load image caches, this might take a while ...")
             self.cache = util.buildCache(self.scriptDir, collectionDir, collectionVersion, self.logger)
 
-        self.handleComponentsState(False)
+        self.__handleComponentsState__(False)
 
     # Listener for filter entry modification
-    def filterGamesList(self, *args):
+    def __filterGamesList__(self, *args):
         filterValue = self.guiVars['filter'].get()
         filteredGameslist = [g for g in self.fullnameToGameDir.keys() if filterValue.lower() in g.lower()]
         self.exoGamesListbox.selection_clear(0, Tk.END)
@@ -418,14 +415,14 @@ class ExoGUI:
         self.leftListLabel.set(self.guiStrings['leftList'].label + ' (' + str(len(self.exoGamesValues.get())) + ')')
 
     # Selection Frame
-    def drawSelectionFrame(self):
+    def __drawSelectionFrame__(self):
         self.selectionFrame = Tk.LabelFrame(self.mainFrame, padx=10, pady=5)
         self.selectionFrame.grid(column=0, row=2, sticky="EW", pady=5)
         self.selectionFrame.grid_columnconfigure(0, weight=1)
 
         self.guiVars['filter'] = Tk.StringVar()
         self.guiVars['filter'].set('')
-        self.guiVars['filter'].trace_add("write", self.filterGamesList)
+        self.guiVars['filter'].trace_add("write", self.__filterGamesList__)
         self.filterEntry = Tk.Entry(self.selectionFrame, textvariable=self.guiVars['filter'])
         self.filterEntry.grid(column=0, row=0, sticky='W')
         wckToolTips.register(self.filterEntry, self.guiStrings['filter'].help)
@@ -447,7 +444,7 @@ class ExoGUI:
         wckToolTips.register(self.selectionPathEntry, self.guiStrings['selectionPath'].help)
         self.selectSelectionPathButton = Tk.Button(self.customSelectionFrame,
                                                    text=self.guiStrings['selectSelectionPath'].label,
-                                                   command=lambda: self.openFileExplorer(False, 'selectionPath', '*'))
+                                                   command=lambda: self.__openFileExplorer__(False, 'selectionPath', '*'))
         self.selectSelectionPathButton.grid(column=2, row=0, padx=5, sticky="WE")
         wckToolTips.register(self.selectSelectionPathButton, self.guiStrings['selectSelectionPath'].help)
 
@@ -469,7 +466,7 @@ class ExoGUI:
         emptyFrame.grid(column=1, row=0, sticky='W')
 
         self.selectAllGamesButton = Tk.Button(hatLeftFrame, text=self.guiStrings['selectall'].label,
-                                              command=self.selectAll)
+                                              command=self.__selectAll__)
         wckToolTips.register(self.selectAllGamesButton, self.guiStrings['selectall'].help)
         self.selectAllGamesButton.grid(column=2, row=0, sticky='E')
 
@@ -493,12 +490,12 @@ class ExoGUI:
         self.buttonsColumnFrame.grid_columnconfigure(1, weight=1)
         emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
         emptyFrame.grid(column=0, row=0, pady=5)
-        self.selectGameButton = Tk.Button(self.buttonsColumnFrame, text='->', command=self.clickRight)
+        self.selectGameButton = Tk.Button(self.buttonsColumnFrame, text='->', command=self.__clickRight__)
         wckToolTips.register(self.selectGameButton, self.guiStrings['right'].help)
         self.selectGameButton.grid(column=0, row=3, padx=3)
         emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
         emptyFrame.grid(column=0, row=4, pady=5)
-        self.deselectGameButton = Tk.Button(self.buttonsColumnFrame, text='<-', command=self.clickLeft)
+        self.deselectGameButton = Tk.Button(self.buttonsColumnFrame, text='<-', command=self.__clickLeft__)
         wckToolTips.register(self.deselectGameButton, self.guiStrings['left'].help)
         self.deselectGameButton.grid(column=0, row=7, padx=3)
         emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
@@ -522,18 +519,18 @@ class ExoGUI:
         emptyFrame.grid(column=1, row=0, sticky='W')
 
         self.unselectAllGamesButton = Tk.Button(hatRightFrame, text=self.guiStrings['unselectall'].label,
-                                                command=self.unselectAll)
+                                                command=self.__unselectAll__)
         wckToolTips.register(self.unselectAllGamesButton, self.guiStrings['unselectall'].help)
         self.unselectAllGamesButton.grid(column=2, row=0, sticky='E')
 
         loadSaveFrame = Tk.Frame(hatRightFrame)
         loadSaveFrame.grid(column=0, row=0, sticky='E')
         self.loadCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['loadCustom'].label,
-                                          command=self.loadCustom)
+                                          command=self.__loadCustom__)
         wckToolTips.register(self.loadCustomButton, self.guiStrings['loadCustom'].help)
         self.loadCustomButton.grid(column=0, row=0, padx=5, sticky='E')
         self.saveCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['saveCustom'].label,
-                                          command=self.saveCustom)
+                                          command=self.__saveCustom__)
         wckToolTips.register(self.saveCustomButton, self.guiStrings['saveCustom'].help)
         self.saveCustomButton.grid(column=1, row=0, padx=5, sticky='E')
 
@@ -547,10 +544,10 @@ class ExoGUI:
         scrollbarRight.grid(column=1, row=1, sticky=(Tk.N, Tk.S))
         self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
 
-        self.handleCollectionFolder()
+        self.__handleCollectionFolder__()
 
     # Listener to save custom selection
-    def saveCustom(self):
+    def __saveCustom__(self):
         customSelectionFile = self.selectionPathEntry.get()
         if not os.path.exists(os.path.dirname(customSelectionFile)):
             self.logger.log('Parent dir "%s" for Selection File "%s" does not exist' % (
@@ -567,7 +564,7 @@ class ExoGUI:
             file.close()
 
     # Listener to load custom collection
-    def loadCustom(self):
+    def __loadCustom__(self):
         customSelectionFile = self.selectionPathEntry.get()
         if not os.path.exists(customSelectionFile):
             self.logger.log('Selection File "%s" does not exist' % customSelectionFile, self.logger.ERROR)
@@ -587,7 +584,7 @@ class ExoGUI:
                 self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Listener to remove game from selection    
-    def clickLeft(self):
+    def __clickLeft__(self):
         selectedOnRight = self.selectedGamesListbox.curselection()
         for sel in reversed(selectedOnRight):
             self.selectedGamesListbox.delete(sel)
@@ -597,7 +594,7 @@ class ExoGUI:
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Listener to add all games to the selection
-    def selectAll(self):
+    def __selectAll__(self):
         selectedAll = self.exoGamesValues.get()
         alreadyOnRight = self.selectedGamesValues.get()
         for sel in selectedAll:
@@ -610,13 +607,13 @@ class ExoGUI:
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Listener to remove all games from the selection
-    def unselectAll(self):
+    def __unselectAll__(self):
         self.selectedGamesValues.set([])
         self.rightListLabel.set(
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Listener to add selected game to selection
-    def clickRight(self):
+    def __clickRight__(self):
         selectedOnLeft = [self.exoGamesListbox.get(int(item)) for item in self.exoGamesListbox.curselection()]
         alreadyOnRight = self.selectedGamesValues.get()
         for sel in selectedOnLeft:
@@ -629,20 +626,20 @@ class ExoGUI:
             self.guiStrings['rightList'].label + ' (' + str(len(self.selectedGamesValues.get())) + ')')
 
     # Action buttons frame    
-    def drawButtonsFrame(self):
+    def __drawButtonsFrame__(self):
         self.buttonsFrame = Tk.Frame(self.mainFrame, padx=10)
         self.buttonsFrame.grid(column=0, row=3, sticky="EW", pady=5)
         emptyFrame = Tk.Frame(self.buttonsFrame, padx=10, width=400)
         emptyFrame.grid(column=0, row=0, sticky="NEWS", pady=5)
         emptyFrame.grid_columnconfigure(0, weight=3)
-        self.verifyButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['verify'].label, command=self.clickVerify)
+        self.verifyButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['verify'].label, command=self.__clickVerify__)
         wckToolTips.register(self.verifyButton, self.guiStrings['verify'].help)
         self.verifyButton.grid(column=1, row=0, sticky="EW", padx=3)
-        self.saveButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['save'].label, command=self.clickSave)
+        self.saveButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['save'].label, command=self.__clickSave__)
         wckToolTips.register(self.saveButton, self.guiStrings['save'].help)
         self.saveButton.grid(column=2, row=0, sticky="EW", padx=3)
         self.proceedButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['proceed'].label,
-                                       command=self.clickProceed)
+                                       command=self.__clickProceed__)
         wckToolTips.register(self.proceedButton, self.guiStrings['proceed'].help)
         self.proceedButton.grid(column=3, row=0, sticky="EW", padx=3)
         emptyFrame = Tk.Frame(self.buttonsFrame, padx=10, width=350)
@@ -650,14 +647,14 @@ class ExoGUI:
         emptyFrame.grid_columnconfigure(4, weight=3)
 
     # Listener for Save button    
-    def clickSave(self):
+    def __clickSave__(self):
         self.logger.log('\n<--------- Saving configuration --------->')
-        self.saveConfFile()
-        self.saveConfInMem()
+        self.__saveConfFile__()
+        self.__saveConfInMem__()
 
         # Saves to conf file
 
-    def saveConfFile(self):
+    def __saveConfFile__(self):
         confBackupFilePath = os.path.join(self.scriptDir, util.confDir, util.getConfBakFilename(self.setKey))
         if os.path.exists(confBackupFilePath):
             os.remove(confBackupFilePath)
@@ -685,7 +682,7 @@ class ExoGUI:
 
         # Saves in memory
 
-    def saveConfInMem(self):
+    def __saveConfInMem__(self):
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys:
             if key.id not in ['verify', 'save', 'proceed', 'confirm', 'left', 'right', 'leftList', 'rightList',
@@ -703,7 +700,7 @@ class ExoGUI:
 
         # Listener for Verify button
 
-    def clickVerify(self):
+    def __clickVerify__(self):
         self.logger.log('\n<--------- Verify ' + self.setKey + ' Parameters --------->')
         error = False
         for key in ['outputDir', 'collectionDir']:
@@ -715,13 +712,12 @@ class ExoGUI:
             self.logger.log('All Good!')
 
     # Listener for Proceed Button
-    def clickProceed(self):
+    def __clickProceed__(self):
         self.logger.log('\n<--------- Saving ' + self.setKey + ' configuration --------->')
-        self.handleComponentsState(True)
+        self.__handleComponentsState__(True)
 
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
-        collectionVersion = self.guiVars['collectionVersion'].get()
         conversionType = self.guiVars['conversionType'].get()
         useGenreSubFolders = True if self.guiVars['genreSubFolders'].get() == 1 else False
         outputDir = self.guiVars['outputDir'].get()
@@ -760,12 +756,13 @@ class ExoGUI:
             _thread.start_new(exoConverter.convertGames, ())
 
     # Set enabled/disabled state for a component
-    def setComponentState(self, component, state):
+    @staticmethod
+    def __setComponentState__(component, state):
         if component is not None:
             component['state'] = state
 
     # Handles state of all the components based on UI status
-    def handleComponentsState(self, clickedProcess):
+    def __handleComponentsState__(self, clickedProcess):
         collectionVersion = self.guiVars['collectionVersion'].get()
         mainButtons = [self.verifyButton, self.saveButton, self.proceedButton]
         entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton,
@@ -784,21 +781,21 @@ class ExoGUI:
                            self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton]
 
         if clickedProcess or collectionVersion == 'None':
-            [self.setComponentState(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
-            [self.setComponentState(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
+            [self.__setComponentState__(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
+            [self.__setComponentState__(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
         else:
-            [self.setComponentState(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
+            [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
              expertComponents]
-            [self.setComponentState(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
-            self.setComponentState(self.preExtractGamesCheckButton,
-                                   'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+            [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
+            self.__setComponentState__(self.preExtractGamesCheckButton,
+                                       'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
 
     def postProcess(self):
-        self.unselectAll()
-        self.handleComponentsState(False)
+        self.__unselectAll__()
+        self.__handleComponentsState__(False)
 
     # Console Frame    
-    def drawConsole(self):
+    def __drawConsole__(self):
         self.consoleFrame = Tk.Frame(self.root, padx=10)
         self.consoleFrame.grid(column=0, row=5, sticky="EW", pady=5)
         self.consoleFrame.grid_columnconfigure(0, weight=1)
@@ -811,18 +808,18 @@ class ExoGUI:
         self.scrollbar = Tk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL, command=self.logTest.yview)
         self.scrollbar.grid(column=1, row=0, sticky=(Tk.N, Tk.S))
         self.logTest['yscrollcommand'] = self.scrollbar.set
-        self.logTest.after(10, self.updateConsoleFromQueue)
+        self.logTest.after(10, self.__updateConsoleFromQueue__)
 
     # Grabs messages from logger queue
-    def updateConsoleFromQueue(self):
+    def __updateConsoleFromQueue__(self):
         while not self.logger.log_queue.empty():
             line = self.logger.log_queue.get()
-            self.writeToConsole(line)
+            self.__writeToConsole__(line)
             self.root.update_idletasks()
-        self.logTest.after(10, self.updateConsoleFromQueue)
+        self.logTest.after(10, self.__updateConsoleFromQueue__)
 
     # Write message to console    
-    def writeToConsole(self, msg):
+    def __writeToConsole__(self, msg):
         numlines = self.logTest.index('end - 1 line').split('.')[0]
         self.logTest['state'] = 'normal'
         if numlines == 24:

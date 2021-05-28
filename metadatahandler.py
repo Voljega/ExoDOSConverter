@@ -23,13 +23,15 @@ class MetadataHandler:
         self.logger = logger
         self.metadatas = dict()
 
-    # Reads a given node    
-    def get(self, i, e):
+    # Reads a given node
+    @staticmethod
+    def __getNode__(i, e):
         ll = i.find(e)
         return ll.text if ll is not None else None
 
     # Inits in-memory gamelist xml either by opening the file or creating it
-    def initXml(self, outputDir):
+    @staticmethod
+    def initXml(outputDir):
         if os.path.exists(os.path.join(outputDir, "gamelist.xml")):
             parser = etree.XMLParser(encoding="utf-8")
             return etree.parse(os.path.join(outputDir, "gamelist.xml"), parser=parser)
@@ -38,8 +40,9 @@ class MetadataHandler:
             tree._setroot(etree.Element('gameList'))
             return tree
 
-    # Write full in-memory gamelist xml to outputDir    
-    def writeXml(self, outputDir, gamelist):
+    # Write full in-memory gamelist xml to outputDir
+    @staticmethod
+    def writeXml(outputDir, gamelist):
         xmlstr = minidom.parseString(etree.tostring(gamelist.getroot())).toprettyxml(indent="   ", newl="\r")
         xmlstr = '\n'.join([s for s in xmlstr.splitlines() if s.strip()])
         with open(os.path.join(outputDir, "gamelist.xml"), "wb") as f:
@@ -53,19 +56,19 @@ class MetadataHandler:
             parser = etree.XMLParser(encoding="utf-8")
             games = etree.parse(xmlPath, parser=parser).findall(".//Game")
             for g in games:
-                name = self.get(g, 'Title')
+                name = self.__getNode__(g, 'Title')
                 if name not in list(map(lambda x: util.exoCollectionsDirs[x]['gamesDir'], list(util.exoCollectionsDirs.keys()))):
                     try:
-                        path = self.get(g, 'ApplicationPath').split("\\")
+                        path = self.__getNode__(g, 'ApplicationPath').split("\\")
                         dosname = path[-2]
                         metadataname = os.path.splitext(path[-1])[0]
                         #                    print("%s %s %s" %(dosname, name, metadataname))
-                        desc = self.get(g, 'Notes') if self.get(g, 'Notes') is not None else ''
-                        releasedate = self.get(g, 'ReleaseDate')[:4] if self.get(g, 'ReleaseDate') is not None else None
-                        developer = self.get(g, 'Developer')
-                        publisher = self.get(g, 'Publisher')
-                        genres = self.get(g, 'Genre').split(';') if self.get(g, 'Genre') is not None else []
-                        manual = self.get(g, 'ManualPath')
+                        desc = self.__getNode__(g, 'Notes') if self.__getNode__(g, 'Notes') is not None else ''
+                        releasedate = self.__getNode__(g, 'ReleaseDate')[:4] if self.__getNode__(g, 'ReleaseDate') is not None else None
+                        developer = self.__getNode__(g, 'Developer')
+                        publisher = self.__getNode__(g, 'Publisher')
+                        genres = self.__getNode__(g, 'Genre').split(';') if self.__getNode__(g, 'Genre') is not None else []
+                        manual = self.__getNode__(g, 'ManualPath')
                         manualpath = util.localOSPath(os.path.join(self.exoCollectionDir, manual)) if manual is not None else None
                         frontPic = util.findPics(name, self.cache)
                         metadata = DosGame(dosname, metadataname, name, genres, publisher, developer, releasedate, frontPic,
@@ -73,35 +76,36 @@ class MetadataHandler:
                         metadatas[metadata.dosname.lower()] = metadata
 
                     except:
-                        self.logger.log('  Error %s while getting metadata for %s\n' % (sys.exc_info()[0], self.get(g, 'Title')), self.logger.ERROR)
+                        self.logger.log('  Error %s while getting metadata for %s\n' % (sys.exc_info()[0], self.__getNode__(g, 'Title')), self.logger.ERROR)
         self.logger.log('Loaded %i metadatas' % len(metadatas.keys()))
         self.metadatas = metadatas
         return metadatas
 
     # Retrieve exo collection metadata for a given game
-    def handleMetadata(self, game):
+    def __handleMetadata__(self, game):
         dosGame = self.metadatas.get(game.lower())
         self.logger.log("  Metadata: %s (%s), genres: %s" % (dosGame.name, dosGame.year, " | ".join(dosGame.genres)))
         return dosGame
 
     # Process and export metadata to in-memory gamelist xml for a given game    
     def processGame(self, game, gamelist, genre, outputDir, useGenreSubFolders, conversionType):
-        dosGame = self.handleMetadata(game)
+        dosGame = self.__handleMetadata__(game)
         self.logger.log("  computed genre %s" % genre)
         self.logger.log("  copy pics and manual")
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic):
             shutil.copy2(dosGame.frontPic, os.path.join(outputDir, 'downloaded_images'))
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        self.writeGamelistEntry(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
+        self.__writeGamelistEntry__(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
         return dosGame
 
     # Replaces “ ” ’ …
-    def cleanXmlString(self, s):
+    @staticmethod
+    def __cleanXmlString__(s):
         return s.replace('&', '&amp;')
 
     # Write metada for a given game to in-memory gamelist xml
-    def writeGamelistEntry(self, gamelist, dosGame, game, genre, useGenreSubFolders, conversionType):
+    def __writeGamelistEntry__(self, gamelist, dosGame, game, genre, useGenreSubFolders, conversionType):
         root = gamelist.getroot()
 
         if platform.system() == 'Windows':
@@ -117,11 +121,11 @@ class MetadataHandler:
             path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.conf') if useGenreSubFolders \
                 else "./" + util.getCleanGameID(dosGame, '.conf')
         else:
-            path = "./" + genre + "/" + self.cleanXmlString(
-                game) + ".pc" if useGenreSubFolders else "./" + self.cleanXmlString(game) + ".pc"
+            path = "./" + genre + "/" + self.__cleanXmlString__(
+                game) + ".pc" if useGenreSubFolders else "./" + self.__cleanXmlString__(game) + ".pc"
 
         existsInGamelist = [child for child in root.iter('game') if
-                            self.get(child, "name") == dosGame.name and self.get(child, "releasedate") == year]
+                            self.__getNode__(child, "name") == dosGame.name and self.__getNode__(child, "releasedate") == year]
         if len(existsInGamelist) == 0:
             gameElt = etree.SubElement(root, 'game')
             etree.SubElement(gameElt, 'path').text = path
@@ -135,7 +139,8 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'image').text = frontPic
 
     # Convert multi genres exo collection format to a single one
-    def buildGenre(self, dosGame):
+    @staticmethod
+    def buildGenre(dosGame):
         if dosGame is None or dosGame.genres is None:
             return Genre.UNKNOWN.value
         

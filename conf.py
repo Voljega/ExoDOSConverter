@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 def cleanString(string):
     return string.rstrip('\n\r ').lstrip()

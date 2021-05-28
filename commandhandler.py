@@ -14,7 +14,8 @@ class CommandHandler:
         self.gGator = gGator
 
     # Rename a filename to a dos compatible 8 char name
-    def dosRename(self, path, originalFile, fileName, fileExt, cdCount):
+    @staticmethod
+    def __dosRename__(path, originalFile, fileName, fileExt, cdCount):
         fileName = fileName.replace(" ", "").replace("[", "").replace("]", "")
         if len(fileName) > 8:
             if cdCount is None:
@@ -34,14 +35,16 @@ class CommandHandler:
         return fileName
 
     # Checks if a command line should be kept or not
-    def useLine(self, line, cLines):
+    @staticmethod
+    def useLine(line, cLines):
         for cL in cLines:
             if line.strip().lower().startswith(cL):
                 return False
         return True
 
     # Parses command lines path parts
-    def pathListInCommandLine(self, line, startTokens, endTokens):
+    @staticmethod
+    def __pathListInCommandLine__(line, startTokens, endTokens):
         command = line.split(" ")
         startIndex = -1
         endIndex = -1
@@ -79,13 +82,13 @@ class CommandHandler:
     def handleImgmount(self, line, gameInternalBatFile=False):
         startTokens = ['a', 'b', 'c', 'd', 'e', 'f','g', 'h', 'i', 'j', 'k', 'y', '0','2']
         endTokens = ['-t', '-size']
-        paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens, endTokens)
+        paths, command, startIndex, endIndex = self.__pathListInCommandLine__(line, startTokens, endTokens)
 
         prString = ""
         if len(paths) == 1:
             path = self.reducePath(paths[0].replace('"', ""), gameInternalBatFile)
             self.logger.log("    clean single imgmount")
-            path = self.cleanCDname(path.rstrip('\n'), None, gameInternalBatFile)
+            path = self.__cleanCDname__(path.rstrip('\n'), None, gameInternalBatFile)
             prString = prString + " " + path
         else:
             # See if path contains ""
@@ -96,7 +99,7 @@ class CommandHandler:
                 # TESTCASE: Take Back / CSS
                 path = self.reducePath(redoPath.replace('"', ""), gameInternalBatFile)
                 self.logger.log("    clean single imgmount")
-                path = self.cleanCDname(path, None, gameInternalBatFile)
+                path = self.__cleanCDname__(path, None, gameInternalBatFile)
                 prString = prString + " " + path
             else:
                 # several paths (multi cds)
@@ -125,7 +128,7 @@ class CommandHandler:
                 cdCount = 1
                 for path in paths:
                     path = self.reducePath(path.replace('"', ""), gameInternalBatFile)
-                    path = self.cleanCDname(path, cdCount, gameInternalBatFile)
+                    path = self.__cleanCDname__(path, cdCount, gameInternalBatFile)
                     prString = prString + " " + '"' + path + '"'
                     cdCount = cdCount + 1
 
@@ -151,7 +154,7 @@ class CommandHandler:
                 imgFile = ntpath.basename(util.localOSPath(path))
                 oldImgFilename = os.path.splitext(imgFile)[0]
                 imgFileExt = os.path.splitext(imgFile)[-1]
-                newImgFilename = self.dosRename(imgFullLocalPath, imgFile, oldImgFilename, imgFileExt, None)
+                newImgFilename = self.__dosRename__(imgFullLocalPath, imgFile, oldImgFilename, imgFileExt, None)
                 self.logger.log("      renamed %s to %s" % (imgFile, newImgFilename + imgFileExt))
                 path = '"' + imgPath + '\\' + newImgFilename + imgFileExt + '"'
                 cleanedPath.append(path)
@@ -183,7 +186,7 @@ class CommandHandler:
     def handleMount(self, line):
         startTokens = ['a', 'b', 'd', 'e', 'f', 'g','h', 'i', 'j', 'k']
         endTokens = ['-t']
-        paths, command, startIndex, endIndex = self.pathListInCommandLine(line, startTokens, endTokens)
+        paths, command, startIndex, endIndex = self.__pathListInCommandLine__(line, startTokens, endTokens)
 
         prString = ""
         if len(paths) == 1:
@@ -250,7 +253,7 @@ class CommandHandler:
         return fullString
 
     # Cleans cd names to a dos compatible 8 char name
-    def cleanCDname(self, path, cdCount=None, gameInternalBatFile=False):
+    def __cleanCDname__(self, path, cdCount=None, gameInternalBatFile=False):
         if self.gGator.isWin3x():
             # Find first game sub path and replace it
             gameSubPathIndex = path.lower().find('\\'+self.gGator.game.lower())
@@ -272,11 +275,11 @@ class CommandHandler:
                 cdsPath = "\\".join(cdFileFullPath.split('\\')[:-1])
 
                 # Rename file to dos compatible name                
-                cdFilename = self.dosRename(cdsPath, cdFile, oldCdFilename, cdFileExt, cdCount)
+                cdFilename = self.__dosRename__(cdsPath, cdFile, oldCdFilename, cdFileExt, cdCount)
                 self.logger.log("      renamed %s to %s" % (cdFile, cdFilename + cdFileExt))
 
                 if cdFileExt == ".cue":
-                    self.cleanCue(cdsPath, cdFilename, cdCount)
+                    self.__cleanCue__(cdsPath, cdFilename, cdCount)
 
                 # Clean remaining ccd and sub file which might have the same name as the cue file
                 otherCdFiles = [file for file in os.listdir(util.localOSPath(cdsPath)) if
@@ -284,7 +287,7 @@ class CommandHandler:
                                     -1].lower() in ['.ccd', '.sub']]
                 for otherCdFile in otherCdFiles:
                     otherCdFileExt = os.path.splitext(otherCdFile)[-1].lower()
-                    otherCdFilename = self.dosRename(cdsPath, otherCdFile, cdFilename, otherCdFileExt, cdCount)
+                    otherCdFilename = self.__dosRename__(cdsPath, otherCdFile, cdFilename, otherCdFileExt, cdCount)
                     self.logger.log("      renamed %s to %s" % (otherCdFile, otherCdFilename + otherCdFileExt))
 
                 cleanedPath = "\\".join(pathList[:-1]) + "\\" + cdFilename + cdFileExt
@@ -297,7 +300,7 @@ class CommandHandler:
             return path
 
     # Cleans cue files content to dos compatible 8 char name
-    def cleanCue(self, path, fileName, cdCount):
+    def __cleanCue__(self, path, fileName, cdCount):
         oldFile = open(os.path.join(util.localOSPath(path), fileName + ".cue"), 'r')
         newFile = open(os.path.join(util.localOSPath(path), fileName + "-fix.cue"), 'w')
         modifiedFirstLine = False
@@ -306,7 +309,7 @@ class CommandHandler:
                 if not modifiedFirstLine:  # Handle first line: img, iso, bin, etc
                     params = line.split('"')
                     isobin = os.path.splitext(params[1].lower())
-                    fixedIsoBinName = self.dosRename(path, params[1], isobin[0], isobin[1], cdCount)
+                    fixedIsoBinName = self.__dosRename__(path, params[1], isobin[0], isobin[1], cdCount)
                     self.logger.log("      renamed %s to %s" % (params[1], fixedIsoBinName + isobin[1]))
                     # TESTCASE: Pinball Arcade (1994) / PBArc94:
                     params[1] = fixedIsoBinName + isobin[-1]

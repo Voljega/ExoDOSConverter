@@ -1,7 +1,7 @@
 import os
 from commandhandler import CommandHandler
 import util
-
+import chardet
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
@@ -18,7 +18,7 @@ class ConfConverter:
         # self.commandHandler = CommandHandler(gGator)
 
     # Handle Parameter in ExpertMod
-    def getExpertParam(self, parameter, defaultValue):
+    def __getExpertParam__(self, parameter, defaultValue):
         if self.conversionConf['useExpertMode']:
             return self.conversionConf[parameter]
         else:
@@ -27,7 +27,7 @@ class ConfConverter:
     # Converts exo collection dosbox.conf to dosbox.cfg and dosbox.bat
     def process(self, gGator):
         self.logger.log("  create dosbox.bat")
-        exoDosboxConf = open(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"), 'r') # original
+        exoDosboxConf = open(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"), 'r')  # original
         retroDosboxCfg = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.cfg"), 'w')  # retroarch dosbox.cfg
         retroDosboxBat = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.bat"), 'w')  # retroarch dosbox.bat
 
@@ -40,13 +40,13 @@ class ConfConverter:
                 if gGator.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
                 else:
-                    retroDosboxCfg.write("fullresolution=" + self.getExpertParam("fullresolutionCfg", "desktop") + "\n")
+                    retroDosboxCfg.write("fullresolution=" + self.__getExpertParam__("fullresolutionCfg", "desktop") + "\n")
             elif cmdline.startswith("output"):
                 if gGator.conversionType == util.retrobat:
                     retroDosboxCfg.write(cmdline)
                 else:
-                    retroDosboxCfg.write("output=" + self.getExpertParam("outputCfg", "texture") + "\n")
-                retroDosboxCfg.write("renderer=" + self.getExpertParam("rendererCfg", "auto") + "\n")
+                    retroDosboxCfg.write("output=" + self.__getExpertParam__("outputCfg", "texture") + "\n")
+                retroDosboxCfg.write("renderer=" + self.__getExpertParam__("rendererCfg", "auto") + "\n")
                 if gGator.conversionConf['vsyncCfg']:
                     retroDosboxCfg.write("vsync=true\n")
                 else:
@@ -64,7 +64,7 @@ class ConfConverter:
                 retroDosboxCfg.write("\n")
             elif cmdline.startswith("[autoexec]"):
                 retroDosboxCfg.write(cmdline)
-                self.createDosboxBat(lines[count + 1:], retroDosboxBat, retroDosboxCfg, gGator)
+                self.__createDosboxBat__(lines[count + 1:], retroDosboxBat, retroDosboxCfg, gGator)
                 break
             else:
                 retroDosboxCfg.write(cmdline)
@@ -77,15 +77,15 @@ class ConfConverter:
         retroDosboxBat.close()
 
     # Creates dosbox.bat from dosbox.conf [autoexec] part
-    def createDosboxBat(self, cmdlines, retroDosboxBat, retroDosboxCfg, gGator):
+    def __createDosboxBat__(self, cmdlines, retroDosboxBat, retroDosboxCfg, gGator):
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
             if self.conversionConf['useDebugMode']:
                 retroDosboxCfg.write("# " + cmdline)
-            self.convertLine(cmdline, retroDosboxBat, gGator)
+            self.__convertLine__(cmdline, retroDosboxBat, gGator)
 
     # Convert command line to dosbox.bat
-    def convertLine(self, cmdline, retroDosboxBat, gGator):
+    def __convertLine__(self, cmdline, retroDosboxBat, gGator):
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
         # always remove @
         cmdline = cmdline.lstrip('@ ')
@@ -126,23 +126,29 @@ class ConfConverter:
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
                 if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                            'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'heromm2d']:
-                    self.handleRunBat(gGator)
-                self.handlePotentialSubFile(cmdline, gGator)
+                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'heromm2d']:
+                    self.__handleRunBat__(gGator)
+                self.__handlePotentialSubFile__(cmdline, gGator)
                 retroDosboxBat.write(cmdline)
             else:
-                self.handlePotentialSubFile(cmdline, gGator)
+                self.__handlePotentialSubFile__(cmdline, gGator)
                 retroDosboxBat.write(cmdline)
 
     # Handle potential sub files and problems in it
-    def handlePotentialSubFile(self, subPath, gGator, handledSubFiles=[]):
+    def __handlePotentialSubFile__(self, subPath, gGator, handledSubFiles=[]):
         subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
         subBat = os.path.join(gGator.getLocalGameDataOutputDir(), subPath.rstrip(' \n\r') + '.bat')
         if os.path.exists(subBat) and not os.path.isdir(subBat) and subBat.lower() not in handledSubFiles:
-            self.logger.log('    Handle Bat File %s' % subBat, self.logger.WARNING)
+            # Handle old DOS file with cp437 encoding (falsely detected as TIS-620, EUC-KR
+            subBatRaw = open(subBat, 'rb')
+            rawdata = subBatRaw.read()
+            result = chardet.detect(rawdata)
+            encoding = 'utf-8' if result['encoding'] not in ['TIS-620', 'EUC-KR'] else 'cp437'
+            subBatRaw.close()
+            self.logger.log('    Handle Bat File (enc:%s->%s) %s' % (result['encoding'],encoding, subBat), self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
-            subBatFile = open(subBat, 'r')
-            subBatFileClone = open(subBat + '1', 'w', newline='\r\n')
+            subBatFile = open(subBat, 'r', encoding=encoding)
+            subBatFileClone = open(subBat + '1', 'w', newline='\r\n', encoding=encoding)
             for cmdline in subBatFile.readlines():
                 # always remove @
                 cmdline = cmdline.lstrip('@ ')
@@ -157,7 +163,7 @@ class ConfConverter:
                             if not gGator.isWin3x():
                                 cmdline = cmdline.replace('c:','c:\\'+gGator.game).replace('C:','C:\\'+gGator.game)
                     else:
-                        self.handlePotentialSubFile(cmdline, gGator, handledSubFiles)
+                        self.__handlePotentialSubFile__(cmdline, gGator, handledSubFiles)
                     subBatFileClone.write(cmdline)
             subBatFileClone.close()
             subBatFile.close()
@@ -166,7 +172,7 @@ class ConfConverter:
             os.rename(subBat + '1', subBat)
 
     # Treat run.bat command inside game directory
-    def handleRunBat(self, gGator):
+    def __handleRunBat__(self, gGator):
         runBat = os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat')
         if os.path.exists(runBat):
             runFile = open(runBat, 'r')

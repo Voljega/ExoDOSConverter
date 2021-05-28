@@ -63,7 +63,7 @@ class ExoConverter:
 
         for game in self.games:
             try:
-                self.convertGame(game, gamelist, total, count)
+                self.__convertGame__(game, gamelist, total, count)
             except:
                 self.logger.log('  Error %s while converting game %s\n\n' % (sys.exc_info()[0], game),
                                 self.logger.ERROR)
@@ -75,14 +75,14 @@ class ExoConverter:
         self.metadataHandler.writeXml(self.outputDir, gamelist)
 
         self.logger.log('\n<--------- Post-conversion --------->')
-        self.postConversion()
+        self.__postConversion__()
 
-        self.logger.log('\n<--------- Finished Process --------->')
+        self.logger.log('\n<--------- Finished Process --------->\n')
 
         if len(errors.keys()) > 0:
             self.logger.log('\n<--------- Errors rundown --------->', self.logger.ERROR)
             self.logger.log('%i errors were found during process' % len(errors.keys()), self.logger.ERROR)
-            self.logger.log('See error log in your outputDir for more info', self.logger.ERROR)
+            self.logger.log('See error log in your outputDir for more info\n', self.logger.ERROR)
             logFile = open(os.path.join(self.outputDir, 'error_log.txt'), 'w')
             for key in list(errors.keys()):
                 logFile.write("Found error when processing %s" % key + " :\n")
@@ -96,7 +96,7 @@ class ExoConverter:
         self.postProcess()
 
     # Full conversion for a given game    
-    def convertGame(self, game, gamelist, totalSize, count):
+    def __convertGame__(self, game, gamelist, totalSize, count):
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()))
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useGenreSubFolders,
@@ -107,7 +107,7 @@ class ExoConverter:
                                self.scriptDir, self.keyb2joypad, self.logger)
 
         if not os.path.exists(gGator.getLocalGameOutputDir()):
-            self.copyGameDataToOutputDir(gGator)
+            self.__copyGameDataToOutputDir__(gGator)
             gGator.convertGame()
         else:
             self.logger.log("  already converted in output folder")
@@ -115,7 +115,7 @@ class ExoConverter:
         self.logger.log("")
 
     # Copy game data from collection to output dir
-    def copyGameDataToOutputDir(self, gGator):
+    def __copyGameDataToOutputDir__(self, gGator):
         # previous method kept for doc purpose
         # automatic Y, F and N to validate answers to exo's install.bat
         # fullscreen = true, output=overlay, aspect=true
@@ -142,7 +142,7 @@ class ExoConverter:
                 else:
                     self.logger.log('  <WARNING> Activate Download on demand if you want to download missing games',
                                     self.logger.WARNING)
-            self.unzipGame(gameZipPath, gGator)
+            self.__unzipGame__(gameZipPath, gGator)
         else:
             self.logger.log(
                 "  ERROR while trying to find zip file for " + os.path.join(self.collectionGamesConfDir, gGator.game),
@@ -154,7 +154,7 @@ class ExoConverter:
                                      gameZip)
         if os.path.exists(updateZipPath):
             self.logger.log("  found an update for the game")
-            self.unzipGame(updateZipPath, gGator)
+            self.__unzipGame__(updateZipPath, gGator)
 
         # For win3x games, all files / dir / etc in game.pc/game should be moved to game.pc/ and sub game.pc/game deleted
         # do not use getLocalGameDataOutputDir as game data are in subdir at that point
@@ -169,7 +169,7 @@ class ExoConverter:
                 shutil.rmtree(os.path.join(gGator.getLocalGameOutputDir(), subDirTempName))
 
     # Unzip game zip
-    def unzipGame(self, gameZipPath, gGator):
+    def __unzipGame__(self, gameZipPath, gGator):
         with ZipFile(gameZipPath, 'r') as zipFile:
             # Extract all the contents of zip file in current directory
             self.logger.log("  unzipping " + gameZipPath)
@@ -182,7 +182,7 @@ class ExoConverter:
             os.rename(os.path.join(gGator.getLocalGameOutputDir(), unzippedDirs[0]), os.path.join(gGator.getLocalGameOutputDir(), gGator.game))
 
     # specific convertion type treatments after converting all games
-    def postConversion(self):
+    def __postConversion__(self):
         # Cleaning for some conversions
         if self.conversionType in [util.esoteric, util.simplemenu, util.mister]:
             self.logger.log('Post cleaning for ' + self.conversionType)

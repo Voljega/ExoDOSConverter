@@ -78,4 +78,3 @@ class Keyb2Joypad:
     @staticmethod
     def emptyList(values):
         return len(values) == 0 or (len(values) == 1 and values[0] == '')
-

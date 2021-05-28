@@ -53,8 +53,9 @@ class Mapping:
 
         return mappings
 
-    def __convertK2JToGeneric__(self, keymapping):
-        k2jkey2generickey = { 'lctrl': 'leftctrl', 'lalt': 'leftalt', 'rctrl': 'rightctrl', 'ralt': 'rightalt'}
+    @staticmethod
+    def __convertK2JToGeneric__(keymapping):
+        k2jkey2generickey = {'lctrl': 'leftctrl', 'lalt': 'leftalt', 'rctrl': 'rightctrl', 'ralt': 'rightalt'}
         genericMapping = dict()
         genericMapping['description'] = keymapping['description']
         genericMapping['key'] = k2jkey2generickey[keymapping['key']] if keymapping['key'] in k2jkey2generickey \
@@ -115,4 +116,3 @@ class Mapping:
         p2kFile.write('    ]\n')
         p2kFile.write('}\n\n')
         p2kFile.close()
-
