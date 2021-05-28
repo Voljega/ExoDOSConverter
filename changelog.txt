@@ -4,7 +4,6 @@
  - full rework of mapping
  - use keyb2joypad project mapping when available (only for Batocera at the moment, will add other distributions on demand)
  - Fix EmuELEC generation (https://github.com/Voljega/ExoDOSConverter/issues/77)
- - TODO (optional): Fix run.bat reading/writing #75
 
 0.9.1-beta
  - major fixes for eXoWin3x conversion
