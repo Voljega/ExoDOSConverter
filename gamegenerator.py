@@ -127,25 +127,27 @@ class GameGenerator:
             os.mkdir(os.path.join(self.outputDir, 'pcdata'))
         if not os.path.exists(os.path.join(self.outputDir, 'pc')):
             os.mkdir(os.path.join(self.outputDir, 'pc'))
+        emuElecDataDir = os.path.join(self.outputDir, 'pcdata', self.genre) if self.useGenreSubFolders \
+            else os.path.join(self.outputDir, 'pcdata')
+        if not os.path.exists(emuElecDataDir):
+            os.mkdir(emuElecDataDir)
         # move *.pc folder to pcdata folder
-        shutil.move(os.path.join(self.getLocalGameOutputDir()), os.path.join(self.outputDir, 'pcdata'))
-        os.rename(os.path.join(self.outputDir, 'pcdata', self.game + '.pc'),
-                  os.path.join(self.outputDir, 'pcdata', self.game))
+        shutil.move(os.path.join(self.getLocalGameOutputDir()), emuElecDataDir)
+        os.rename(os.path.join(emuElecDataDir, self.game + '.pc'), os.path.join(emuElecDataDir, self.game))
+        open(os.path.join(emuElecDataDir, self.game, util.getCleanGameID(self.metadata, '.bat')),'w').close()
         # move *.bat *.map and *.cfg to pc/*.pc folder and rename *.cfg to dosbox-SDL2.conf
-        emuelecConfOutputDir = os.path.join(self.outputDir, 'pc', self.genre,
-                                            self.game + ".pc") if self.useGenreSubFolders else os.path.join(
-            self.outputDir, 'pc',
-            self.game + ".pc")
+        emuelecConfOutputDir = os.path.join(self.outputDir, 'pc', self.genre, self.game + ".pc") \
+            if self.useGenreSubFolders else os.path.join(self.outputDir, 'pc', self.game + ".pc")
         if not os.path.exists(emuelecConfOutputDir):
             os.makedirs(emuelecConfOutputDir)
-        shutil.move(os.path.join(self.outputDir, 'pcdata', self.game, 'dosbox.bat'), emuelecConfOutputDir)
-        shutil.move(os.path.join(self.outputDir, 'pcdata', self.game, 'dosbox.cfg'),
+        shutil.move(os.path.join(emuElecDataDir, self.game, 'dosbox.bat'), emuelecConfOutputDir)
+        shutil.move(os.path.join(emuElecDataDir, self.game, 'dosbox.cfg'),
                     os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'))
         shutil.copy2(
-            os.path.join(self.outputDir, 'pcdata', self.game, util.getCleanGameID(self.metadata, '.txt')),
+            os.path.join(emuElecDataDir, self.game, util.getCleanGameID(self.metadata, '.txt')),
             emuelecConfOutputDir)
-        if os.path.exists(os.path.join(self.outputDir, 'pcdata', self.game, 'mapper.map')):
-            shutil.move(os.path.join(self.outputDir, 'pcdata', self.game, 'mapper.map'), emuelecConfOutputDir)
+        if os.path.exists(os.path.join(emuElecDataDir, self.game, 'mapper.map')):
+            shutil.move(os.path.join(emuElecDataDir, self.game, 'mapper.map'), emuelecConfOutputDir)
         # modify dosbox-SDL2.conf to add mount c /storage/roms/pcdata/game at the beginning of autoexec.bat
         dosboxCfg = open(os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'), 'a')
         # add mount c at end of dosbox.cfg
@@ -156,7 +158,8 @@ class GameGenerator:
         # copy all instructions from dosbox.bat to end of dosbox.cfg
         dosboxBat = open(os.path.join(emuelecConfOutputDir, "dosbox.bat"), 'r')  # retroarch dosbox.bat
         for cmdLine in dosboxBat.readlines():
-            dosboxCfg.write(cmdLine)
+            # needs to get rid of '.pc' in mount instructions
+            dosboxCfg.write(cmdLine.replace('.pc',''))
         # delete dosbox.bat
         dosboxCfg.close()
         dosboxBat.close()

@@ -250,3 +250,6 @@ class ExoConverter:
                     os.path.isdir(os.path.join(self.outputDir, file)) and file not in ['pc', 'pcdata']]
             for genreDir in dirs:
                 shutil.rmtree(os.path.join(self.outputDir, genreDir))
+            instructions = open(os.path.join(self.outputDir, 'instructions for emuelec.txt'), 'w')
+            instructions.write('The script /emuelec/scripts/emuelecRunEmu.sh must be modified to read the exported configuration files (need to comment/uncomment the relevant RUNTHIS commands)\n')
+            instructions.close()

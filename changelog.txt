@@ -3,8 +3,7 @@
  - clean and simplify mapping logic (thenks @Newsdee)
  - full rework of mapping
  - use keyb2joypad project mapping when available (only for Batocera at the moment, will add other distributions on demand)
- - TODO: fix EmuELEC generation #77
- - TODO: MiSTeR enhancement #79
+ - Fix EmuELEC generation (https://github.com/Voljega/ExoDOSConverter/issues/77)
  - TODO (optional): Fix run.bat reading/writing #75
 
 0.9.1-beta
