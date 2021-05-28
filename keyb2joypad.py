@@ -26,7 +26,7 @@ class Keyb2Joypad:
         self.gamesConf = dict()
 
     def load(self):
-        sourceFile = os.path.join(self.scriptDir, 'data', 'keyb2joypad.csv')
+        sourceFile = os.path.join(self.scriptDir, 'data', 'keyb2Joypad.csv')
         columns = []
         keyb2joypadFile = open(sourceFile, 'r', encoding='utf-8')
         for line in keyb2joypadFile.readlines():
