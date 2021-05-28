@@ -1,6 +1,6 @@
 0.9.2-beta
  - updates and enhancements for MiSTeR
- - clean and simplify mapping logic (thenks @Newsdee)
+ - clean and simplify genre mapping logic (thenks @Newsdee)
  - full rework of mapping
  - use keyb2joypad project mapping when available (only for Batocera at the moment, will add other distributions on demand)
  - Fix EmuELEC generation (https://github.com/Voljega/ExoDOSConverter/issues/77)

@@ -210,9 +210,12 @@ def buildCollectionCSV(scriptDir, gamesConfDir, logger):
 
 # Finds pic for a game in the three pics caches
 def findPics(name, cache):
-    frontPic = findPic(name, cache, '.jpg')
-    frontPic = frontPic if frontPic is not None else findPic(name, cache, '.png')
-    frontPic = frontPic if frontPic is not None else findPic(name, cache, '.gif')
+    # Some special chars name in metadata have a clean name for the picture
+    specialCharsGame = {'Pył': 'Pyl'}
+    gameName = name if name not in specialCharsGame.keys() else specialCharsGame[name]
+    frontPic = findPic(gameName, cache, '.jpg')
+    frontPic = frontPic if frontPic is not None else findPic(gameName, cache, '.png')
+    frontPic = frontPic if frontPic is not None else findPic(gameName, cache, '.gif')
     return frontPic
 
 

@@ -94,6 +94,8 @@ class MetadataHandler:
         self.logger.log("  copy pics and manual")
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic):
             shutil.copy2(dosGame.frontPic, os.path.join(outputDir, 'downloaded_images'))
+        else:
+            self.logger.log('  [WARNING] No pic found for %s, please report on Github' % game, self.logger.WARNING)
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         self.__writeGamelistEntry__(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
