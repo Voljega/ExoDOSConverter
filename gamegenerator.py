@@ -197,7 +197,7 @@ class GameGenerator:
         # Remove unused CDs
         mister.removeUnusedCds(self.game, self.getLocalGameDataOutputDir(), self.logger)
         # Remove any COMMAND.COM and CHOICE.EXE files, as they are not compatible with MiSTeR
-        if self.isWin3x:
+        if self.isWin3x():
             tobeRemoved = [file for file in os.listdir(self.getLocalGameOutputDir()) if
                            file.lower() in ['command.com', 'choice.exe']]
             for fileToRemove in tobeRemoved:
