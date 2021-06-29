@@ -115,6 +115,8 @@ def convertSoundConfig(line):
             return 'mt32-pi -m -v'
         elif 'fluidsynth' in line:
             return 'mt32-pi -g -v'
+        elif 'default' in line:
+            return 'mt32-pi -g -v'
     return 'REM ' + line
 
 
