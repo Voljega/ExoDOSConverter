@@ -54,7 +54,7 @@ def batsAndMounts(gGator):
                 launchBat.write('f:\n')
             elif line.lower() == 'call run' or line.lower() == 'call run.bat':
                 if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
+                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'longbow']:
                     handleRunBat(gGator)
                 launchBat.write(line)
             else:
