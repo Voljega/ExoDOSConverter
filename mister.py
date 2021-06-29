@@ -94,6 +94,9 @@ def handleRunBat(gGator):
                 if cmdline not in handled:
                     handled[cmdline] = convertImgMount(cmdline, gGator)
                 runFileClone.write(handled[cmdline] + '\n')
+            elif cmdline.lower().startswith("config "):
+                converted_sound_command = convertSoundConfig(cmdline)
+                runFileClone.write(converted_sound_command + '\n')
             else:
                 runFileClone.write(cmdline + '\n')
         runFileClone.close()
@@ -103,6 +106,16 @@ def handleRunBat(gGator):
         os.rename(os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat1'), os.path.join(gGator.getLocalGameDataOutputDir(), 'run.bat'))
     else:
         gGator.logger.log('    <ERROR> run.bat not found', gGator.logger.ERROR)
+
+
+# Convert sound command for MiSTeR
+def convertSoundConfig(line):
+    if 'mididevice' in line:
+        if 'mt32' in line:
+            return 'mt32-pi -m -v'
+        elif 'fluidsynth' in line:
+            return 'mt32-pi -g -v'
+    return 'REM ' + line
 
 
 # Convert imgmount command for MiSTeR
