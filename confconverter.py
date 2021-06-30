@@ -126,7 +126,7 @@ class ConfConverter:
                 retroDosboxBat.write(self.commandHandler.handleBoot(cmdline.rstrip('\n\r ')))
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
-                if gGator.game in lists.handle_run_bat_for:
+                if gGator.game in lists.gamesWithRunBatHandling:
                     self.__handleRunBat__(gGator)
                 self.__handlePotentialSubFile__(cmdline, gGator)
                 retroDosboxBat.write(cmdline)

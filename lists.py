@@ -1,4 +1,4 @@
-handle_run_bat_for = [
+gamesWithRunBatHandling = [
     'bisle2',
     'Blood',
     'Carmaged',
