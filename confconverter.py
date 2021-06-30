@@ -2,6 +2,7 @@ import os
 from commandhandler import CommandHandler
 import util
 import chardet
+import lists
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
@@ -125,8 +126,7 @@ class ConfConverter:
                 retroDosboxBat.write(self.commandHandler.handleBoot(cmdline.rstrip('\n\r ')))
             elif cmdline.lower().rstrip(' \n\r') == 'call run' or cmdline.lower().rstrip(' \n\r') == 'call run.bat':
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
-                if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec', 'heromm2d']:
+                if gGator.game in lists.gamesWithRunBatHandling:
                     self.__handleRunBat__(gGator)
                 self.__handlePotentialSubFile__(cmdline, gGator)
                 retroDosboxBat.write(cmdline)

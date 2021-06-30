@@ -3,6 +3,7 @@ import util
 import shutil
 import ntpath
 import platform
+import lists
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
@@ -53,8 +54,7 @@ def batsAndMounts(gGator):
             elif line.lower() in ['d:', 'f:', 'g:', 'h:', 'i:', 'j:', 'k:']:
                 launchBat.write('f:\n')
             elif line.lower() == 'call run' or line.lower() == 'call run.bat':
-                if gGator.game in ['bisle2', 'Blood', 'Carmaged', 'comcon', 'comconra', 'CrypticP', 'lemm3', 'LewLeon',
-                                   'MechW2', 'rarkani1', 'Resurrec', 'stjudgec']:
+                if gGator.game in lists.gamesWithRunBatHandling:
                     handleRunBat(gGator)
                 launchBat.write(line)
             else:
