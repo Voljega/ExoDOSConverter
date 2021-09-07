@@ -134,12 +134,12 @@ class GameGenerator:
         # move *.pc folder to pcdata folder
         shutil.move(os.path.join(self.getLocalGameOutputDir()), emuElecDataDir)
         os.rename(os.path.join(emuElecDataDir, self.game + '.pc'), os.path.join(emuElecDataDir, self.game))
-        open(os.path.join(emuElecDataDir, self.game, util.getCleanGameID(self.metadata, '.bat')),'w').close()
         # move *.bat *.map and *.cfg to pc/*.pc folder and rename *.cfg to dosbox-SDL2.conf
         emuelecConfOutputDir = os.path.join(self.outputDir, 'pc', self.genre, self.game + ".pc") \
             if self.useGenreSubFolders else os.path.join(self.outputDir, 'pc', self.game + ".pc")
         if not os.path.exists(emuelecConfOutputDir):
             os.makedirs(emuelecConfOutputDir)
+        open(os.path.join(emuelecConfOutputDir, util.getCleanGameID(self.metadata, '.bat')),'w').close()
         shutil.move(os.path.join(emuElecDataDir, self.game, 'dosbox.bat'), emuelecConfOutputDir)
         shutil.move(os.path.join(emuElecDataDir, self.game, 'dosbox.cfg'),
                     os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'))
