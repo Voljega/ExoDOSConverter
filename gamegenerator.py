@@ -11,12 +11,14 @@ from mapping import Mapping
 # contains all data and conf about generating a given game
 class GameGenerator:
 
-    def __init__(self, game, genre, outputDir, collectionVersion, useGenreSubFolders, metadata, conversionType,
+    def __init__(self, game, gameDir, genre, outputDir, collectionVersion, useLongFolderNames, useGenreSubFolders, metadata, conversionType,
                  conversionConf, exoCollectionDir, fullnameToGameDir, scriptDir, keyb2joypad, logger):
         self.game = game
+        self.gameDir = gameDir
         self.collectionVersion = collectionVersion
         self.genre = genre
         self.outputDir = outputDir
+        self.useLongFolderNames = useLongFolderNames
         self.useGenreSubFolders = useGenreSubFolders
         self.metadata = metadata
         self.conversionType = conversionType
@@ -40,7 +42,7 @@ class GameGenerator:
 
     # returns local game ouput dir of the generated game
     def getLocalGameOutputDir(self):
-        return os.path.join(self.getLocalParentOutputDir(), self.game + ".pc")
+        return os.path.join(self.getLocalParentOutputDir(), self.gameDir)
 
     # returns local game data output dir of the generated game
     def getLocalGameDataOutputDir(self):
@@ -135,8 +137,8 @@ class GameGenerator:
         shutil.move(os.path.join(self.getLocalGameOutputDir()), emuElecDataDir)
         os.rename(os.path.join(emuElecDataDir, self.game + '.pc'), os.path.join(emuElecDataDir, self.game))
         # move *.bat *.map and *.cfg to pc/*.pc folder and rename *.cfg to dosbox-SDL2.conf
-        emuelecConfOutputDir = os.path.join(self.outputDir, 'pc', self.genre, self.game + ".pc") \
-            if self.useGenreSubFolders else os.path.join(self.outputDir, 'pc', self.game + ".pc")
+        emuelecConfOutputDir = os.path.join(self.outputDir, 'pc', self.genre, self.gameDir) \
+            if self.useGenreSubFolders else os.path.join(self.outputDir, 'pc', self.gameDir)
         if not os.path.exists(emuelecConfOutputDir):
             os.makedirs(emuelecConfOutputDir)
         open(os.path.join(emuelecConfOutputDir, util.getCleanGameID(self.metadata, '.bat')),'w').close()
@@ -300,7 +302,7 @@ class GameGenerator:
         dosboxCfg = open(os.path.join(self.getLocalGameOutputDir(), "dosbox.cfg"), 'a')
         # add mount c at end of dosbox.cfg
         romsFolder = util.getRomsFolderPrefix(self.conversionType, self.conversionConf)
-        retropieGameDir = romsFolder + "/" + self.genre + "/" + self.game + ".pc" if self.useGenreSubFolders else romsFolder + "/" + self.game + ".pc"
+        retropieGameDir = romsFolder + "/" + self.genre + "/" + self.gameDir if self.useGenreSubFolders else romsFolder + "/" + self.gameDir
         dosboxCfg.write("mount c " + retropieGameDir + "\n")
         dosboxCfg.write("c:\n")
         # copy all instructions from dosbox.bat to end of dosbox.cfg

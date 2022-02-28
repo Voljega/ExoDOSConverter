@@ -88,7 +88,7 @@ class MetadataHandler:
         return dosGame
 
     # Process and export metadata to in-memory gamelist xml for a given game    
-    def processGame(self, game, gamelist, genre, outputDir, useGenreSubFolders, conversionType):
+    def processGame(self, game, gamelist, genre, outputDir, useLongFolderNames, useGenreSubFolders, conversionType):
         dosGame = self.__handleMetadata__(game)
         self.logger.log("  computed genre %s" % genre)
         self.logger.log("  copy pics and manual")
@@ -98,7 +98,7 @@ class MetadataHandler:
             self.logger.log('  [WARNING] No pic found for %s, please report on Github' % game, self.logger.WARNING)
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
-        self.__writeGamelistEntry__(gamelist, dosGame, game, genre, useGenreSubFolders, conversionType)
+        self.__writeGamelistEntry__(gamelist, dosGame, game, genre, useLongFolderNames, useGenreSubFolders, conversionType)
         return dosGame
 
     # Replaces “ ” ’ …
@@ -107,7 +107,7 @@ class MetadataHandler:
         return s.replace('&', '&amp;')
 
     # Write metada for a given game to in-memory gamelist xml
-    def __writeGamelistEntry__(self, gamelist, dosGame, game, genre, useGenreSubFolders, conversionType):
+    def __writeGamelistEntry__(self, gamelist, dosGame, game, genre, useLongFolderNames, useGenreSubFolders, conversionType):
         root = gamelist.getroot()
 
         if platform.system() == 'Windows':
@@ -122,12 +122,17 @@ class MetadataHandler:
         if conversionType == util.retropie:
             path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.conf') if useGenreSubFolders \
                 else "./" + util.getCleanGameID(dosGame, '.conf')
+        elif conversionType == util.batocera and useLongFolderNames:
+            path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.pc') if useGenreSubFolders \
+                else "./" + util.getCleanGameID(dosGame, '.pc')
         else:
             path = "./" + genre + "/" + self.__cleanXmlString__(
                 game) + ".pc" if useGenreSubFolders else "./" + self.__cleanXmlString__(game) + ".pc"
 
         existsInGamelist = [child for child in root.iter('game') if
-                            self.__getNode__(child, "name") == dosGame.name and self.__getNode__(child, "releasedate") == year]
+                            #self.__getNode__(child, "name") == dosGame.name and self.__getNode__(child, "releasedate") == year]
+                            #better to have two entries than a wrong entry.
+                            self.__getNode__(child, "path") == path and self.__getNode__(child, "releasedate") == year]
         if len(existsInGamelist) == 0:
             gameElt = etree.SubElement(root, 'game')
             etree.SubElement(gameElt, 'path').text = path

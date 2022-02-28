@@ -116,7 +116,7 @@ def loadUIStrings(scriptDir, guiStringsFile):
     for line in file.readlines()[1:]:
         confLine = line.split(";")
         if len(confLine) == 3:
-            guiStrings[confLine[0]] = GUIString(confLine[0], confLine[1], confLine[2].rstrip('\n\r '), order)
+            guiStrings[confLine[0]] = GUIString(confLine[0], confLine[1], confLine[2].rstrip('\n\r ').replace("#n","\n"), order)
             order = order + 1
     file.close()
     return guiStrings

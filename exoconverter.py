@@ -13,7 +13,7 @@ from gamegenerator import GameGenerator
 # Main Converter
 class ExoConverter:
 
-    def __init__(self, games, cache, scriptDir, collectionVersion, collectionDir, outputDir, conversionType,
+    def __init__(self, games, cache, scriptDir, collectionVersion, collectionDir, outputDir, conversionType, useLongFolderNames, 
                  useGenreSubFolders, conversionConf, fullnameToGameDir, postProcess, logger):
         self.games = games
         self.cache = cache
@@ -26,6 +26,7 @@ class ExoConverter:
         self.collectionGamesConfDir = util.getCollectionGamesConfDir(collectionDir, collectionVersion)
         self.outputDir = outputDir
         self.conversionType = conversionType
+        self.useLongFolderNames = useLongFolderNames
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionConf = conversionConf
         self.metadataHandler = MetadataHandler(collectionDir, collectionVersion, self.cache, self.logger)
@@ -99,10 +100,14 @@ class ExoConverter:
     def __convertGame__(self, game, gamelist, totalSize, count):
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()))
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
-        metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useGenreSubFolders,
+        metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
                                                     self.conversionType)
 
-        gGator = GameGenerator(game, genre, self.outputDir, self.collectionVersion, self.useGenreSubFolders, metadata,
+        if self.conversionType == util.batocera and self.useLongFolderNames:
+            gameDir = util.getCleanGameID(metadata,'.pc')
+        else:
+            gameDir = game + ".pc"
+        gGator = GameGenerator(game, gameDir, genre, self.outputDir, self.collectionVersion, self.useLongFolderNames, self.useGenreSubFolders, metadata,
                                self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir,
                                self.scriptDir, self.keyb2joypad, self.logger)
 
