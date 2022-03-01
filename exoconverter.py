@@ -111,7 +111,9 @@ class ExoConverter:
                                self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir,
                                self.scriptDir, self.keyb2joypad, self.logger)
 
-        if not os.path.exists(gGator.getLocalGameOutputDir()):
+        # for batocera(maybe others) this will allow re-naming etc of the folders if already existing
+        # for everything else it works just as well as it did previously(basically won't convert from one export type to another)
+        if not util.moveFolderifExist(self.useGenreSubFolders, metadata, genre, game, gameDir, self.outputDir, self.logger):
             self.__copyGameDataToOutputDir__(gGator)
             gGator.convertGame()
         else:

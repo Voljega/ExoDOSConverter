@@ -1,6 +1,7 @@
 import os.path
 import platform
 import collections
+import shutil
 from PIL import Image
 import requests
 import urllib.request
@@ -298,3 +299,40 @@ def buildCache(scriptDir, collectionDir, collection, logger):
     logger.log("gameplayPicCache: %i entities" % len(gameplayPicCache.keys()))
 
     return frontPicCache, titlePicCache, gameplayPicCache
+
+def moveFolderifExist(useGenreSubFolders, metadata, genre, game, gameDir, outputDir, logger):
+    wantedPath = os.path.join(outputDir, genre, gameDir) if useGenreSubFolders else os.path.join(outputDir,gameDir)
+    paths = {
+    'shortPath':        os.path.join(outputDir,game + ".pc"),
+    'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
+    'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
+    'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
+    }
+
+    totalExistingPaths = 0
+    existingPath = []
+    for name,path in paths.items():
+        if os.path.exists(path):
+            existingPath.append(path)
+            totalExistingPaths += 1
+            logger.log("  Existing Path: " + path)
+
+    if totalExistingPaths > 1:
+        logger.log("    There can only be one, aborting auto rename.")
+        logger.log("    If no Errors, gamelist.xml will be accurate.")
+        for path in existingPath:
+            if path == wantedPath:
+                return True
+        #more than 1 path already, don't know what they want so create requested folder(will result in duplicates/triplicates/quad)
+        return False
+    elif totalExistingPaths == 0:
+        #game folder is non existent in any path, so create it.
+        return False
+    
+    #only one existing path found rename it to wanted path
+    if wantedPath != existingPath[0]:
+        logger.log("  Moving Existing -> " + wantedPath)
+        shutil.move(existingPath[0],wantedPath)
+        #moved it so now its exists
+        return True
+    return True

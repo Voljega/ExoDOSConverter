@@ -130,9 +130,7 @@ class MetadataHandler:
                 game) + ".pc" if useGenreSubFolders else "./" + self.__cleanXmlString__(game) + ".pc"
 
         existsInGamelist = [child for child in root.iter('game') if
-                            #self.__getNode__(child, "name") == dosGame.name and self.__getNode__(child, "releasedate") == year]
-                            #better to have two entries than a wrong entry.
-                            self.__getNode__(child, "path") == path and self.__getNode__(child, "releasedate") == year]
+                            self.__getNode__(child, "name") == dosGame.name and self.__getNode__(child, "releasedate") == year]
         if len(existsInGamelist) == 0:
             gameElt = etree.SubElement(root, 'game')
             etree.SubElement(gameElt, 'path').text = path
@@ -144,6 +142,10 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'genre').text = genre
             etree.SubElement(gameElt, 'manual').text = manual
             etree.SubElement(gameElt, 'image').text = frontPic
+        else:
+            #game exists lets make sure path is correct to whats been done with subFolders/longNames
+            for child in existsInGamelist:
+                child.find("path").text = path
 
     # Convert multi genres exo collection format to a single one
     @staticmethod
