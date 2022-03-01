@@ -310,10 +310,8 @@ def checkMultipleofSameGame(useGenreSubFolders, metadata, genre, game, gameDir, 
     }
 
     totalExistingPaths = 0
-    existingPath = []
     for name,path in paths.items():
         if os.path.exists(path):
-            existingPath.append(path)
             totalExistingPaths += 1
             logger.log("  Existing Path: " + path)
 
