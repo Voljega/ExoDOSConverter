@@ -801,7 +801,7 @@ class ExoGUI:
             self.__setComponentState__(self.preExtractGamesCheckButton,
                                        'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
             self.__setComponentState__(self.longGameFolderCheckButton,
-                                       'normal' if self.guiVars['conversionType'].get() == util.batocera else 'disabled')
+                                       'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
 
     def postProcess(self):
         self.__unselectAll__()

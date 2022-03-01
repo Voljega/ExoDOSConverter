@@ -103,7 +103,7 @@ class ExoConverter:
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
                                                     self.conversionType)
 
-        if self.conversionType == util.batocera and self.useLongFolderNames:
+        if (self.conversionType == util.batocera or self.conversionType == util.retrobat) and self.useLongFolderNames:
             gameDir = util.getCleanGameID(metadata,'.pc')
         else:
             gameDir = game + ".pc"
@@ -111,9 +111,7 @@ class ExoConverter:
                                self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir,
                                self.scriptDir, self.keyb2joypad, self.logger)
 
-        # for batocera(maybe others) this will allow re-naming etc of the folders if already existing
-        # for everything else it works just as well as it did previously(basically won't convert from one export type to another)
-        if not util.moveFolderifExist(self.useGenreSubFolders, metadata, genre, game, gameDir, self.outputDir, self.logger):
+        if not os.path.exists(gGator.getLocalGameOutputDir()):
             self.__copyGameDataToOutputDir__(gGator)
             gGator.convertGame()
         else:

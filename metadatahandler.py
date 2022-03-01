@@ -122,7 +122,7 @@ class MetadataHandler:
         if conversionType == util.retropie:
             path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.conf') if useGenreSubFolders \
                 else "./" + util.getCleanGameID(dosGame, '.conf')
-        elif conversionType == util.batocera and useLongFolderNames:
+        elif (conversionType == util.batocera or conversionType == util.retrobat) and useLongFolderNames:
             path = "./" + genre + "/" + util.getCleanGameID(dosGame,'.pc') if useGenreSubFolders \
                 else "./" + util.getCleanGameID(dosGame, '.pc')
         else:
