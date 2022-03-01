@@ -300,6 +300,26 @@ def buildCache(scriptDir, collectionDir, collection, logger):
 
     return frontPicCache, titlePicCache, gameplayPicCache
 
+def checkMultipleofSameGame(useGenreSubFolders, metadata, genre, game, gameDir, outputDir, logger):
+    wantedPath = os.path.join(outputDir, genre, gameDir) if useGenreSubFolders else os.path.join(outputDir,gameDir)
+    paths = {
+    'shortPath':        os.path.join(outputDir,game + ".pc"),
+    'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
+    'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
+    'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
+    }
+
+    totalExistingPaths = 0
+    existingPath = []
+    for name,path in paths.items():
+        if os.path.exists(path):
+            existingPath.append(path)
+            totalExistingPaths += 1
+            logger.log("  Existing Path: " + path)
+
+    if totalExistingPaths > 1:
+        logger.log("  \tDue to not Clearing output folder you have...\n\t\t\t\t MULTIPLE COPIES.\n\t\tIf changing conversion type this may lead to bigger issues.")
+
 def moveFolderifExist(useGenreSubFolders, metadata, genre, game, gameDir, outputDir, logger):
     wantedPath = os.path.join(outputDir, genre, gameDir) if useGenreSubFolders else os.path.join(outputDir,gameDir)
     paths = {
