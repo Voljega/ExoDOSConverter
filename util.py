@@ -1,3 +1,5 @@
+import shutil
+import subprocess
 import os.path
 import platform
 import collections
@@ -76,21 +78,63 @@ def getConfBakFilename(setKey):
 def getGuiStringsFilename(setKey):
     return getKeySetString(guiStringsFilename, setKey)
 
+def lines_that_contain(string, fp):
+    return [line for line in fp if string in line]
 
-def downloadZip(gameZip, gameZipPath, logger):
+def downloadTorrent(gameZip,gameZipPath, exoCollectionDir, logger):
+    eXoDir = os.path.join(exoCollectionDir, 'eXo')
+    outputDir = os.path.join(eXoDir,"eXoDOS", "DOWNLOAD")
+    eXoAriaDir = os.path.join(exoCollectionDir, 'eXo', 'util', 'aria')
+    eXoAriaIndex = os.path.join(eXoAriaDir, 'index.txt')
+        
+    if os.path.exists(eXoAriaIndex):
+        with open(eXoAriaIndex, "r") as fp:
+            for line in lines_that_contain(gameZip, fp):
+                gameInfo = line.split(':')
+            
+        #make our downloads DIR at the torrent will create files we Don't want due to chunk size
+        try: 
+            os.mkdir(outputDir) 
+        except OSError as error: 
+            #just continue we don't care if it already exists(its a disposable download folder)
+            pass
+
+        subProcessArgs = [
+            eXoAriaDir + '\\aria2c.exe',
+            "--select-file=" + gameInfo[0],
+            "--index-out="+gameInfo[0] + "=..\\" + gameZip,
+            "--dir=" + outputDir,
+            "--file-allocation=none",
+            "--allow-overwrite=true",
+            "--seed-time=0",
+            eXoAriaDir + "\\eXoDOS.torrent"
+        ]
+        logger.log("  Downloading... " + gameZip)
+        #run torrent downloader aria2c
+        #this will log to command window not GUI as it floods GUI
+        exitCode = subprocess.call(subProcessArgs)
+        if exitCode == 0:
+            logger.log("  Download Succeeded!")
+        #remove the outputDir... download would have been moved already
+        shutil.rmtree(outputDir)
+    else:
+        logger.log("  No torrent downloader in eXo utils DIR.\n  Did you run Setup.bat? or Extract utils folder?",logger.ERROR)
+
+
+def downloadZip(gameZip, gameZipPath, exoCollectionDir, logger):
     response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
                             headers={'User-agent': 'Mozilla/5.0'})
-    totalSize = int(response.headers.get('content-length'))
-    rightSize = totalSize
-    typeSize = ['b', 'kb', 'mb', 'gb']
-    typeIndex = 0
-    printableSize = ''
-    while rightSize > 0 and typeIndex < len(typeSize):
-        printableSize = str(rightSize) + ' ' + typeSize[typeIndex]
-        rightSize = int(rightSize / 1024)
-        typeIndex = typeIndex + 1
-    logger.log('  Downloading %s of size %s' % (gameZip, printableSize))
     if response.status_code == 200:
+        totalSize = int(response.headers.get('content-length'))
+        rightSize = totalSize
+        typeSize = ['b', 'kb', 'mb', 'gb']
+        typeIndex = 0
+        printableSize = ''
+        while rightSize > 0 and typeIndex < len(typeSize):
+            printableSize = str(rightSize) + ' ' + typeSize[typeIndex]
+            rightSize = int(rightSize / 1024)
+            typeIndex = typeIndex + 1
+        logger.log('  Downloading %s of size %s' % (gameZip, printableSize))
         with open(gameZipPath, 'wb') as f:
             if totalSize is None:
                 f.write(response.content)
@@ -104,8 +148,11 @@ def downloadZip(gameZip, gameZipPath, logger):
                     logger.log('\r    [{}{}]'.format('█' * done, '.' * (50 - done)), logger.INFO, True)
     else:
         logger.log(
-            '  <ERROR> error %s while downloading %s: %s' % (response.status_code, gameZipPath, response.reason),
+            '  <ERROR> error %s while downloading from web %s: %s' % (response.status_code, gameZipPath, response.reason),
             logger.ERROR)
+        if platform.system() == 'Windows':
+            logger.log('  Since this is Windows, trying torrent.')
+            downloadTorrent(gameZip,gameZipPath, exoCollectionDir,logger)
 
 
 # Loads UI Strings
