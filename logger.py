@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import queue
+import re
 
 
 class Logger:
@@ -27,4 +28,24 @@ class Logger:
         if not replaceLine:
             print(msg.rstrip('\n'))
         else:
-            print(msg.rstrip('\n'), end='')
+            #no reason we can't have two \r incase its missing
+            print(msg.rstrip('\n'), end='\r')
+
+    #log a subprocess call
+    def logProcess(self, process):
+        # some Process use ANSI color control characters,
+        # they are not that neccesary and would need a re-work of logger to show
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        with process:
+            if process.stdout:
+                for line in process.stdout:
+                    line = line.strip()
+                    if line != "":
+                        line = ansi_escape.sub('', line)
+                        if line.startswith("[") and line.endswith("]"):
+                            self.log("    " + line, replaceLine=True)
+                        else:
+                            self.log("    " + line)
+            if process.stderr:
+                for line in process.stderr:
+                    self.log("  " + line,self.ERROR)

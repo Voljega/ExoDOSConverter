@@ -135,19 +135,23 @@ class ExoConverter:
             gameZipPath = os.path.join(
                 os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion)), gameZip)
 
-            #check for a previous Torrent download fail(0 byte file)
+            # ensure gameZip not 0 bytes, this will trigger a download if it is.
             try:    
                 if not os.path.getsize(gameZipPath):
-                    self.logger.log("  "+ gameZipPath + " is 0 bytes. Removing.",self.logger.ERROR)
+                    self.logger.log("  <WARNING>"+ gameZipPath + " is 0 bytes. Removing.",self.logger.WARNING)
                     os.remove(gameZipPath)
             except OSError as error: 
                 pass
-            
+
             # If zip of the game is not found, try to download it
             if not os.path.exists(gameZipPath):
                 self.logger.log('  <WARNING> %s not found' % gameZipPath, self.logger.WARNING)
                 if self.conversionConf['downloadOnDemand']:
-                    util.downloadZip(gameZip, gameZipPath, self.exoCollectionDir, self.logger)
+                    #try zip then try torrent
+                    downloadZipSuccess = util.downloadZip(gameZip, gameZipPath, self.logger)
+                    if not downloadZipSuccess:
+                        self.logger.log("  <WARNING> Web download Failed, trying Torrent",self.logger.WARNING)
+                        util.downloadTorrent(gameZip, gameZipPath, self.exoCollectionDir, self.logger)
                 else:
                     self.logger.log('  <WARNING> Activate Download on demand if you want to download missing games',
                                     self.logger.WARNING)
