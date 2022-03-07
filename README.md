@@ -27,6 +27,8 @@ There's also an ExoDOSWin3x collection for Windows 3.1 games, version 2 of which
 
 Before using this tool, don't forget to install the collections (eXoDOS full and lite V5 versions, or eXoWin3x) with theuir respective `setup.bat`
 
+They should be installed separately and not combined, or the tool will not work.
+
 ## The Tool
 
 The original aim of this tool was to convert any selection of games of the eXoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
@@ -38,6 +40,9 @@ The conversion should cover the following :
  - when possible, custom or generic controller configuration
 
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
+It should be used on a separate computer, not on the system you are targetting.
+
+On a side note, please do not use dosbox pure as core, it is not fully compatible with the eXo collections and using it with lead to a lot of games not running at all.
 
 ## Anti-virus false positives
 
@@ -79,6 +84,8 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 Either use the latest [release](https://github.com/Voljega/ExoDOSConverter/releases) or you can build your own version using one of these two options :
 - @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
 - read the `build.txt` to build your own version
+
+Before using the tool, install the collection by executing `setup.bat`
 
 ## Expert mode
 

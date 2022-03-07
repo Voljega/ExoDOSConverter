@@ -1,5 +1,5 @@
 If you want to build your own executable on Windows, it's pretty straightforward :
-- Install your Python 3.8 environment
+- Install your Python 3.8 or 3.9 environment
 - Launch python prompt
 - Install pyinstaller with this command : `pip install pyinstaller`
 - Depending on your environment you might need to install `pip install image`, `pip install pillow`, and `pip install requests`
@@ -8,5 +8,5 @@ If you want to build your own executable on Windows, it's pretty straightforward
 - Copy all `.py` files and the `exodosicon.ico` file in a work directory
 - Go into the work directory and type : `pyinstaller --icon=exodosicon.ico --clean -F main.py`
 - Your exe will be generated into a `dist` subDirectory
-- Just copy README.md, exodosicon.ico, build.txt, build.bat, ExoDOSConverter.sh and conf, data and GUI directories alongside the main exe and you're good to go
+- Just copy README.md, exodosicon.ico, build.txt and conf, data and GUI directories alongside the main exe and you're good to go
 - Delete cache and data/mister/distro subfolder in your dist dir if it exists

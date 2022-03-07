@@ -385,7 +385,7 @@ class ExoGUI:
 
         if collectionVersion is None:
             self.logger.log(
-                "\n%s is not a directory, doesn't exist, or is not a valid exo Collection directory" % collectionDir, self.logger.ERROR)
+                "\n%s is not a directory, doesn't exist, or is not a valid eXo collection directory" % collectionDir, self.logger.ERROR)
             self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
             self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
