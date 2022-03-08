@@ -1,3 +1,6 @@
+import errno
+import shutil
+import subprocess
 import os.path
 import platform
 import collections
@@ -76,21 +79,128 @@ def getConfBakFilename(setKey):
 def getGuiStringsFilename(setKey):
     return getKeySetString(guiStringsFilename, setKey)
 
+def lines_that_contain(string, fp):
+    return [line for line in fp if string in line]
+
+def callProcess(subProcessArgs,logger):
+    process = subprocess.Popen(subProcessArgs, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, universal_newlines=True)
+    logger.logProcess(process)
+    return process.wait()
+    
+def installAria2cWindows(exoCollectionDir, logger):
+    eXoUtilDir = os.path.join(exoCollectionDir, 'eXo', 'util')
+    subProcessArgs = [os.path.join(eXoUtilDir, "unzip.exe"), "-o", "-d",
+                      eXoUtilDir, os.path.join(eXoUtilDir, "util.zip"), "aria.zip"]
+    exitCode = callProcess(subProcessArgs, logger)
+
+    #extract next file if succesful
+    if not exitCode:
+        subProcessArgs = [os.path.join(eXoUtilDir, "unzip.exe"), "-o",
+                          "-d", eXoUtilDir, os.path.join(eXoUtilDir, "aria.zip"), "aria/*"]
+        exitCode = callProcess(subProcessArgs, logger)
+
+def installAria2cLinux(exoCollectionDir, logger):
+    logger.log("  <Error> Installing aria2c for Linux not implemented yet",logger.ERROR)
+
+def installAria2cMac(exoCollectionDir, logger):
+    logger.log("  <Error> Installing aria2c for Mac not implemented yet",logger.ERROR)
+
+def installAria2c(exoCollectionDir, logger):
+        if platform.system() == 'Windows':
+            installAria2cWindows(exoCollectionDir, logger)
+        elif platform.system() == 'Linux':
+            installAria2cLinux(exoCollectionDir, logger)
+        elif platform.system() == 'Darwin':
+            installAria2cMac(exoCollectionDir, logger)
+
+def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
+    eXoDir = os.path.join(exoCollectionDir, 'eXo')
+    outputDir = os.path.join(eXoDir, "eXoDOS", "DOWNLOAD")
+    aria2cDir = os.path.join(exoCollectionDir, 'eXo', 'util', 'aria')
+    eXoTorrentIndex = os.path.join(aria2cDir, 'index.txt')
+    downloadFolderAlreadyExisted = False
+    downloadedSuccess = False
+
+    #try and install Aria2c(torrent downloader) based on platform.
+    if not os.path.exists(eXoTorrentIndex):
+        logger.log("  <WARNING> Missing index.txt from eXoDOS util.zip, attempting extraction.", logger.WARNING)
+        installAria2c(exoCollectionDir, logger)
+
+    #check again as we cannot assume the above succeeded, but if it did work we can then use the tool on a first run.
+    if os.path.exists(eXoTorrentIndex):
+        with open(eXoTorrentIndex, "r") as fp:
+            for line in lines_that_contain(gameZip, fp):
+                gameInfo = line.split(':')
+
+        #make our downloads DIR at the torrent will create files we Don't want due to chunk size
+        try:
+            os.mkdir(outputDir)
+        except OSError as e:
+            #continue if DOWNLOAD folder already exists.
+            if e.errno != errno.EEXIST:
+                raise
+            downloadFolderAlreadyExisted = True
+            logger.log(
+                f"  <WARNING> {outputDir} already exists, will not remove when done.", logger.WARNING)
+
+        if platform.system() == 'Windows':
+            command = os.path.join(aria2cDir, 'aria2c.exe')
+        elif platform.system() == 'Linux':
+            command = os.path.join(aria2cDir, 'aria2c')
+        elif platform.system() == 'Darwin':
+            command = os.path.join(aria2cDir, 'aria2c')
+
+        subProcessArgs = [command, "--select-file=" + gameInfo[0], "--index-out="+gameInfo[0] + "=..\\" + gameZip, "--dir=" +
+                          outputDir, "--file-allocation=none", "--allow-overwrite=true", "--seed-time=0", aria2cDir + "\\eXoDOS.torrent"]
+        logger.log("  Downloading... " + gameZip)
+
+        # run torrent downloader aria2c
+        # retry download a few times as the torrent sometimes ends up at 0 bytes
+        # didn't seem to help, but no reason to remove this code we will just retry 0 times
+        retryCount = 0
+        exitCode = -1
+        while ((retryCount >= 0) and (not downloadedSuccess)):
+            try:
+                if os.path.getsize(gameZipPath):
+                    # TODO: Check against size in index.txt
+                    downloadedSuccess = True
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+                
+            exitCode = callProcess(subProcessArgs,logger)
+            retryCount -= 1
+
+        if exitCode == 0 and os.path.getsize(gameZipPath):
+            logger.log("  Download Succeeded!")
+        elif exitCode == 9:
+            logger.log("  <ERROR> Not enough disk Space!", logger.ERROR)
+        else:
+            logger.log("  Download Had Issues!", logger.ERROR)
+
+        #remove the outputDir if we created it... download would have been moved already
+        if not downloadFolderAlreadyExisted:
+            shutil.rmtree(outputDir)
+        return True
+    else:
+        logger.log("  <ERROR> Could not Install Torrent Tools!", logger.ERROR)
+    return downloadedSuccess
 
 def downloadZip(gameZip, gameZipPath, logger):
     response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
                             headers={'User-agent': 'Mozilla/5.0'})
-    totalSize = int(response.headers.get('content-length'))
-    rightSize = totalSize
-    typeSize = ['b', 'kb', 'mb', 'gb']
-    typeIndex = 0
-    printableSize = ''
-    while rightSize > 0 and typeIndex < len(typeSize):
-        printableSize = str(rightSize) + ' ' + typeSize[typeIndex]
-        rightSize = int(rightSize / 1024)
-        typeIndex = typeIndex + 1
-    logger.log('  Downloading %s of size %s' % (gameZip, printableSize))
     if response.status_code == 200:
+        totalSize = int(response.headers.get('content-length'))
+        rightSize = totalSize
+        typeSize = ['b', 'kb', 'mb', 'gb']
+        typeIndex = 0
+        printableSize = ''
+        while rightSize > 0 and typeIndex < len(typeSize):
+            printableSize = str(rightSize) + ' ' + typeSize[typeIndex]
+            rightSize = int(rightSize / 1024)
+            typeIndex = typeIndex + 1
+        logger.log('  Downloading %s of size %s' % (gameZip, printableSize))
         with open(gameZipPath, 'wb') as f:
             if totalSize is None:
                 f.write(response.content)
@@ -101,12 +211,16 @@ def downloadZip(gameZip, gameZipPath, logger):
                     downloaded += len(data)
                     f.write(data)
                     done = int(50 * downloaded / totalSize)
-                    logger.log('\r    [{}{}]'.format('█' * done, '.' * (50 - done)), logger.INFO, True)
+                    logger.log('\r    [{}{}]'.format(
+                        '█' * done, '.' * (50 - done)), logger.INFO, True)
+        return True
     else:
         logger.log(
-            '  <ERROR> error %s while downloading %s: %s' % (response.status_code, gameZipPath, response.reason),
+            '  <ERROR> error %s while downloading from web %s: %s' % (
+                response.status_code, gameZipPath, response.reason),
             logger.ERROR)
-
+        return False
+    
 
 # Loads UI Strings
 def loadUIStrings(scriptDir, guiStringsFile):
