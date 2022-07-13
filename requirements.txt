@@ -1,0 +1,8 @@
+certifi==2021.10.8
+chardet==4.0.0
+charset-normalizer==2.0.12
+idna==3.3
+Pillow==9.0.1
+requests==2.27.1
+tk==0.1.0
+urllib3==1.26.8

@@ -57,6 +57,7 @@ class ExoGUI:
         self.conversionTypeComboBox = None
         self.conversionTypeValues = None
         self.downloadOnDemandCheckButton = None
+        self.longGameFolderCheckButton = None
         self.mapperLabel = None
         self.mapperComboBox = None
         self.mapperValues = None
@@ -235,6 +236,15 @@ class ExoGUI:
                                                           offvalue=0)
         wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
         self.downloadOnDemandCheckButton.grid(column=3, row=0, sticky="E", pady=5)
+
+        self.guiVars['longGameFolder'] = Tk.IntVar()
+        self.guiVars['longGameFolder'].set(self.configuration['longGameFolder'])
+        self.longGameFolderCheckButton = Tk.Checkbutton(self.collectionFrame,
+                                                          text=self.guiStrings['longGameFolder'].label,
+                                                          variable=self.guiVars['longGameFolder'], onvalue=1,
+                                                          offvalue=0)
+        wckToolTips.register(self.longGameFolderCheckButton, self.guiStrings['longGameFolder'].help)
+        self.longGameFolderCheckButton.grid(column=4, row=0, sticky="", pady=5)
 
         self.guiVars['preExtractGames'] = Tk.IntVar()
         self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
@@ -668,7 +678,7 @@ class ExoGUI:
                               'filter', 'selectall', 'unselectall', 'loadCustom', 'saveCustom', 'selectOutputDir',
                               'selectCollectionDir', 'selectSelectionPath']:
                 if key.help:
-                    confFile.write('# ' + key.help.replace('#n', '\n# ') + '\n')
+                    confFile.write('# ' + key.help.replace('\n', '\n# ') + '\n')
                 if key.id == 'images':
                     imagesValue = self.guiVars[self.guiStrings['images'].label + ' #1'].get()
                     if self.guiStrings['images'].label + ' #2' in self.guiVars:
@@ -719,6 +729,7 @@ class ExoGUI:
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
         conversionType = self.guiVars['conversionType'].get()
+        useLongFolderNames = True if self.guiVars['longGameFolder'].get() == 1 else False
         useGenreSubFolders = True if self.guiVars['genreSubFolders'].get() == 1 else False
         outputDir = self.guiVars['outputDir'].get()
         # Configuration parameters
@@ -751,7 +762,7 @@ class ExoGUI:
             self.logger.log("%s doesn't seem to be a valid collection folder" % collectionDir)
         else:
             exoConverter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
-                                        conversionType, useGenreSubFolders, conversionConf, self.fullnameToGameDir,
+                                        conversionType, useLongFolderNames, useGenreSubFolders, conversionConf, self.fullnameToGameDir,
                                         partial(self.postProcess), self.logger)
             _thread.start_new(exoConverter.convertGames, ())
 
@@ -778,7 +789,7 @@ class ExoGUI:
                            self.expertModeCheckButton,
                            self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry,
                            self.selectSelectionPathButton,
-                           self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton]
+                           self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton, self.longGameFolderCheckButton]
 
         if clickedProcess or collectionVersion == 'None':
             [self.__setComponentState__(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
@@ -789,6 +800,8 @@ class ExoGUI:
             [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
             self.__setComponentState__(self.preExtractGamesCheckButton,
                                        'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+            self.__setComponentState__(self.longGameFolderCheckButton,
+                                       'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
 
     def postProcess(self):
         self.__unselectAll__()

@@ -240,7 +240,7 @@ class CommandHandler:
         # Mount command needs to be absolute linux path
         if prString.strip().startswith('.'):
             prString = prString.strip()[1:]
-        gameString = "/" + self.gGator.genre + "/" + self.gGator.game + ".pc" if self.gGator.useGenreSubFolders else "/" + self.gGator.game + ".pc"
+        gameString = "/" + self.gGator.genre + "/" + self.gGator.gameDir if self.gGator.useGenreSubFolders else "/" + self.gGator.gameDir
         prString = util.getRomsFolderPrefix(self.gGator.conversionType,
                                             self.gGator.conversionConf) + gameString + prString.strip()
         prString = ' "' + prString.replace("\\", "/") + '"'

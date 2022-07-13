@@ -13,6 +13,7 @@ genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted
 mapper;Mapper;Use controls mapping
 useKeyb2Joypad;Use Keyb2Joypad;Use keyb2joypad mappings
 mapSticks; Map Analog Sticks;Map controler analog sticks
+longGameFolder;Long Folder Names;Allow long Folder Names ["Long Game Name (YEAR).pc" not "LongGame.pc"] (Batocera/RetroBat Only)#nWill not Rename Existing Folders!
 downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
 preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
