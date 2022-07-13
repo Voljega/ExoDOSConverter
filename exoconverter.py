@@ -117,7 +117,8 @@ class ExoConverter:
         else:
             self.logger.log("  already converted in output folder")
 
-        util.checkMultipleofSameGame(self.useGenreSubFolders, metadata, genre, game, gameDir, self.outputDir, self.logger)
+        # TODO refine and reactivate
+        # util.checkMultipleofSameGame(self.useGenreSubFolders, metadata, genre, game, gameDir, self.outputDir, self.logger)
         self.logger.log("")
 
     # Copy game data from collection to output dir

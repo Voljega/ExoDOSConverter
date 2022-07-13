@@ -37,6 +37,7 @@ class Logger:
         with process:
             if process.stdout:
                 for line in process.stdout:
+                    # TODO used for torrent but too verbose, try to better it, see what was done with regular downloads to overwrite same line
                     line = line.strip()
                     if line != "":
                         line = ansi_escape.sub('', line)

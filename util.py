@@ -1,5 +1,4 @@
 import errno
-import shutil
 import subprocess
 import os.path
 import platform
@@ -80,32 +79,38 @@ def getConfBakFilename(setKey):
 def getGuiStringsFilename(setKey):
     return getKeySetString(guiStringsFilename, setKey)
 
+
 def lines_that_contain(string, fp):
     return [line for line in fp if string in line]
+
 
 def callProcess(subProcessArgs,logger):
     process = subprocess.Popen(subProcessArgs, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, universal_newlines=True)
     logger.logProcess(process)
     return process.wait()
-    
+
+
 def installAria2cWindows(exoCollectionDir, logger):
     eXoUtilDir = os.path.join(exoCollectionDir, 'eXo', 'util')
     subProcessArgs = [os.path.join(eXoUtilDir, "unzip.exe"), "-o", "-d",
                       eXoUtilDir, os.path.join(eXoUtilDir, "util.zip"), "aria.zip"]
     exitCode = callProcess(subProcessArgs, logger)
 
-    #extract next file if succesful
+    # extract next file if succesful
     if not exitCode:
         subProcessArgs = [os.path.join(eXoUtilDir, "unzip.exe"), "-o",
                           "-d", eXoUtilDir, os.path.join(eXoUtilDir, "aria.zip"), "aria/*"]
         exitCode = callProcess(subProcessArgs, logger)
 
+
 def installAria2cLinux(exoCollectionDir, logger):
     logger.log("  <Error> Installing aria2c for Linux not implemented yet",logger.ERROR)
 
+
 def installAria2cMac(exoCollectionDir, logger):
     logger.log("  <Error> Installing aria2c for Mac not implemented yet",logger.ERROR)
+
 
 def installAria2c(exoCollectionDir, logger):
         if platform.system() == 'Windows':
@@ -115,6 +120,7 @@ def installAria2c(exoCollectionDir, logger):
         elif platform.system() == 'Darwin':
             installAria2cMac(exoCollectionDir, logger)
 
+
 def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
     eXoDir = os.path.join(exoCollectionDir, 'eXo')
     outputDir = os.path.join(eXoDir, "eXoDOS", "DOWNLOAD")
@@ -123,22 +129,22 @@ def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
     downloadFolderAlreadyExisted = False
     downloadedSuccess = False
 
-    #try and install Aria2c(torrent downloader) based on platform.
+    # try and install Aria2c(torrent downloader) based on platform.
     if not os.path.exists(eXoTorrentIndex):
         logger.log("  <WARNING> Missing index.txt from eXoDOS util.zip, attempting extraction.", logger.WARNING)
         installAria2c(exoCollectionDir, logger)
 
-    #check again as we cannot assume the above succeeded, but if it did work we can then use the tool on a first run.
+    # check again as we cannot assume the above succeeded, but if it did work we can then use the tool on a first run.
     if os.path.exists(eXoTorrentIndex):
         with open(eXoTorrentIndex, "r") as fp:
             for line in lines_that_contain(gameZip, fp):
                 gameInfo = line.split(':')
 
-        #make our downloads DIR at the torrent will create files we Don't want due to chunk size
+        # make our downloads DIR at the torrent will create files we Don't want due to chunk size
         try:
             os.mkdir(outputDir)
         except OSError as e:
-            #continue if DOWNLOAD folder already exists.
+            # continue if DOWNLOAD folder already exists.
             if e.errno != errno.EEXIST:
                 raise
             downloadFolderAlreadyExisted = True
@@ -161,7 +167,7 @@ def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
         # didn't seem to help, but no reason to remove this code we will just retry 0 times
         retryCount = 0
         exitCode = -1
-        while ((retryCount >= 0) and (not downloadedSuccess)):
+        while (retryCount >= 0) and (not downloadedSuccess):
             try:
                 if os.path.getsize(gameZipPath):
                     # TODO: Check against size in index.txt
@@ -180,13 +186,14 @@ def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
         else:
             logger.log("  Download Had Issues!", logger.ERROR)
 
-        #remove the outputDir if we created it... download would have been moved already
+        # remove the outputDir if we created it... download would have been moved already
         if not downloadFolderAlreadyExisted:
             shutil.rmtree(outputDir)
         return True
     else:
         logger.log("  <ERROR> Could not Install Torrent Tools!", logger.ERROR)
     return downloadedSuccess
+
 
 def downloadZip(gameZip, gameZipPath, logger):
     response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
@@ -414,31 +421,36 @@ def buildCache(scriptDir, collectionDir, collection, logger):
 
     return frontPicCache, titlePicCache, gameplayPicCache
 
+
+# TODO reactivate in dedicated functionnality, handle properly at start of detection
 def checkMultipleofSameGame(useGenreSubFolders, metadata, genre, game, gameDir, outputDir, logger):
     wantedPath = os.path.join(outputDir, genre, gameDir) if useGenreSubFolders else os.path.join(outputDir,gameDir)
     paths = {
-    'shortPath':        os.path.join(outputDir,game + ".pc"),
-    'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
-    'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
-    'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
+        'shortPath':        os.path.join(outputDir,game + ".pc"),
+        'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
+        'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
+        'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
     }
 
     totalExistingPaths = 0
     for name,path in paths.items():
         if os.path.exists(path):
             totalExistingPaths += 1
-            logger.log("  Existing Path: " + path)
+            logger.log("  Existing Path: " + path, level=logger.WARNING)
 
     if totalExistingPaths > 1:
-        logger.log("  \tDue to not Clearing output folder you have...\n\t\t\t\t MULTIPLE COPIES.\n\t\tIf changing conversion type this may lead to bigger issues.")
+        logger.log("  \tDue to not Clearing output folder you have...\n\t\t\t\t MULTIPLE COPIES.\n\t\tIf changing conversion type this may lead to bigger issues.",
+                   level=logger.WARNING)
 
+
+# TODO seems unused ?
 def moveFolderifExist(useGenreSubFolders, metadata, genre, game, gameDir, outputDir, logger):
     wantedPath = os.path.join(outputDir, genre, gameDir) if useGenreSubFolders else os.path.join(outputDir,gameDir)
     paths = {
-    'shortPath':        os.path.join(outputDir,game + ".pc"),
-    'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
-    'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
-    'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
+        'shortPath':        os.path.join(outputDir,game + ".pc"),
+        'longPath':         os.path.join(outputDir,getCleanGameID(metadata,".pc")),
+        'shortPathGenre':   os.path.join(outputDir,genre,game + ".pc"),
+        'longPathGenre':    os.path.join(outputDir,genre,getCleanGameID(metadata,".pc"))
     }
 
     totalExistingPaths = 0
@@ -455,16 +467,16 @@ def moveFolderifExist(useGenreSubFolders, metadata, genre, game, gameDir, output
         for path in existingPath:
             if path == wantedPath:
                 return True
-        #more than 1 path already, don't know what they want so create requested folder(will result in duplicates/triplicates/quad)
+        # more than 1 path already, don't know what they want so create requested folder(will result in duplicates/triplicates/quad)
         return False
     elif totalExistingPaths == 0:
-        #game folder is non existent in any path, so create it.
+        # game folder is non existent in any path, so create it.
         return False
     
-    #only one existing path found rename it to wanted path
+    # only one existing path found rename it to wanted path
     if wantedPath != existingPath[0]:
         logger.log("  Moving Existing -> " + wantedPath)
         shutil.move(existingPath[0],wantedPath)
-        #moved it so now its exists
+        # moved it so now its exists
         return True
     return True

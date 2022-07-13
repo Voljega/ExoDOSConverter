@@ -143,7 +143,8 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'manual').text = manual
             etree.SubElement(gameElt, 'image').text = frontPic
         else:
-            #game exists lets make sure path is correct to whats been done with subFolders/longNames
+            # TODO not clear
+            # game exists lets make sure path is correct to whats been done with subFolders/longNames
             for child in existsInGamelist:
                 child.find("path").text = path
 
