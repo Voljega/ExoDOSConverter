@@ -19,7 +19,6 @@ class ExoConverter:
         self.cache = cache
         self.scriptDir = scriptDir
         self.collectionVersion = collectionVersion
-        self.isWin3x = (self.collectionVersion == util.EXOWIN3X)
         self.exoCollectionDir = collectionDir
         self.logger = logger
         self.collectionGamesDir = util.getCollectionGamesDir(collectionDir, collectionVersion)
@@ -29,7 +28,7 @@ class ExoConverter:
         self.useLongFolderNames = useLongFolderNames
         self.useGenreSubFolders = useGenreSubFolders
         self.conversionConf = conversionConf
-        self.metadataHandler = MetadataHandler(collectionDir, collectionVersion, self.cache, self.logger)
+        self.metadataHandler = MetadataHandler(scriptDir, collectionDir, collectionVersion, self.cache, self.logger)
         self.keyb2joypad = Keyb2Joypad(self.scriptDir, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
         self.postProcess = postProcess
@@ -98,7 +97,7 @@ class ExoConverter:
 
     # Full conversion for a given game    
     def __convertGame__(self, game, gamelist, totalSize, count):
-        genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()))
+        genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()), self.metadataHandler.fixGenres)
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
                                                     self.conversionType)
@@ -178,7 +177,7 @@ class ExoConverter:
 
         # For win3x games, all files / dir / etc in game.pc/game should be moved to game.pc/ and sub game.pc/game deleted
         # do not use getLocalGameDataOutputDir as game data are in subdir at that point
-        if self.isWin3x:
+        if gGator.isWin3x():
             # Needs to rename sub game dir first then move content to .pc folder , then delete sub game dir
             subDirTempName = gGator.game + '-tempEDC'
             os.rename(os.path.join(gGator.getLocalGameOutputDir(), gGator.game), os.path.join(gGator.getLocalGameOutputDir(), subDirTempName))

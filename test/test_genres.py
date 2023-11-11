@@ -82,7 +82,7 @@ result = []
 for name in data:
     game = data[name]
     oldGenre = buildGenre_old(game)
-    newGenre = mdh.buildGenre(game)
+    newGenre = mdh.buildGenre(game, dict())
     genres = sorted([g.strip() for g in list(set(game.genres))])
     if oldGenre != newGenre:
         if 'Interactive Movie' in genres:

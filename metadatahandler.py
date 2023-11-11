@@ -16,12 +16,14 @@ DosGame = collections.namedtuple('DosGame',
 # Metadata exporting
 class MetadataHandler:
 
-    def __init__(self, exoCollectionDir, collectionVersion, cache, logger):
+    def __init__(self, scriptDir, exoCollectionDir, collectionVersion, cache, logger):
         self.exoCollectionDir = exoCollectionDir
         self.collectionVersion = collectionVersion
         self.cache = cache
         self.logger = logger
         self.metadatas = dict()
+        self.fixGenres = self.loadFixGenre(scriptDir)
+
 
     # Reads a given node
     @staticmethod
@@ -150,8 +152,18 @@ class MetadataHandler:
 
     # Convert multi genres exo collection format to a single one
     @staticmethod
-    def buildGenre(dosGame):
+    def buildGenre(dosGame, fixGenres):
         if dosGame is None or dosGame.genres is None:
             return Genre.UNKNOWN.value
         
-        return mapGenres(dosGame.genres)
+        return fixGenres[dosGame.dosname] if dosGame.dosname in fixGenres else mapGenres(dosGame.genres)
+
+    @staticmethod
+    def loadFixGenre(scriptDir):
+        fixGenres = open(os.path.join(scriptDir, 'data', 'fixGenres.csv'), 'r', encoding="utf-8")
+        fg = dict()
+        for line in fixGenres.readlines():
+            [genre, game] = line.split(';')
+            fg[game.rstrip('\n\r ').lstrip()] = genre.rstrip('\n\r ').lstrip()
+        fixGenres.close()
+        return fg

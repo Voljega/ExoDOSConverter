@@ -79,6 +79,19 @@ class ConfConverter:
 
     # Creates dosbox.bat from dosbox.conf [autoexec] part
     def __createDosboxBat__(self, cmdlines, retroDosboxBat, retroDosboxCfg, gGator):
+        # if needed, set ULTRADIR folder used by dosbox as driver (uses ULTRASND folder un games files)
+        if not gGator.isWin3x() and os.path.exists(os.path.join(gGator.getLocalGameDataOutputDir(), 'ULTRASND')):
+            self.logger.log("    add ULTRADIR for ULTRASND driver")
+            retroDosboxBat.write("set ULTRADIR=C:\\%s\\ULTRASND\n" % gGator.game)
+
+        # prevent dosbox-pure shitty automapping
+        retroDosboxBat.write("imgmount -u a\n")
+        retroDosboxBat.write("imgmount -u b\n")
+        retroDosboxBat.write("imgmount -u d\n")
+        retroDosboxBat.write("imgmount -u e\n")
+        retroDosboxBat.write("imgmount -u f\n")
+        retroDosboxBat.write("imgmount -u g\n")
+
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
             if self.conversionConf['useDebugMode']:

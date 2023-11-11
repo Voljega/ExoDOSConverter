@@ -34,7 +34,10 @@ class GameGenerator:
 
     # Checks if collection is win3x or dos
     def isWin3x(self):
-        return util.isWin3x(self.collectionVersion)
+        # Handle this DOS games like win3x games: files must be at C: root for them to work
+        cRootForcedGames = ['Screamer', 'SWTieCD', 'CyberMag', 'ActionSo', 'scomet', 'dw1', 'RAVAGER', 'EWJ2', 'MDK',
+                            'lordorm2', 'kknd', 'BURGER', 'pice', 'RedBaron', 'rzork', 'samnmax', 'WormsRe', 'Tyrian']
+        return self.game in cRootForcedGames or util.isWin3x(self.collectionVersion)
 
     # Returns local parent output dir of the generated game
     def getLocalParentOutputDir(self):
@@ -57,6 +60,7 @@ class GameGenerator:
     def convertGame(self):
         self.__copyGameFiles__()
         self.confConverter.process(self)
+        self.__specificFixes()
         self.__postConversion__()
 
     # Copy game files and game dosbox.conf to output dir
@@ -103,6 +107,19 @@ class GameGenerator:
                             os.path.join(self.getLocalGameOutputDir()))
 
     ######################################
+
+    def __specificFixes(self):
+        if self.game == 'SWTieCD':
+            self.logger.log('ouaich test')
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIE.CD'), self.getLocalGameOutputDir())
+            # os.mkdir(os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'FOPTION.CFG'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'IMUSE.INI'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'NEWACE7.TFR'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'NEWACE10.TFR'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'READ.ME'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'TOPACE7.TFR'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
+            # shutil.copy2(os.path.join(self.getLocalGameDataOutputDir(), 'TIECD', 'TOPACE10.TFR'), os.path.join(self.getLocalGameOutputDir(), 'TIECD'))
 
     ###### Post-conversion functions #####
 
