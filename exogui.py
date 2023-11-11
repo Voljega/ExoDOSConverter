@@ -28,6 +28,7 @@ class ExoGUI:
             os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)))
         self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
+        # util.buildCollectionCSV(self.scriptDir, 'H:\eXo\eXoDOS\eXo\eXoDOS\!dos', logger)
         self.fullnameToGameDir = util.fullnameToGameDir(scriptDir, self.configuration['collectionVersion'])
 
         self.window = Tk.Tk()

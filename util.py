@@ -25,7 +25,7 @@ retrobat = 'Retrobat'
 emuelec = 'Emuelec'
 conversionTypes = [batocera, recalbox, retropie, retrobat, emuelec, simplemenu, esoteric, mister]
 
-EXODOS = 'eXoDOS v5'
+EXODOS = 'eXoDOS v6'
 EXOWIN3X = 'eXoWin3x v2'
 exoVersions = [EXODOS, EXOWIN3X]
 

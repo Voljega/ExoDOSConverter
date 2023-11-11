@@ -28,7 +28,7 @@
  - Fix major bugs of v4 to v5 transition
 
 0.7-beta
- - Update for eXoDOS v5, v4 is not supported anymore
+ - Update for eXoDOS v6, v4 is not supported anymore
  - Further integrate MiSTeR compatibility
  - EmuELEC compatibility
  - More configuration options for generation

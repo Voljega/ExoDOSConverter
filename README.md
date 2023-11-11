@@ -2,7 +2,7 @@
 
 # ExoConverter
 
-A custom converter of the eXoDOS v5 and eXoWin3x collections to several EmulationStation and/or Linux based distributions format : 
+A custom converter of the eXoDOS v6 and eXoWin3x collections to several EmulationStation and/or Linux based distributions format : 
  - Recalbox
  - Batocera
  - Retrobat
@@ -102,7 +102,7 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 ## Known issues
 
 A few games in both collections have some conversion issues with this tool.  
-For eXoDOS v5 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)
+For eXoDOS v6 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)
 For eXoWin3x v2 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoWin3x-v2)
   
   

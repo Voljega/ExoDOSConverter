@@ -10,7 +10,7 @@ from tabulate import tabulate
 logger = Logger()
 
 exo_folder = r'Z:\\'
-collection = 'eXoDOS v5'
+collection = 'eXoDOS v6'
 
 def buildGenre_old(dosGame):
     if dosGame is not None and dosGame.genres is not None:
