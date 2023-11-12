@@ -399,6 +399,8 @@ class ExoGUI:
                 "\n%s is not a directory, doesn't exist, or is not a valid eXo collection directory" % collectionDir, self.logger.ERROR)
             self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
+            # Use when needing to rebuild collection (usually new releases)
+            # util.buildCollectionCSV(self.scriptDir, r'H:\eXo\eXoDOS\eXo\eXoDOS\!dos', self.logger)
             self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
             # Empty filter
             self.guiVars['filter'].set('')

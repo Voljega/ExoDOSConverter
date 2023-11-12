@@ -50,29 +50,12 @@ class MetadataHandler:
         with open(os.path.join(outputDir, "gamelist.xml"), "wb") as f:
             f.write(xmlstr.encode('utf-8'))
 
-    # def convertToProperXml(self):
-    #     msdosPath = os.path.join(self.exoCollectionDir, 'xml', 'all',
-    #                            util.getCollectionMetadataID(self.collectionVersion) + '.msdos')
-    #     xmlPath = os.path.join(self.exoCollectionDir, 'xml', 'all',
-    #                            util.getCollectionMetadataID(self.collectionVersion) + '.xml')
-    #     msdosFile = open(msdosPath,'r',encoding="utf-8")
-    #     xmlPath = open(xmlPath,'w',encoding="utf-8")
-    #     xmlPath.write('<?xml version="1.0" standalone="yes"?>\n')
-    #     xmlPath.write('<LaunchBox>\n')
-    #     for line in msdosFile.readlines():
-    #         xmlPath.write(line)
-    #     msdosFile.close()
-    #     xmlPath.write('</LaunchBox>\n')
-    #     xmlPath.close()
-    #     return xmlPath
-
     # Parse exo collection metadata file
     def parseXmlMetadata(self):
-        # TODO enhance if possible to not break exowin compatibility
-        # self.convertToProperXml()
-        # xmlPath = os.path.join(self.exoCollectionDir, 'xml', 'all', util.getCollectionMetadataID(self.collectionVersion) + '.xml')
-        xmlPath = os.path.join(self.exoCollectionDir, 'Data', 'Platforms',
-                               util.getCollectionMetadataID(self.collectionVersion) + '.xml')
+        xmlPath = os.path.join(self.exoCollectionDir, 'xml', 'all', util.getCollectionMetadataID(self.collectionVersion) + '.xml')
+        if not os.path.exists(xmlPath):  # v6
+            xmlPath = os.path.join(self.exoCollectionDir, 'Data', 'Platforms', util.getCollectionMetadataID(self.collectionVersion) + '.xml')
+
         metadatas = dict()
         if os.path.exists(xmlPath):
             parser = etree.XMLParser(encoding="utf-8")
@@ -117,7 +100,7 @@ class MetadataHandler:
         if dosGame.frontPic is not None and os.path.exists(dosGame.frontPic):
             shutil.copy2(dosGame.frontPic, os.path.join(outputDir, 'downloaded_images'))
         else:
-            self.logger.log('  [WARNING] No pic found for %s, please file a report on Github with the game name' % game, self.logger.WARNING)
+            self.logger.log('  <WARNING> No pic found for %s, please file a report on Github with the game name' % game, self.logger.WARNING)
         if dosGame.manual is not None and os.path.exists(dosGame.manual):
             shutil.copy2(dosGame.manual, os.path.join(outputDir, 'manuals'))
         self.__writeGamelistEntry__(gamelist, dosGame, game, genre, useLongFolderNames, useGenreSubFolders, conversionType)

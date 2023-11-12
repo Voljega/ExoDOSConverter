@@ -1,8 +1,10 @@
 import os
 from commandhandler import CommandHandler
 import util
+import dosboxconfv6
 import chardet
 import lists
+
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
 class ConfConverter:
@@ -25,8 +27,49 @@ class ConfConverter:
         else:
             return defaultValue
 
+    # Converts exo collection v6 dosbox.conf to dosbox.cfg and dosbox.bat
+    def processV6(self, gGator, defaultDosboxConf, optionsDosboxConfPath):
+        exoDosboxConfPath = os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf")  # original game conf
+        # stack on top of default conf
+        fullDosboxConf = dosboxconfv6.loadDosboxConf(exoDosboxConfPath, defaultDosboxConf)
+        if gGator.conversionType == util.retrobat:  # keep options.conf on windows
+            fullDosboxConf = dosboxconfv6.loadDosboxConf(optionsDosboxConfPath, fullDosboxConf)
+        self.setUserParameters(fullDosboxConf, gGator)
+        dosboxCfgPath = os.path.join(gGator.getLocalGameOutputDir(), "dosbox.cfg")
+        dosboxconfv6.writeDosboxConf(dosboxCfgPath, fullDosboxConf)
+        retroDosboxCfg = open(dosboxCfgPath, 'a')  # retroarch dosbox.cfg
+        retroDosboxBat = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.bat"), 'w')  # retroarch dosbox.bat
+
+        exoDosboxConf = open(exoDosboxConfPath, 'r')
+        count = 0
+        lines = exoDosboxConf.readlines()
+        for cmdline in lines:
+            if cmdline.startswith("[autoexec]"):
+                retroDosboxCfg.write(cmdline)
+                self.__createDosboxBat__(lines[count + 1:], retroDosboxBat, retroDosboxCfg, gGator)
+                break
+
+            count = count + 1
+
+        exoDosboxConf.close()
+        os.remove(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"))
+        retroDosboxCfg.close()
+        retroDosboxBat.close()
+
+    def setUserParameters(self, dosboxConf, gGator):
+        dosboxConf['[sdl]']['fullscreen'] = 'true'
+        if gGator.conversionType != util.retrobat:
+            dosboxConf['[sdl]']['fullresolution'] = self.__getExpertParam__("fullresolutionCfg", "desktop")
+            dosboxConf['[sdl]']['output'] = self.__getExpertParam__("outputCfg", "texture")
+        dosboxConf['[sdl]']['renderer'] = self.__getExpertParam__("rendererCfg", "auto")
+        dosboxConf['[sdl]']['vsync'] = 'true' if gGator.conversionConf['vsyncCfg'] else 'false'
+        dosboxConf['[sdl]']['mapperfile'] = 'mapper.map'
+        dosboxConf['[render]']['aspect'] = 'true'
+        dosboxConf['[joystick]']['buttonwrap'] = 'false'
+        dosboxConf['[gus]']['ultradir'] = 'C:\\ULTRASND'
+
     # Converts exo collection dosbox.conf to dosbox.cfg and dosbox.bat
-    def process(self, gGator):
+    def processV5(self, gGator):
         self.logger.log("  create dosbox.bat")
         exoDosboxConf = open(os.path.join(gGator.getLocalGameDataOutputDir(), "dosbox.conf"), 'r')  # original
         retroDosboxCfg = open(os.path.join(gGator.getLocalGameOutputDir(), "dosbox.cfg"), 'w')  # retroarch dosbox.cfg
@@ -84,14 +127,6 @@ class ConfConverter:
             self.logger.log("    add ULTRADIR for ULTRASND driver")
             retroDosboxBat.write("set ULTRADIR=C:\\%s\\ULTRASND\n" % gGator.game)
 
-        # prevent dosbox-pure shitty automapping
-        retroDosboxBat.write("imgmount -u a\n")
-        retroDosboxBat.write("imgmount -u b\n")
-        retroDosboxBat.write("imgmount -u d\n")
-        retroDosboxBat.write("imgmount -u e\n")
-        retroDosboxBat.write("imgmount -u f\n")
-        retroDosboxBat.write("imgmount -u g\n")
-
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
             if self.conversionConf['useDebugMode']:
@@ -124,13 +159,17 @@ class ConfConverter:
                     retroDosboxBat.write(cmdline)
                     whereWeAt.append(path)
             elif cmdline.lower().startswith("imgmount "):
-                retroDosboxBat.write(self.commandHandler.handleImgmount(cmdline.rstrip('\n\r ')))
+                fixedCommand, letter = self.commandHandler.handleImgmount(cmdline.rstrip('\n\r '))
+                retroDosboxBat.write('imgmount -u ' + letter + '\n')  # prevents dosbox-pure automount
+                retroDosboxBat.write(fixedCommand)
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
                     retroDosboxBat.write("\n")
             elif cmdline.lower().startswith("mount "):
-                retroDosboxBat.write(self.commandHandler.handleMount(cmdline.rstrip('\n\r ')))
+                fixedCommand, letter = self.commandHandler.handleMount(cmdline.rstrip('\n\r '))
+                retroDosboxBat.write('imgmount -u ' + letter + '\n')  # prevents dosbox-pure automount
+                retroDosboxBat.write(fixedCommand)
                 if self.conversionConf['useDebugMode']:
                     retroDosboxBat.write("\npause\n")
                 else:
@@ -211,7 +250,9 @@ class ConfConverter:
                 cmdline = cmdline.lstrip('@ ')
                 if cmdline.lower().startswith("imgmount "):
                     if cmdline not in handled:
-                        handled[cmdline] = self.commandHandler.handleImgmount(cmdline, True)
+                        fixedCommand, letter = self.commandHandler.handleImgmount(cmdline, True)
+                        runFileClone.write('imgmount -u ' + letter + '\n')  # prevents dosbox-pure automount
+                        handled[cmdline] = fixedCommand
                     runFileClone.write(handled[cmdline])
                     if self.conversionConf['useDebugMode']:
                         runFileClone.write("\npause\n")

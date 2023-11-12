@@ -16,7 +16,7 @@ class Genre(Enum):
     RPG = "RPG"
     SIMULATION = "Simulation"
     SHMUP = "ShootEmUp"
-    SPORTS = "Sport"
+    SPORTS = "Sports"
     STRATEGY_MANAGEMENT = "Strategy-Management"
     TOOLS = "Tools"
 
@@ -133,6 +133,10 @@ def mapGenres(input_genres):
         output = GENRE_MAPPER.get(genre, Genre.UNKNOWN)
         if output != Genre.UNKNOWN:
             return output.value
+        else:
+            for key in GENRE_MAPPER.keys():
+                if genre.startswith(key):
+                    return GENRE_MAPPER[key].value
 
     # fallback - there are probably no genres defined (or Exo added a new genre name)
     return Genre.UNKNOWN.value

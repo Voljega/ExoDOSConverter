@@ -33,8 +33,7 @@ copy ..\conf\*.conf .\dist\conf
 if not exist .\dist\GUI mkdir .\dist\GUI
 copy ..\GUI\*.* .\dist\GUI
 copy ..\*.md .\dist
-copy ..\*.sh .\dist
-copy ..\changelog.txt \dist
+copy ..\changelog.txt .\dist
 echo .
 echo Rename exec and dir
 ren .\dist\main.exe eXoConverter-%version%.exe

@@ -1,3 +1,12 @@
+0.9-4-beta
+- eXoDOS v6 compatibility, backward compatibility with eXoWin3.x 2 should still work
+- fixes for some games : Screamer, Blake Stone I & II, Action Soccer, CyberMage, Call of Cthulhu - Shadow of the Comet, Discworld, Earthworm Jim 2, MDK, Lords of the Realms II, Orion Burger, Red Baron, KKND, Z, Sam & Max
+
+0.9.3-beta
+- some bugs fixed for emuELEC and MiSTeR generation
+- use torrents for Lite version when theEye is down (windows only)
+- allow proper long names (i.e. The $100,000 Pyramid (1988).pc) for game directories instead of short ones (i.e. $100000P.pc) (Batocera/Retrobat only)
+
 0.9.2-beta
  - updates and enhancements for MiSTeR
  - clean and simplify genre mapping logic (thanks @Newsdee)

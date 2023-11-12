@@ -324,9 +324,11 @@ def buildCollectionCSV(scriptDir, gamesConfDir, logger):
     for game in games:  # games = list of folder in !dos dir
         if os.path.isdir(os.path.join(gamesConfDir, game)):
             bats = [os.path.splitext(filename)[0] for filename in os.listdir(os.path.join(gamesConfDir, game)) if
-                    os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
-                                                                                 0].lower() == 'install']
-            # logger.log('  ' + bats[0] + '->' + game, logger.WARNING)
+                    os.path.splitext(filename)[-1].lower() == '.bat'
+                    and not os.path.splitext(filename)[0].lower() == 'install'
+                    and not os.path.splitext(filename)[0].lower() == 'exception']
+            if bats[0] == 'exception':
+                logger.log('  ' + bats[0] + '->' + game, logger.ERROR)
             collectFile.write(bats[0] + ';' + game + '\n')
 
 
