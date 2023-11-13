@@ -18,7 +18,7 @@ https://www.retro-exo.com
 eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.  
 It is based on Launchbox and Windows only though
 
-eXoDOS is supported in its V5 full and lite versions, V4 support has been dropped  
+eXoDOS is supported in its v6 full version (lite version for v6 not released yet), v5 support has been dropped  
 eXoWin3x is supported in its latest V2 version.
 
 If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye
