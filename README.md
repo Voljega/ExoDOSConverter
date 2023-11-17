@@ -116,9 +116,9 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 ## Known issues
 
 A few games in both collections have some conversion issues with this tool.  
-For eXoDOS v5 issues (not updated for v6), see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)
-For eXoWin3x v2 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoWin3x-v2)
-For C64 Dreams v0.60 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-Issues:-C64-Dreams)
+For eXoDOS v5 issues (not updated for v6), see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)  
+For eXoWin3x v2 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoWin3x-v2)  
+For C64 Dreams v0.60 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-Issues:-C64-Dreams)  
   
   
 ### Licences, shoutouts
