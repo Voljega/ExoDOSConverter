@@ -208,9 +208,8 @@ class GameGenerator:
     def __postConversionForBatocera__(self):
         self.logger.log("  Batocera post-conversion")
         if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
-            # TODO Remove included padto.keys when new full generation well tested by users
-            Mapping(self.keyb2joypad.gamesConf, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
-                    self.conversionConf, self.logger).mapForBatocera()
+            Mapping(self.keyb2joypad.gamesConf, self.game, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
+                    self.conversionConf, self.collectionVersion, self.scriptDir, self.logger).mapForBatocera()
 
     # Post-conversion for MiSTeR for a given game
     def __postConversionForMister__(self):

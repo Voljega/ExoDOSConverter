@@ -2,7 +2,7 @@
 
 # ExoConverter
 
-A custom converter of the eXoDOS v6 and eXoWin3x collections to several EmulationStation and/or Linux based distributions format : 
+A custom converter of the eXoDOS v6, eXoWin3x and C64 Dreams collections to several EmulationStation and/or Linux based distributions format : 
  - Recalbox
  - Batocera
  - Retrobat
@@ -11,28 +11,10 @@ A custom converter of the eXoDOS v6 and eXoWin3x collections to several Emulatio
  - OpenDingux (both SimpleMenu / Esoteric flavours) with mapping for RG350
  - MiSTer
 
-## ExoDOS & ExoWin3x
-
-https://www.retro-exo.com
-
-eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.  
-It is based on Launchbox and Windows only though
-
-eXoDOS is supported in its v6 full version (lite version for v6 not released yet), v5 support has been dropped  
-eXoWin3x is supported in its latest V2 version.
-
-If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye
-
-There's also an ExoDOSWin3x collection for Windows 3.1 games, version 2 of which will be supported when it's released
-
-Before using this tool, don't forget to install the collections (eXoDOS full and lite V5 versions, or eXoWin3x) with theuir respective `setup.bat`
-
-They should be installed separately and not combined, or the tool will not work.
-
 ## The Tool
 
 The original aim of this tool was to convert any selection of games of the eXoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
-As the project evolved it now covers diffrent distributions and/or formats. 
+As the project evolved it now covers different collections, distributions and/or formats. 
 
 The conversion should cover the following :
  - conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
@@ -42,7 +24,39 @@ The conversion should cover the following :
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 It should be used on a separate computer, not on the system you are targetting.
 
-On a side note, please do not use dosbox pure as core, it is not fully compatible with the eXo collections and using it with lead to a lot of games not running at all.
+The conversion now works fine with dosbox-pure, although it doesn't generate zipped games and it might be wise to disable auto mapping.
+In the libretro version this can be done by simply changing the focus mode by clicking Scroll Lock on you keyboard
+
+
+## ExoDOS & ExoWin3x
+
+[Retro-Exo](https://www.retro-exo.com)
+
+eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.  
+It is based on Launchbox and Windows only though
+
+eXoDOS: full support for v6 version (lite version not supported yet), v5 support has been dropped  
+eXoWin3x: full support for v2
+
+If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye or download through torrent (much slower)
+
+Before using this tool, don't forget to install the collections (eXoDOS full and lite V5 versions, or eXoWin3x) with their respective `setup.bat`
+
+They should be installed separately and not combined/merged, or the tool will not work.
+
+## C64 Dreams
+
+[C64 Dreams](https://forums.launchbox-app.com/topic/49324-c64-dreams-massive-curated-c64-collection/)
+
+C64 Dreams is a carefully crafted collection of C64 Games, based on Launchbox and Windows only too.
+
+C64 Dreams: support for v0.60 (custom mapping files not supported yet)
+
+Support is prelimilary, but it's fully functional
+
+Mostly missing is the conversion of keyboard to joystick mapping files (whi I hope to implement later)
+
+UI is not fully adapted yet, most extra parameters will do nothing foe this collection generation 
 
 ## Anti-virus false positives
 
@@ -54,7 +68,7 @@ This is due to the exe python packager `pyInstaller` and it's safe to exclude th
 For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.  
 This will be corrected when possible
 
-Fully supported distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
+Fully supported (but not always tested) distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
 
 MiSTer compatibility is still beeing worked on at the moment but is already at a pretty advanced stage, espeically for DOS games.
 
@@ -102,8 +116,9 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 ## Known issues
 
 A few games in both collections have some conversion issues with this tool.  
-For eXoDOS v6 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)
+For eXoDOS v5 issues (not updated for v6), see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)
 For eXoWin3x v2 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoWin3x-v2)
+For C64 Dreams v0.60 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-Issues:-C64-Dreams)
   
   
 ### Licences, shoutouts

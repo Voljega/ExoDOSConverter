@@ -9,6 +9,7 @@ class Genre(Enum):
     ADVENTURE_VISUAL = "Adventure-Visual"
     BEATEMUP = "BeatEmUp"
     FPS = "Gun-FPS"
+    MUSIC = "Music-Rythm"
     PINBALL = "Pinball"
     PLATFORM = "Platform"
     PUZZLE = "Puzzle"
@@ -27,6 +28,7 @@ GENRE_MAPPER = {
     'Adventure': Genre.ADVENTURE_VISUAL,
     'App': Genre.TOOLS,
     'Arcade': Genre.MISC,
+    'Artillery': Genre.MISC,
     'Beat \'em Up': Genre.BEATEMUP,
     'Board / Party Game': Genre.PUZZLE,
     'Board': Genre.PUZZLE,
@@ -40,10 +42,13 @@ GENRE_MAPPER = {
     'First Person Shooter': Genre.FPS,
     'Flight Simulator': Genre.SIMULATION,
     'Game Show': Genre.PUZZLE,
+    'Horror': Genre.ACTION_ADVENTURE,
     'Interactive Fiction': Genre.ADVENTURE_VISUAL,
     'Interactive Movie': Genre.ADVENTURE_VISUAL,
     'Life Simulation': Genre.MISC,
     'Managerial': Genre.STRATEGY_MANAGEMENT,
+    'Music': Genre.MUSIC,
+    'Party': Genre.MISC,
     'Pinball': Genre.PINBALL,
     'Platform': Genre.PLATFORM,
     'Puzzle': Genre.PUZZLE,
@@ -56,7 +61,9 @@ GENRE_MAPPER = {
     'Shooter': Genre.SHMUP,
     'Simulation': Genre.SIMULATION,
     'Sports': Genre.SPORTS,
+    'Stealth': Genre.ACTION_ADVENTURE,
     'Strategy': Genre.STRATEGY_MANAGEMENT,
+    'Text Adventure': Genre.ADVENTURE_VISUAL,
     'Text-Based': Genre.ADVENTURE_VISUAL,
     'Vehicle Simulation': Genre.SIMULATION,
     'Visual Novel': Genre.ADVENTURE_VISUAL,
@@ -64,8 +71,10 @@ GENRE_MAPPER = {
 
 # as above, but applies for combined genres (used for overides)
 MULTI_GENRE_MAPPER = {
+    "['Action', 'Music']": Genre.MUSIC,
     "['Action', 'Arcade']": Genre.ACTION_ADVENTURE,
     "['Action', 'Adventure']": Genre.ACTION_ADVENTURE,
+    "['Action', 'Horror']": Genre.ACTION_ADVENTURE,
     "['Action', 'Adventure', 'Fighting']": Genre.BEATEMUP,
     "['Action', 'Adventure', 'Platform']": Genre.PLATFORM,
     "['Action', 'Adventure', 'Text-Based']": Genre.ACTION_ADVENTURE,

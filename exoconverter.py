@@ -102,7 +102,7 @@ class ExoConverter:
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()), self.metadataHandler.fixGenres)
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
-                                                    self.conversionType)
+                                                    self.conversionType, None, None)
 
         if (self.conversionType == util.batocera or self.conversionType == util.retrobat) and self.useLongFolderNames:
             gameDir = util.getCleanGameID(metadata,'.pc')

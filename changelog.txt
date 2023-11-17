@@ -1,3 +1,7 @@
+0.9.5-beta
+- C64 dreams support (without custom controller mapping for now)
+- small mapping fixes for eXoDOS
+
 0.9-4-beta
 - eXoDOS v6 compatibility, backward compatibility with eXoWin3.x 2 should still work
 - fixes for some games : Screamer, Blake Stone I & II, Action Soccer, CyberMage, Call of Cthulhu - Shadow of the Comet, Discworld, Earthworm Jim 2, MDK, Lords of the Realms II, Orion Burger, Red Baron, KKND, Z, Sam & Max
