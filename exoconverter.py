@@ -5,6 +5,7 @@ import traceback
 from metadatahandler import MetadataHandler
 from keyb2joypad import Keyb2Joypad
 import util
+import dosboxconfv6
 from zipfile import ZipFile
 import TDLindexer
 from gamegenerator import GameGenerator
@@ -32,6 +33,7 @@ class ExoConverter:
         self.keyb2joypad = Keyb2Joypad(self.scriptDir, self.logger)
         self.fullnameToGameDir = fullnameToGameDir
         self.postProcess = postProcess
+        self.defaultDosboxConf = dosboxconfv6.loadDosboxConf(os.path.join(scriptDir, 'data', 'dosbox-0.74-default.conf'), dict())
 
     # Loops on all games to convert them
     def convertGames(self):
@@ -100,7 +102,7 @@ class ExoConverter:
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()), self.metadataHandler.fixGenres)
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
-                                                    self.conversionType)
+                                                    self.conversionType, None, None)
 
         if (self.conversionType == util.batocera or self.conversionType == util.retrobat) and self.useLongFolderNames:
             gameDir = util.getCleanGameID(metadata,'.pc')
@@ -108,7 +110,7 @@ class ExoConverter:
             gameDir = game + ".pc"
         gGator = GameGenerator(game, gameDir, genre, self.outputDir, self.collectionVersion, self.useLongFolderNames, self.useGenreSubFolders, metadata,
                                self.conversionType, self.conversionConf, self.exoCollectionDir, self.fullnameToGameDir,
-                               self.scriptDir, self.keyb2joypad, self.logger)
+                               self.scriptDir, self.keyb2joypad, self.defaultDosboxConf, self.logger)
 
         if not os.path.exists(gGator.getLocalGameOutputDir()):
             self.__copyGameDataToOutputDir__(gGator)
@@ -133,8 +135,8 @@ class ExoConverter:
         # fullscreen = true, output=overlay, aspect=true
         bats = [os.path.splitext(filename)[0] for filename in
                 os.listdir(os.path.join(self.collectionGamesConfDir, gGator.game)) if
-                os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[
-                                                                             0].lower() == 'install']
+                os.path.splitext(filename)[-1].lower() == '.bat' and not os.path.splitext(filename)[0].lower() == 'install'
+                and not os.path.splitext(filename)[0].lower() == 'exception']
         gameZip = bats[0] + '.zip'
         # Unzip game
         if gameZip is not None:
@@ -144,7 +146,7 @@ class ExoConverter:
             # ensure gameZip not 0 bytes, this will trigger a download if it is.
             try:    
                 if not os.path.getsize(gameZipPath):
-                    self.logger.log("  <WARNING>"+ gameZipPath + " is 0 bytes. Removing.",self.logger.WARNING)
+                    self.logger.log("  <WARNING>" + gameZipPath + " is 0 bytes. Removing.",self.logger.WARNING)
                     os.remove(gameZipPath)
             except OSError as error: 
                 pass
@@ -153,7 +155,7 @@ class ExoConverter:
             if not os.path.exists(gameZipPath):
                 self.logger.log('  <WARNING> %s not found' % gameZipPath, self.logger.WARNING)
                 if self.conversionConf['downloadOnDemand']:
-                    #try zip then try torrent
+                    # try zip then try torrent
                     downloadZipSuccess = util.downloadZip(gameZip, gameZipPath, self.logger)
                     if not downloadZipSuccess:
                         self.logger.log("  <WARNING> Web download Failed, trying Torrent",self.logger.WARNING)

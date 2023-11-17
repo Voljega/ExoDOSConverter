@@ -12,7 +12,7 @@ from mapping import Mapping
 class GameGenerator:
 
     def __init__(self, game, gameDir, genre, outputDir, collectionVersion, useLongFolderNames, useGenreSubFolders, metadata, conversionType,
-                 conversionConf, exoCollectionDir, fullnameToGameDir, scriptDir, keyb2joypad, logger):
+                 conversionConf, exoCollectionDir, fullnameToGameDir, scriptDir, keyb2joypad, defaultDosboxConf, logger):
         self.game = game
         self.gameDir = gameDir
         self.collectionVersion = collectionVersion
@@ -29,6 +29,7 @@ class GameGenerator:
         self.scriptDir = scriptDir
         self.confConverter = ConfConverter(self)
         self.keyb2joypad = keyb2joypad
+        self.defaultDosboxConf = defaultDosboxConf
 
     ##### Utils functions ####
 
@@ -59,7 +60,11 @@ class GameGenerator:
     # Converts game
     def convertGame(self):
         self.__copyGameFiles__()
-        self.confConverter.process(self)
+        if self.collectionVersion == 'eXoDOS v6':
+            optionsDosboxConfPath = os.path.join(self.exoCollectionDir, 'eXo', 'emulators', 'dosbox', 'options.conf')
+            self.confConverter.processV6(self, self.defaultDosboxConf, optionsDosboxConfPath)
+        else:
+            self.confConverter.processV5(self)
         self.__specificFixes()
         self.__postConversion__()
 
@@ -71,6 +76,9 @@ class GameGenerator:
             os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game,
                          "dosbox.conf"),
             os.path.join(self.getLocalGameDataOutputDir(), "dosbox.conf"))
+        # TODO warn about exception conf (do something later)
+        if os.path.exists(os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game, "exception.bat")):
+            self.logger.log('  <WARNING> This game has specific exception launch configuration', self.logger.WARNING)
         # Create blank file with full game name        
         f = open(os.path.join(self.getLocalGameOutputDir(), util.getCleanGameID(self.metadata, '.txt')), 'w',
                  encoding='utf8')
@@ -200,9 +208,8 @@ class GameGenerator:
     def __postConversionForBatocera__(self):
         self.logger.log("  Batocera post-conversion")
         if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
-            # TODO Remove included padt2.keys when new full generation well tested by users
-            Mapping(self.keyb2joypad.gamesConf, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
-                    self.conversionConf, self.logger).mapForBatocera()
+            Mapping(self.keyb2joypad.gamesConf, self.game, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
+                    self.conversionConf, self.collectionVersion, self.scriptDir, self.logger).mapForBatocera()
 
     # Post-conversion for MiSTeR for a given game
     def __postConversionForMister__(self):

@@ -1,0 +1,125 @@
+{
+    "actions_player1": [
+        {
+            "trigger": "l2",
+            "type": "key",
+            "target": "KEY_DOWN",
+            "description": "Brake"
+        },
+        {
+            "trigger": "r2",
+            "type": "key",
+            "target": "KEY_KP2",
+            "description": "2"
+        },
+        {
+            "trigger": "up",
+            "type": "key",
+            "target": "KEY_F1",
+            "description": "Giggle"
+        },
+        {
+            "trigger": "down",
+            "type": "key",
+            "target": "KEY_F3",
+            "description": "Giggle"
+        },
+        {
+            "trigger": "left",
+            "type": "key",
+            "target": "KEY_F2",
+            "description": "Giggle"
+        },
+        {
+            "trigger": "right",
+            "type": "key",
+            "target": "KEY_F4",
+            "description": "Giggle"
+        },
+        {
+            "trigger": "select",
+            "type": "key",
+            "target": "KEY_ESC",
+            "description": "Esc"
+        },
+        {
+            "trigger": "start",
+            "type": "key",
+            "target": [
+                "KEY_ENTER",
+                "KEY_SPACE"
+            ],
+            "description": "Start"
+        },
+        {
+            "trigger": "a",
+            "type": "key",
+            "target": "KEY_LEFTCTRL",
+            "description": "Fire"
+        },
+        {
+            "trigger": "b",
+            "type": "key",
+            "target": "KEY_LEFTALT",
+            "description": "Accelerate"
+        },
+        {
+            "trigger": "x",
+            "type": "key",
+            "target": "KEY_LEFTSHIFT",
+            "description": "Left Shift"
+        },
+        {
+            "trigger": "y",
+            "type": "key",
+            "target": "KEY_DOWN",
+            "description": "Brake"
+        },
+        {
+            "trigger": "pageup",
+            "type": "key",
+            "target": "KEY_SPACE",
+            "description": "Hand brake turn"
+        },
+        {
+            "trigger": "pagedown",
+            "type": "key",
+            "target": "KEY_LEFTCTRL",
+            "description": "Fire"
+        },
+        {
+            "trigger": [
+                "hotkey",
+                "start"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_LEFTCTRL",
+                "KEY_F9"
+            ],
+            "description": "Quit emulator"
+        },
+        {
+            "trigger": [
+                "hotkey",
+                "pageup"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_LEFTCTRL",
+                "KEY_F4"
+            ],
+            "description": "Change CD"
+        },
+        {
+            "trigger": [
+                "hotkey",
+                "l3"
+            ],
+            "type": "key",
+            "target": "KEY_ESC",
+            "description": "Quit to title"
+        }
+    ]
+}
+

@@ -10,6 +10,7 @@ import shutil
 import platform
 from datetime import datetime
 from exoconverter import ExoConverter
+from c64converter import C64Converter
 from functools import partial
 import _thread
 
@@ -28,7 +29,7 @@ class ExoGUI:
             os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)))
         self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
-        self.fullnameToGameDir = util.fullnameToGameDir(scriptDir, self.configuration['collectionVersion'])
+        self.fullnameToGameDir = None
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
@@ -162,6 +163,7 @@ class ExoGUI:
         label.grid(column=0, row=setRow, padx=5, sticky="W")
         self.guiVars['collectionDir'] = Tk.StringVar()
         self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
+        self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionDir'].get(), self.configuration['collectionVersion'], self.logger)
         self.guiVars['collectionDir'].trace_add("write", self.__handleCollectionFolder__)
         self.collectionEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
         self.collectionEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
@@ -398,7 +400,7 @@ class ExoGUI:
                 "\n%s is not a directory, doesn't exist, or is not a valid eXo collection directory" % collectionDir, self.logger.ERROR)
             self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
         else:
-            self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionVersion'].get())
+            self.fullnameToGameDir = util.fullnameToGameDir(self.guiVars['collectionDir'].get(), self.scriptDir, self.guiVars['collectionVersion'].get(), self.logger)
             # Empty filter
             self.guiVars['filter'].set('')
             # Empty right textarea
@@ -761,10 +763,15 @@ class ExoGUI:
         if collectionVersion is None:
             self.logger.log("%s doesn't seem to be a valid collection folder" % collectionDir)
         else:
-            exoConverter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
-                                        conversionType, useLongFolderNames, useGenreSubFolders, conversionConf, self.fullnameToGameDir,
-                                        partial(self.postProcess), self.logger)
-            _thread.start_new(exoConverter.convertGames, ())
+            if collectionVersion is util.C64DREAMS:
+                converter = C64Converter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
+                                         conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
+                                         self.fullnameToGameDir, partial(self.postProcess), self.logger)
+            else:
+                converter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
+                                         conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
+                                         self.fullnameToGameDir, partial(self.postProcess), self.logger)
+            _thread.start_new(converter.convertGames, ())
 
     # Set enabled/disabled state for a component
     @staticmethod

@@ -28,13 +28,14 @@ if not exist .\dist\data mkdir .\dist\data
 copy ..\data\*.* .\dist\data
 if not exist .\dist\data\mister mkdir .\dist\data\mister
 copy ..\data\mister\*.* .\dist\data\mister
+if not exist .\dist\data\padtokeys mkdir .\dist\data\padtokeys
+copy ..\data\padtokeys\*.* .\dist\data\padtokeys
 if not exist .\dist\conf mkdir .\dist\conf
 copy ..\conf\*.conf .\dist\conf
 if not exist .\dist\GUI mkdir .\dist\GUI
 copy ..\GUI\*.* .\dist\GUI
 copy ..\*.md .\dist
-copy ..\*.sh .\dist
-copy ..\changelog.txt \dist
+copy ..\changelog.txt .\dist
 echo .
 echo Rename exec and dir
 ren .\dist\main.exe eXoConverter-%version%.exe

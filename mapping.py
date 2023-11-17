@@ -1,4 +1,5 @@
 import os
+import shutil
 
 defaultKeys = {'l2': {'type': 'kp', 'description': '1', "key": "1"},
                'r2': {'type': 'kp', 'description': '2', "key": "2"},
@@ -16,8 +17,8 @@ defaultKeys = {'l2': {'type': 'kp', 'description': '1', "key": "1"},
                'pagedown': {"type": "btn", "description": "Right Mouse Click", "key": "right"},
                'l3': {'type': 'key', 'description': 'Y', 'key': 'y'},
                'r3': {'type': 'key', 'description': 'N', 'key': 'n'},
-               'hotkey+start': {'type': 'key', 'description': 'Quit emulator', 'key': 'F9+leftctrl'},
-               'hotkey+pageup': {'type': 'key', 'description': 'Change CD', 'key': 'F4+leftctrl'}
+               'hotkey+start': {'type': 'key', 'description': 'Quit emulator', 'key': 'leftctrl+F9'},
+               'hotkey+pageup': {'type': 'key', 'description': 'Change CD', 'key': 'leftctrl+F4'}
                }
 
 defaultStickKeys = {'joystick2': {"type": "mouse", "description": "mouse"},
@@ -31,22 +32,25 @@ defaultStickKeys = {'joystick2': {"type": "mouse", "description": "mouse"},
 # Generates controller mapping
 class Mapping:
 
-    def __init__(self, gamesConf, game, localGameOutputDir, conversionConf, logger):
+    def __init__(self, gamesConf, game, fullname, localGameOutputDir, conversionConf, collectionVersion, scriptDir, logger):
         self.gamesConf = gamesConf
         self.game = game
+        self.fullname = fullname
         self.localGameOutputDir = localGameOutputDir
         self.conversionConf = conversionConf
+        self.collectionVersion = collectionVersion
+        self.scriptDir = scriptDir
         self.logger = logger
 
     def __initGameMapping__(self):
         mappings = dict(defaultKeys)
         if 'mapSticks' in self.conversionConf and self.conversionConf['mapSticks']:
             mappings.update(defaultStickKeys)
-        if 'useKeyb2Joypad' in self.conversionConf and self.conversionConf['useKeyb2Joypad'] and self.game in self.gamesConf:
-            gameMappings = dict(self.gamesConf[self.game])
+        if 'useKeyb2Joypad' in self.conversionConf and self.conversionConf['useKeyb2Joypad'] and self.fullname in self.gamesConf:
+            gameMappings = dict(self.gamesConf[self.fullname])
             if 'mapSticks' not in self.conversionConf or not self.conversionConf['mapSticks']:
-                stickKeys = list(filter(lambda k: 'stick' in k.lower(), gameMappings.keys()))
-                for key in stickKeys:
+                stickandpadKeys = list(filter(lambda k: 'stick' in k.lower() or k.lower() in ['up','down','left','right'], gameMappings.keys()))
+                for key in stickandpadKeys:
                     del gameMappings[key]
             for key in gameMappings.keys():
                 mappings[key] = self.__convertK2JToGeneric__(gameMappings[key])
@@ -65,54 +69,60 @@ class Mapping:
         return genericMapping
 
     def mapForBatocera(self):
-        self.logger.log("    Generate pad2key controller mapping")
-        gameMapping = self.__initGameMapping__()
-        p2kFile = open(os.path.join(self.localGameOutputDir, 'padto.keys'), 'w', encoding='utf-8')
-        p2kFile.write('{\n')
-        p2kFile.write('    "actions_player1": [\n')
-        nbMappings = len(gameMapping)
-        c = 0
-        # convert genericMapping to batocera format
-        for key in gameMapping.keys():
-            keyMapping = gameMapping[key]
-            p2kFile.write('        {\n')
-            if '+' in key:
-                p2kFile.write('            "trigger": [\n')
-                p2kFile.write('                "%s",\n' % key.split('+')[0])
-                p2kFile.write('                "%s"\n' % key.split('+')[1])
-                p2kFile.write('            ],\n')
-            else:
-                p2kFile.write('            "trigger": "%s",\n' % key)
-            # TODO following if/elif/else might be simplified. might.
-            if keyMapping['type'] == 'kp':
-                p2kFile.write('            "type": "key",\n')
-                target = 'key_' + keyMapping['type'] + keyMapping['key']
-                p2kFile.write('            "target": "%s",\n' % target.upper())
-            elif keyMapping['type'] == 'mouse':
-                p2kFile.write('            "type": "mouse",\n')
-            elif keyMapping['type'] == 'btn':
-                p2kFile.write('            "type": "key",\n')
-                target = keyMapping['type'] + '_' + keyMapping['key']
-                p2kFile.write('            "target": "%s",\n' % target.upper())
-            else:
-                p2kFile.write('            "type": "%s",\n' % keyMapping['type'])
-                if '+' in keyMapping['key']:
-                    p2kFile.write('            "target": [\n')
-                    target = 'key_' + keyMapping['key'].split('+')[0]
-                    p2kFile.write('                "%s",\n' % target.upper())
-                    target = 'key_' + keyMapping['key'].split('+')[1]
-                    p2kFile.write('                "%s"\n' % target.upper())
+        collectionp2kpath = os.path.join(self.scriptDir, 'data', 'padtokeys', self.game + '-' + self.collectionVersion.replace(' ','') + '.keys')
+        if os.path.exists(collectionp2kpath):
+            # TODO remove joystick keys if no mapsticks
+            self.logger.log("    Copy premade pad2key controller mapping")
+            shutil.copy2(collectionp2kpath, os.path.join(self.localGameOutputDir, 'padto.keys'))
+        else:
+            self.logger.log("    Generate pad2key controller mapping")
+            gameMapping = self.__initGameMapping__()
+            p2kFile = open(os.path.join(self.localGameOutputDir, 'padto.keys'), 'w', encoding='utf-8')
+            p2kFile.write('{\n')
+            p2kFile.write('    "actions_player1": [\n')
+            nbMappings = len(gameMapping)
+            c = 0
+            # convert genericMapping to batocera format
+            for key in gameMapping.keys():
+                keyMapping = gameMapping[key]
+                p2kFile.write('        {\n')
+                if '+' in key:
+                    p2kFile.write('            "trigger": [\n')
+                    p2kFile.write('                "%s",\n' % key.split('+')[0])
+                    p2kFile.write('                "%s"\n' % key.split('+')[1])
                     p2kFile.write('            ],\n')
                 else:
-                    target = 'key_' + keyMapping['key']
+                    p2kFile.write('            "trigger": "%s",\n' % key)
+                # TODO following if/elif/else might be simplified. might.
+                if keyMapping['type'] == 'kp':
+                    p2kFile.write('            "type": "key",\n')
+                    target = 'key_' + keyMapping['type'] + keyMapping['key']
                     p2kFile.write('            "target": "%s",\n' % target.upper())
-            p2kFile.write('            "description": "%s"\n' % keyMapping['description'])
-            if c == nbMappings - 1:
-                p2kFile.write('        }\n')
-            else:
-                p2kFile.write('        },\n')
-            c = c + 1
+                elif keyMapping['type'] == 'mouse':
+                    p2kFile.write('            "type": "mouse",\n')
+                elif keyMapping['type'] == 'btn':
+                    p2kFile.write('            "type": "key",\n')
+                    target = keyMapping['type'] + '_' + keyMapping['key']
+                    p2kFile.write('            "target": "%s",\n' % target.upper())
+                else:
+                    p2kFile.write('            "type": "%s",\n' % keyMapping['type'])
+                    if '+' in keyMapping['key']:
+                        p2kFile.write('            "target": [\n')
+                        target = 'key_' + keyMapping['key'].split('+')[0]
+                        p2kFile.write('                "%s",\n' % target.upper())
+                        target = 'key_' + keyMapping['key'].split('+')[1]
+                        p2kFile.write('                "%s"\n' % target.upper())
+                        p2kFile.write('            ],\n')
+                    else:
+                        target = 'key_' + keyMapping['key']
+                        p2kFile.write('            "target": "%s",\n' % target.upper())
+                p2kFile.write('            "description": "%s"\n' % keyMapping['description'])
+                if c == nbMappings - 1:
+                    p2kFile.write('        }\n')
+                else:
+                    p2kFile.write('        },\n')
+                c = c + 1
 
-        p2kFile.write('    ]\n')
-        p2kFile.write('}\n\n')
-        p2kFile.close()
+            p2kFile.write('    ]\n')
+            p2kFile.write('}\n\n')
+            p2kFile.close()

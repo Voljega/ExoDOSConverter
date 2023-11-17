@@ -10,7 +10,7 @@ from tabulate import tabulate
 logger = Logger()
 
 exo_folder = r'Z:\\'
-collection = 'eXoDOS v5'
+collection = 'eXoDOS v6'
 
 def buildGenre_old(dosGame):
     if dosGame is not None and dosGame.genres is not None:
@@ -22,7 +22,7 @@ def buildGenre_old(dosGame):
             else:
                 return 'Misc'
         elif "Racing" in dosGame.genres or "Driving" in dosGame.genres or "Racing / Driving" in dosGame.genres:
-            return "Race"
+            return "Racing"
         elif 'Sports' in dosGame.genres:
             return 'Sports'
         elif 'Pinball' in dosGame.genres:
@@ -87,8 +87,8 @@ for name in data:
     if oldGenre != newGenre:
         if 'Interactive Movie' in genres:
             continue
-        if oldGenre not in ['Sports', 'Strategy-Gestion', 'Race']:
-            result.append( (name, str(genres), oldGenre, newGenre) )
+        if oldGenre not in ['Sports', 'Strategy-Gestion', 'Racing']:
+            result.append( (name, str(genres), oldGenre, newGenre))
 
 df = pd.DataFrame(result, columns=['name', 'exo', 'old', 'new'])
 df.to_csv(r'.\game_genres_compare.csv')

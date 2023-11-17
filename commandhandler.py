@@ -51,6 +51,7 @@ class CommandHandler:
         count = 0
         for param in command:
             if param.lower() in startTokens and startIndex == -1:
+                letter = param.lower()
                 startIndex = count
             elif param.lower() in endTokens and endIndex == -1:
                 endIndex = count
@@ -59,7 +60,7 @@ class CommandHandler:
         if endIndex == -1:
             endIndex = len(command)
 
-        return command[startIndex + 1:endIndex], command, startIndex, endIndex
+        return command[startIndex + 1:endIndex], command, startIndex, endIndex, letter
 
     # Removes eXo collection games folder parts from exo collection paths
     def reducePath(self, path, gameInternalBatFile=False):
@@ -82,7 +83,7 @@ class CommandHandler:
     def handleImgmount(self, line, gameInternalBatFile=False):
         startTokens = ['a', 'b', 'c', 'd', 'e', 'f','g', 'h', 'i', 'j', 'k', 'y', '0','2']
         endTokens = ['-t', '-size']
-        paths, command, startIndex, endIndex = self.__pathListInCommandLine__(line, startTokens, endTokens)
+        paths, command, startIndex, endIndex, letter = self.__pathListInCommandLine__(line, startTokens, endTokens)
 
         prString = ""
         if len(paths) == 1:
@@ -134,7 +135,7 @@ class CommandHandler:
 
         fullString = " ".join(command[0:startIndex + 1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    imgmount path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
-        return fullString.rstrip(' ')
+        return fullString.rstrip(' '), letter
 
     # Converts mount command line
     def handleBoot(self, line):
@@ -186,7 +187,7 @@ class CommandHandler:
     def handleMount(self, line):
         startTokens = ['a', 'b', 'd', 'e', 'f', 'g','h', 'i', 'j', 'k']
         endTokens = ['-t']
-        paths, command, startIndex, endIndex = self.__pathListInCommandLine__(line, startTokens, endTokens)
+        paths, command, startIndex, endIndex, letter = self.__pathListInCommandLine__(line, startTokens, endTokens)
 
         prString = ""
         if len(paths) == 1:
@@ -250,7 +251,7 @@ class CommandHandler:
 
         fullString = " ".join(command[0:startIndex + 1]) + prString + " " + " ".join(command[endIndex:])
         self.logger.log("    mount path: " + line.rstrip('\n\r ') + " --> " + fullString.rstrip('\n\r '))
-        return fullString
+        return fullString, letter
 
     # Cleans cd names to a dos compatible 8 char name
     def __cleanCDname__(self, path, cdCount=None, gameInternalBatFile=False):
