@@ -130,40 +130,93 @@ class C64Converter:
             os.makedirs(outputDir)
 
         if len(collectionGameFiles) == 0:
-            if os.path.exists(os.path.join(collectionGamePath, game + '.cmd')):
-                cmdFile = open(os.path.join(collectionGamePath, game + '.cmd'))
-                for line in cmdFile.readlines():
-                    compilationGameFilePath = os.path.join(collectionGamePath, line.replace('"', ''))
-                    compilationGameFile = compilationGameFilePath.split('\\')[-1]
-                    outputGameFile = game + os.path.splitext(compilationGameFile)[-1]
-                    if os.path.exists(compilationGameFilePath):
-                        self.logger.log('  Copy %s to %s\n\n' % (compilationGameFile, outputGameFile), self.logger.INFO)
-                        shutil.copy2(os.path.join(collectionGamePath, compilationGameFilePath), os.path.join(outputDir, outputGameFile))
-                        return [outputGameFile, []]
-                cmdFile.close()
-            self.logger.log('  <WARNING> no game file found while converting game %s\n\n' % game, self.logger.WARNING)
-            self.logger.log('            (most likely a commercial homebrew)\n\n', self.logger.WARNING)
-            return [game + '.notfound', []]
+            compilationConversion = self.handleCompilationDisk(game, outputDir, collectionGamePath)
+            if compilationConversion is not None:
+                return compilationConversion
+            else:
+                self.logger.log('  <WARNING> no game file found while converting game %s\n\n' % game, self.logger.WARNING)
+                self.logger.log('            (most likely a commercial homebrew)\n\n', self.logger.WARNING)
+                return [game + '.notfound', []]
         elif len(collectionGameFiles) > 1:
             m3uGameFiles = list(filter(lambda f: os.path.splitext(f)[-1] == '.m3u', collectionGameFiles))
             if len(m3uGameFiles) == 1:
-                self.logger.log('  m3u file found while converting game %s\n\n' % game)
-                m3uGameFilePath = os.path.join(collectionGamePath, m3uGameFiles[0])
-                m3uGameFile = open(m3uGameFilePath, 'r', encoding='utf-8')
-                disks = list(map(lambda d: d.rstrip(' \n\r'), m3uGameFile.readlines()))
-                m3uGameFile.close()
-                return self.createM3u(collectionGamePath, outputDir, game, disks)
+                return self.handleM3U(game, outputDir, collectionGamePath, m3uGameFiles[0])
             else:
-                self.logger.log('  several files but no m3u found while converting game %s\n\n' % game)
-                maingame = 'Game.crt'
-                if maingame in collectionGameFiles:
-                    collectionGameFiles.remove(maingame)
-                    collectionGameFiles = [maingame] + collectionGameFiles
-                return self.createM3u(collectionGamePath, outputDir, game, collectionGameFiles)
+                return self.handleMultiDisksWithoutM3U(game, outputDir, collectionGamePath, collectionGameFiles)
 
-        gameFile = collectionGameFiles[0]
+        return self.handleSingleDisk(game, outputDir, collectionGamePath, collectionGameFiles[0])
+
+    def handleCompilationDisk(self, game, outputDir, collectionGamePath):
+        if os.path.exists(os.path.join(collectionGamePath, game + '.cmd')):
+            self.logger.log('  compilation conversion')
+            cmdFile = open(os.path.join(collectionGamePath, game + '.cmd'))
+            for line in cmdFile.readlines():
+                compilationGameFilePath = os.path.join(collectionGamePath, line.replace('"', ''))
+                compilationGameFile = compilationGameFilePath.split('\\')[-1]
+                outputGameFile = game + os.path.splitext(compilationGameFile)[-1]
+                if os.path.exists(compilationGameFilePath):
+                    self.logger.log('  Copy %s to %s\n\n' % (compilationGameFile, outputGameFile), self.logger.INFO)
+                    shutil.copy2(os.path.join(collectionGamePath, compilationGameFilePath),
+                                 os.path.join(outputDir, outputGameFile))
+                    return [outputGameFile, []]
+            cmdFile.close()
+        return None
+
+    def handleM3U(self, game, outputDir, collectionGamePath, m3uFile):
+        self.logger.log('  m3u conversion')
+        m3uGameFilePath = os.path.join(collectionGamePath, m3uFile)
+        m3uGameFile = open(m3uGameFilePath, 'r', encoding='utf-8')
+        disks = list(map(lambda d: d.rstrip(' \n\r'), m3uGameFile.readlines()))
+        m3uGameFile.close()
+        return self.createM3u(collectionGamePath, outputDir, game, disks)
+
+    def handleMultiDisksWithoutM3U(self, game, outputDir, collectionGamePath, collectionGameFiles):
+        self.logger.log('  multi disks without m3u conversion')
+        # TODO most likely special launch, see cmd in Advanced Dungeons & Dragons - Champions of Krynn
+        maingame = 'Game.crt'
+        if maingame in collectionGameFiles:
+            collectionGameFiles.remove(maingame)
+            collectionGameFiles = [maingame] + collectionGameFiles
+        return self.createM3u(collectionGamePath, outputDir, game, collectionGameFiles)
+
+    def handleSingleDisk(self, game, outputDir, collectionGamePath, gameFile):
+        cmds = [cmd for cmd in os.listdir(collectionGamePath) if os.path.splitext(cmd)[-1] == '.cmd']
+        if len(cmds) > 0:
+            return self.handleSingleDiskWithCmd(game, outputDir, collectionGamePath, gameFile, cmds)
+        else:
+            return self.handleSingleDiskWithoutCmd(game, outputDir, collectionGamePath, gameFile)
+
+    def handleSingleDiskWithCmd(self, game, outputDir, collectionGamePath, gameFile, cmds):
+        # TODO actually we should use cmd and not m3u for compatibility, however doe not work at the moment on Batocera
+        if len(cmds) > 1:
+            self.logger.log('  <ERROR> more than one cmd found\n\n', self.logger.ERROR)
+        cmd = os.path.join(collectionGamePath, cmds[0])
+        cmdFile = open(cmd, 'r', encoding='utf-8')
+        lines = list(filter(lambda line: line.strip() != '', list(map(lambda l: l.replace('"','').rstrip(' \n\r'), cmdFile.readlines()))))
+        cmdFile.close()
+        if len(lines) > 1:
+            self.logger.log('  <ERROR> more than one line found in cmd\n\n', self.logger.ERROR)
+        cmdline = lines[0].split(':')
+        if cmdline[0] != gameFile or len(cmdline) != 2:
+            if len(cmdline) == 1:
+                return self.handleSingleDiskWithoutCmd(game, outputDir, collectionGamePath, gameFile)
+            else:
+                self.logger.log('  <ERROR> more than one or no parameter found in cmd\n\n', self.logger.ERROR)
+        self.logger.log('  single disk conversion with cmd\n\n')
+        m3uOutputGameFilePath = os.path.join(outputDir, game + '.m3u')
+        m3uOutputGameFile = open(os.path.join(outputDir, game + '.m3u'), 'w', encoding='utf-8')
+        self.logger.log('  Create %s with launch parameter: %s\n\n' % (m3uOutputGameFilePath, cmdline[1]), self.logger.INFO)
         outputGameFile = game + os.path.splitext(gameFile)[-1]
-        self.logger.log('  Copy %s to %s\n\n' % (gameFile, outputGameFile), self.logger.INFO)
+        m3uOutputGameFile.write(outputGameFile + ':' + cmdline[1] + '\n')
+        m3uOutputGameFile.close()
+        self.logger.log('  copy %s to %s\n\n' % (gameFile, outputGameFile), self.logger.INFO)
+        shutil.copy2(os.path.join(collectionGamePath, str(gameFile)), os.path.join(outputDir, outputGameFile))
+        return [game + '.m3u', [outputGameFile]]
+
+    def handleSingleDiskWithoutCmd(self, game, outputDir, collectionGamePath, gameFile):
+        self.logger.log('  single disk conversion without cmd\n\n')
+        outputGameFile = game + os.path.splitext(gameFile)[-1]
+        self.logger.log('  copy %s to %s\n\n' % (gameFile, outputGameFile), self.logger.INFO)
         shutil.copy2(os.path.join(collectionGamePath, str(gameFile)), os.path.join(outputDir, outputGameFile))
         return [outputGameFile, []]
 
@@ -172,11 +225,16 @@ class C64Converter:
         m3uOutputGameFile = open(os.path.join(outputDir, game + '.m3u'), 'w', encoding='utf-8')
         self.logger.log('  Create %s\n\n' % m3uOutputGameFilePath, self.logger.INFO)
         hiddenGameFiles = []
-        for disk in disks:
+        for rawdisk in disks:
+            diskandparameter = rawdisk.split(':')
+            [disk, parameter] = [diskandparameter[0], None] if len(diskandparameter) == 1 else [diskandparameter[0], diskandparameter[1]]
             outputGameFile = game + ' (' + '.'.join(os.path.splitext(disk)[:-1]) + ')' + os.path.splitext(disk)[-1]
             self.logger.log('  Copy %s to %s\n\n' % (disk, outputGameFile), self.logger.INFO)
             shutil.copy2(os.path.join(collectionGamePath, str(disk)), os.path.join(outputDir, outputGameFile))
-            m3uOutputGameFile.write(outputGameFile + '\n')
+            if parameter is None:
+                m3uOutputGameFile.write(outputGameFile + '\n')
+            else:
+                m3uOutputGameFile.write(outputGameFile + ':' + parameter + '\n')
             hiddenGameFiles.append(outputGameFile)
         m3uOutputGameFile.close()
         return [game + '.m3u', hiddenGameFiles]
