@@ -210,6 +210,41 @@ class GameGenerator:
         if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
             Mapping(self.keyb2joypad.gamesConf, self.game, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
                     self.conversionConf, self.collectionVersion, self.scriptDir, self.logger).mapForBatocera()
+        if 'dosboxPureZip' in self.conversionConf and self.conversionConf['dosboxPureZip'] is True:
+            self.__postConversionDosboxPureZip()
+
+    def __postConversionDosboxPureZip(self):
+        self.logger.log("    ReZip game for dosbox-pure")
+        # dosbox-pure full treatment
+        # TODO see if it's compatible with full name
+        # combine dosbox.cfg and dosbox.bat into dosbox.conf
+        dosboxcfgpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg')
+        dosboxbatpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.bat')
+        dosboxcfg = open(dosboxcfgpath, 'r', encoding='utf-8')
+        dosboxbat = open(dosboxbatpath, 'r', encoding='utf-8')
+        dosboxconf = open(os.path.join(self.getLocalGameOutputDir(), 'dosbox.conf'), 'w', encoding='utf-8')
+        dosboxcfglines = list(map(lambda l: l.rstrip(' \r\n'), dosboxcfg.readlines()))
+        dosboxcfglines = dosboxcfglines[:dosboxcfglines.index('[autoexec]')]
+        dosboxconf.write('\n'.join(dosboxcfglines) + '\n[autoexec]\n')
+        dosboxconf.write(''.join(dosboxbat.readlines()))
+        dosboxcfg.close()
+        dosboxbat.close()
+        dosboxconf.close()
+        # remove dosbox.cfg and dosbox.conf
+        os.remove(dosboxcfgpath)
+        os.remove(dosboxbatpath)
+        # move padto.keys up
+        gamename = '.'.join(os.path.splitext(self.gameDir)[:-1])
+        padtokeys = os.path.join(self.getLocalGameOutputDir(), 'padto.keys')
+        if os.path.exists(padtokeys):
+            shutil.move(padtokeys, os.path.join(self.getLocalParentOutputDir(), gamename + '.keys'))
+        # TODO might have issues with empty directories
+        shutil.make_archive(os.path.join(self.getLocalParentOutputDir(), gamename), 'zip',
+                            self.getLocalGameOutputDir())
+        shutil.rmtree(os.path.join(self.getLocalParentOutputDir(), self.gameDir))
+        # TODO modify gamelist.xml (do it before during generation)
+        # handle issues with dosbox.conf handling option ...
+        # handle padtokeys not taken into account / dosbox pure mapping not disabled through scroll lock
 
     # Post-conversion for MiSTeR for a given game
     def __postConversionForMister__(self):

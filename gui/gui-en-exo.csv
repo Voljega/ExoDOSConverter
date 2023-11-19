@@ -16,6 +16,7 @@ mapSticks; Map Analog Sticks;Map controler analog sticks
 longGameFolder;Long Folder Names;Allow long Folder Names ["Long Game Name (YEAR).pc" not "LongGame.pc"] (Batocera/RetroBat Only)#nWill not Rename Existing Folders!
 downloadOnDemand;Download on demand;Activate direct download on demand (only for eXoDOS)
 preExtractGames;Pre-extract Games;Pre-Extract Games (MiSTeR and DOS Native only)
+dosboxPureZip;Rezip for dosbox-pure;ReZip games for dosbox pure (Batocera and Retrobat only)
 debugMode;Debug Mode; in debug mode, pause instruction will be added and [autoexec] part left commented in dosbox.cfg
 expertMode;Expert mode;Allows overriding of generated configuration
 mountPrefix;Mount prefix; Mount command prefix

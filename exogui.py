@@ -257,6 +257,15 @@ class ExoGUI:
         wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
         self.preExtractGamesCheckButton.grid(column=5, row=0, sticky="W", pady=5)
 
+        self.guiVars['dosboxPureZip'] = Tk.IntVar()
+        self.guiVars['dosboxPureZip'].set(self.configuration['dosboxPureZip'])
+        self.dosboxPureZipGamesCheckButton = Tk.Checkbutton(self.collectionFrame,
+                                                         text=self.guiStrings['dosboxPureZip'].label,
+                                                         variable=self.guiVars['dosboxPureZip'], onvalue=1,
+                                                         offvalue=0)
+        wckToolTips.register(self.dosboxPureZipGamesCheckButton, self.guiStrings['dosboxPureZip'].help)
+        self.dosboxPureZipGamesCheckButton.grid(column=6, row=0, sticky="W", pady=5)
+
         ttk.Separator(self.configurationFrame, orient=Tk.HORIZONTAL).grid(column=0, row=2, padx=5, pady=0,
                                                                           sticky="EW")
 
@@ -746,6 +755,7 @@ class ExoGUI:
         conversionConf['outputCfg'] = self.guiVars['outputCfg'].get()
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
         conversionConf['preExtractGames'] = True if self.guiVars['preExtractGames'].get() == 1 else False
+        conversionConf['dosboxPureZip'] = True if self.guiVars['dosboxPureZip'].get() == 1 else False
         conversionConf['downloadOnDemand'] = True if self.guiVars['downloadOnDemand'].get() == 1 else False
         conversionConf['mapper'] = self.guiVars['mapper'].get()
 
@@ -796,7 +806,7 @@ class ExoGUI:
                            self.expertModeCheckButton,
                            self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry,
                            self.selectSelectionPathButton,
-                           self.preExtractGamesCheckButton, self.downloadOnDemandCheckButton, self.longGameFolderCheckButton]
+                           self.preExtractGamesCheckButton, self.dosboxPureZipGamesCheckButton, self.downloadOnDemandCheckButton, self.longGameFolderCheckButton]
 
         if clickedProcess or collectionVersion == 'None':
             [self.__setComponentState__(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
@@ -807,6 +817,8 @@ class ExoGUI:
             [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
             self.__setComponentState__(self.preExtractGamesCheckButton,
                                        'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+            self.__setComponentState__(self.dosboxPureZipGamesCheckButton,
+                                       'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
             self.__setComponentState__(self.longGameFolderCheckButton,
                                        'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
 

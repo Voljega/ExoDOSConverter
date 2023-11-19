@@ -103,7 +103,7 @@ class MetadataHandler:
             return None
 
     # Process and export metadata to in-memory gamelist xml for a given game    
-    def processGame(self, game, gamelist, genre, outputDir, useLongFolderNames, useGenreSubFolders, conversionType, nameOverride, manualOverride):
+    def processGame(self, game, gamelist, genre, outputDir, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride):
         gameMetadata = self.__handleMetadata__(game)
         self.logger.log("  computed genre %s" % genre)
         self.logger.log("  copy pics and manual")
@@ -113,7 +113,7 @@ class MetadataHandler:
             self.logger.log('  <WARNING> No pic found for %s, please file a report on Github with the game name' % game, self.logger.WARNING)
         if gameMetadata.manual is not None and os.path.exists(gameMetadata.manual):
             shutil.copy2(gameMetadata.manual, os.path.join(outputDir, 'manuals'))
-        self.__writeGamelistEntry__(gamelist, gameMetadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, nameOverride, manualOverride)
+        self.__writeGamelistEntry__(gamelist, gameMetadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride)
         return gameMetadata
 
     # Replaces “ ” ’ …
@@ -133,7 +133,7 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'hidden').text = 'true'
 
     # Write metada for a given game to in-memory gamelist xml
-    def __writeGamelistEntry__(self, gamelist, metadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, nameOverride, manualOverride):
+    def __writeGamelistEntry__(self, gamelist, metadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride):
         root = gamelist.getroot()
 
         if platform.system() == 'Windows':
@@ -148,14 +148,16 @@ class MetadataHandler:
 
         year = metadata.year + "0101T000000" if metadata.year is not None else ''
 
+        extension = '.zip' if (conversionType == util.batocera or conversionType == util.retrobat) and rezipped else '.pc'
+
         if conversionType == util.retropie:
             gameFilePath = nameOverride if nameOverride is not None else util.getCleanGameID(metadata, '.conf')
             path = "./" + genre + "/" + gameFilePath if useGenreSubFolders else "./" + gameFilePath
         elif (conversionType == util.batocera or conversionType == util.retrobat) and useLongFolderNames:
-            gameFilePath = nameOverride if nameOverride is not None else util.getCleanGameID(metadata, '.pc')
+            gameFilePath = nameOverride if nameOverride is not None else util.getCleanGameID(metadata, extension)
             path = "./" + genre + "/" + gameFilePath if useGenreSubFolders else "./" + gameFilePath
         else:
-            gameFilePath = nameOverride if nameOverride is not None else self.__cleanXmlString__(game) + ".pc"
+            gameFilePath = nameOverride if nameOverride is not None else self.__cleanXmlString__(game) + extension
             path = "./" + genre + "/" + gameFilePath if useGenreSubFolders else "./" + gameFilePath
 
         existsInGamelist = [child for child in root.iter('game') if

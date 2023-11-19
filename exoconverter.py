@@ -34,6 +34,7 @@ class ExoConverter:
         self.fullnameToGameDir = fullnameToGameDir
         self.postProcess = postProcess
         self.defaultDosboxConf = dosboxconfv6.loadDosboxConf(os.path.join(scriptDir, 'data', 'dosbox-0.74-default.conf'), dict())
+        self.dosboxPureZip = True if 'dosboxPureZip' in self.conversionConf and self.conversionConf['dosboxPureZip'] is True else False
 
     # Loops on all games to convert them
     def convertGames(self):
@@ -102,7 +103,7 @@ class ExoConverter:
         genre = self.metadataHandler.buildGenre(self.metadataHandler.metadatas.get(game.lower()), self.metadataHandler.fixGenres)
         self.logger.log(">>> %i/%i >>> %s: starting conversion" % (count, totalSize, game))
         metadata = self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames, self.useGenreSubFolders,
-                                                    self.conversionType, None, None)
+                                                    self.conversionType, self.dosboxPureZip, None, None)
 
         if (self.conversionType == util.batocera or self.conversionType == util.retrobat) and self.useLongFolderNames:
             gameDir = util.getCleanGameID(metadata,'.pc')
