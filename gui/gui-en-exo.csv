@@ -8,6 +8,9 @@ selectSelectionPath;Select;Select your selection file
 loadCustom;Load;Load your custom selection from file
 saveCustom;Save;Save your custom selection to file
 conversionType;Conversion Type;Choose your conversion type
+converterSettings;eXoDOS / eXoWin3x Conversion Settings; Settings for the Converter (DOS/Win3x only)
+dosboxBasicSettings;Dosbox Basic Settings; Basic Settings for Dosbox
+dosboxExpertSettings;Dosbox Expert Settings; Expert Settings for Dosbox
 collectionVersion;Collection version;Your collection version (automatically set)
 genreSubFolders;Use genre subfolders;Check to use genre subfolders for converted games
 mapper;Mapper;Use controls mapping

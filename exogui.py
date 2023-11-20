@@ -16,6 +16,7 @@ import _thread
 
 
 # Main GUI
+# noinspection PyUnresolvedReferences
 class ExoGUI:
     DEFAULT_FONT_SIZE = 9
 
@@ -33,7 +34,7 @@ class ExoGUI:
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
-        self.window.geometry('+50+50')
+        self.window.geometry('+0+0')
         self.startFontSize = self.DEFAULT_FONT_SIZE
 
         if platform.system() == 'Windows':
@@ -64,8 +65,8 @@ class ExoGUI:
         self.mapperValues = None
         self.preExtractGamesCheckButton = None
         self.conversionFrame = None
-        self.genericConversionFrame = None
-        self.expertConversionFrame = None
+        self.converterSettingsFrame = None
+        self.expertConversionFirstLineFrame = None
         self.mapperConversionFrame = None
         self.conversionTypeLabel = None
         self.debugModeCheckButton = None
@@ -123,8 +124,8 @@ class ExoGUI:
 
     # Main mama Frame    
     def __drawMainframe__(self):
-        self.mainFrame = Tk.Frame(self.root, padx=10, pady=0)
-        self.mainFrame.grid(column=0, row=1, sticky="EW", pady=5)
+        self.mainFrame = Tk.Frame(self.root, pady=0)
+        self.mainFrame.grid(column=0, row=1, sticky="EW")
         self.mainFrame.grid_columnconfigure(0, weight=1)
         self.__drawPathsFrame__()
         self.__drawConfigurationFrame__()
@@ -153,8 +154,8 @@ class ExoGUI:
 
     # Paths frame    
     def __drawPathsFrame__(self):
-        self.pathsFrame = Tk.LabelFrame(self.mainFrame, text="Your Paths", padx=10, pady=5)
-        self.pathsFrame.grid(column=0, row=0, sticky="EW", pady=5)
+        self.pathsFrame = Tk.LabelFrame(self.mainFrame, text="Your Paths", pady=5)
+        self.pathsFrame.grid(column=0, row=0, sticky="EW")
         self.pathsFrame.grid_columnconfigure(1, weight=1)
         setRow = 0
 
@@ -163,7 +164,7 @@ class ExoGUI:
         label.grid(column=0, row=setRow, padx=5, sticky="W")
         self.guiVars['collectionDir'] = Tk.StringVar()
         self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
-        self.fullnameToGameDir = util.fullnameToGameDir(self.scriptDir, self.guiVars['collectionDir'].get(), self.configuration['collectionVersion'], self.logger)
+        self.fullnameToGameDir = util.fullnameToGameDir(self.guiVars['collectionDir'].get(), self.scriptDir, self.configuration['collectionVersion'], self.logger)
         self.guiVars['collectionDir'].trace_add("write", self.__handleCollectionFolder__)
         self.collectionEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
         self.collectionEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
@@ -192,18 +193,22 @@ class ExoGUI:
     # Configuration Frame
     def __drawConfigurationFrame__(self):
         self.__drawGenericConfigurationFrame__()
+        self.__drawBasicConfigurationFrame__()
         self.__drawExpertConfigurationFrame__()
-        self.__drawMapperConfigurationFrame__()
         self.__checkExpertMode__()
         self.loading = False
 
     def __drawGenericConfigurationFrame__(self):
-        self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", padx=10, pady=5)
+        self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", pady=5)
         self.configurationFrame.grid(column=0, row=1, sticky="EW", pady=5)
         self.configurationFrame.columnconfigure(0, weight=1)
+        self.configurationFrame.rowconfigure(0, weight=1)
 
+        # Collection Version Frame
         self.versionFrame = Tk.Frame(self.configurationFrame)
         self.versionFrame.grid(column=0, row=0, padx=5, sticky="EW")
+        self.versionFrame.columnconfigure(1, weight=1)
+
         self.guiVars['collectionVersion'] = Tk.StringVar()
         self.guiVars['collectionVersion'].set(self.configuration['collectionVersion'])
         self.guiVars['collectionVersionLabel'] = Tk.StringVar()
@@ -214,177 +219,222 @@ class ExoGUI:
         wckToolTips.register(self.collectionVersionLabel, self.guiStrings['collectionVersion'].help)
         self.collectionVersionLabel.grid(column=0, row=0, sticky="W")
 
-        # Collection parameters
-        self.collectionFrame = Tk.Frame(self.configurationFrame)
-        self.collectionFrame.grid(column=0, row=1, padx=5, sticky="EW")
+        # empty frame
+        Tk.Frame(self.conversionFrame).grid(column=1, row=0, sticky="EW")
 
-        self.conversionTypeLabel = Tk.Label(self.collectionFrame, text=self.guiStrings['conversionType'].label)
+        # Conversion Type frame
+        # self.collectionFrame = Tk.Frame(self.configurationFrame)
+        # self.collectionFrame.grid(column=0, row=1, padx=5, sticky="EW")
+
+        self.conversionTypeLabel = Tk.Label(self.versionFrame, text=self.guiStrings['conversionType'].label)
         wckToolTips.register(self.conversionTypeLabel, self.guiStrings['conversionType'].help)
-        self.conversionTypeLabel.grid(column=0, row=0, sticky="W", pady=5)
+        self.conversionTypeLabel.grid(column=2, row=0, sticky="W")
         self.guiVars['conversionType'] = Tk.StringVar()
         self.guiVars['conversionType'].set(self.configuration['conversionType'])
-        self.conversionTypeComboBox = ttk.Combobox(self.collectionFrame, state="readonly",
+        self.conversionTypeComboBox = ttk.Combobox(self.versionFrame, state="readonly",
                                                    textvariable=self.guiVars['conversionType'])
         self.conversionTypeComboBox.bind('<<ComboboxSelected>>', self.__changeConversionType__)
-        self.conversionTypeComboBox.grid(column=1, row=0, sticky="W", pady=5, padx=5)
+        self.conversionTypeComboBox.grid(column=3, row=0, sticky="W", padx=5)
         self.conversionTypeValues = util.conversionTypes.copy()
         self.conversionTypeComboBox['values'] = self.conversionTypeValues
 
-        self.guiVars['downloadOnDemand'] = Tk.IntVar()
-        self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
-        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.collectionFrame,
-                                                          text=self.guiStrings['downloadOnDemand'].label,
-                                                          variable=self.guiVars['downloadOnDemand'], onvalue=1,
-                                                          offvalue=0)
-        wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
-        self.downloadOnDemandCheckButton.grid(column=3, row=0, sticky="E", pady=5)
+        self.guiVars['genreSubFolders'] = Tk.IntVar()
+        self.guiVars['genreSubFolders'].set(self.configuration['genreSubFolders'])
+        self.useGenreSubFolderCheckButton = Tk.Checkbutton(self.versionFrame,
+                                                           text=self.guiStrings['genreSubFolders'].label,
+                                                           variable=self.guiVars['genreSubFolders'], onvalue=1,
+                                                           offvalue=0)
+        wckToolTips.register(self.useGenreSubFolderCheckButton, self.guiStrings['genreSubFolders'].help)
+        self.useGenreSubFolderCheckButton.grid(column=4, row=0, sticky="W", padx=5)
 
-        self.guiVars['longGameFolder'] = Tk.IntVar()
-        self.guiVars['longGameFolder'].set(self.configuration['longGameFolder'])
-        self.longGameFolderCheckButton = Tk.Checkbutton(self.collectionFrame,
-                                                          text=self.guiStrings['longGameFolder'].label,
-                                                          variable=self.guiVars['longGameFolder'], onvalue=1,
-                                                          offvalue=0)
-        wckToolTips.register(self.longGameFolderCheckButton, self.guiStrings['longGameFolder'].help)
-        self.longGameFolderCheckButton.grid(column=4, row=0, sticky="", pady=5)
-
-        self.guiVars['preExtractGames'] = Tk.IntVar()
-        self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
-        self.preExtractGamesCheckButton = Tk.Checkbutton(self.collectionFrame,
-                                                         text=self.guiStrings['preExtractGames'].label,
-                                                         variable=self.guiVars['preExtractGames'], onvalue=1,
-                                                         offvalue=0)
-        wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
-        self.preExtractGamesCheckButton.grid(column=5, row=0, sticky="W", pady=5)
-
-        self.guiVars['dosboxPureZip'] = Tk.IntVar()
-        self.guiVars['dosboxPureZip'].set(self.configuration['dosboxPureZip'])
-        self.dosboxPureZipGamesCheckButton = Tk.Checkbutton(self.collectionFrame,
-                                                         text=self.guiStrings['dosboxPureZip'].label,
-                                                         variable=self.guiVars['dosboxPureZip'], onvalue=1,
-                                                         offvalue=0)
-        wckToolTips.register(self.dosboxPureZipGamesCheckButton, self.guiStrings['dosboxPureZip'].help)
-        self.dosboxPureZipGamesCheckButton.grid(column=6, row=0, sticky="W", pady=5)
-
-        ttk.Separator(self.configurationFrame, orient=Tk.HORIZONTAL).grid(column=0, row=2, padx=5, pady=0,
-                                                                          sticky="EW")
+        # 'ConverterSettings' separator frame
+        self.converterSeparatorFrame = Tk.Frame(self.configurationFrame)
+        self.converterSeparatorFrame.grid(column=0, row=2, padx=5, sticky="EW")
+        self.converterSeparatorFrame.columnconfigure(0, weight=2)
+        self.converterSeparatorFrame.columnconfigure(1, weight=1)
+        self.converterSeparatorFrame.columnconfigure(2, weight=100)
+        ttk.Separator(self.converterSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
+        converterSeparatorLabel = Tk.Label(self.converterSeparatorFrame, text=self.guiStrings['converterSettings'].label)
+        wckToolTips.register(converterSeparatorLabel, self.guiStrings['converterSettings'].help)
+        converterSeparatorLabel.grid(column=1, row=0)
+        ttk.Separator(self.converterSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0,
+                                                                               sticky="EW")
 
         # Conversion parameters
         self.conversionFrame = Tk.Frame(self.configurationFrame)
         self.conversionFrame.grid(column=0, row=3, padx=5, sticky="EW")
         self.conversionFrame.columnconfigure(0, weight=1)
 
-        self.genericConversionFrame = Tk.Frame(self.conversionFrame)
-        self.genericConversionFrame.grid(column=0, row=0, sticky="EW")
+        self.converterSettingsFrame = Tk.Frame(self.conversionFrame)
+        self.converterSettingsFrame.grid(column=0, row=0, sticky="EW")
+
+        self.guiVars['downloadOnDemand'] = Tk.IntVar()
+        self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
+        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+                                                          text=self.guiStrings['downloadOnDemand'].label,
+                                                          variable=self.guiVars['downloadOnDemand'], onvalue=1,
+                                                          offvalue=0)
+        wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
+        self.downloadOnDemandCheckButton.grid(column=1, row=0, sticky="E", pady=5)
+
+        self.guiVars['longGameFolder'] = Tk.IntVar()
+        self.guiVars['longGameFolder'].set(self.configuration['longGameFolder'])
+        self.longGameFolderCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+                                                        text=self.guiStrings['longGameFolder'].label,
+                                                        variable=self.guiVars['longGameFolder'], onvalue=1,
+                                                        offvalue=0)
+        wckToolTips.register(self.longGameFolderCheckButton, self.guiStrings['longGameFolder'].help)
+        self.longGameFolderCheckButton.grid(column=2, row=0, sticky="", pady=5)
+
+        self.guiVars['preExtractGames'] = Tk.IntVar()
+        self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
+        self.preExtractGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+                                                         text=self.guiStrings['preExtractGames'].label,
+                                                         variable=self.guiVars['preExtractGames'], onvalue=1,
+                                                         offvalue=0)
+        wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
+        self.preExtractGamesCheckButton.grid(column=3, row=0, sticky="W", pady=5)
+
+        self.guiVars['dosboxPureZip'] = Tk.IntVar()
+        self.guiVars['dosboxPureZip'].set(self.configuration['dosboxPureZip'])
+        self.dosboxPureZipGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+                                                            text=self.guiStrings['dosboxPureZip'].label,
+                                                            variable=self.guiVars['dosboxPureZip'], onvalue=1,
+                                                            offvalue=0)
+        wckToolTips.register(self.dosboxPureZipGamesCheckButton, self.guiStrings['dosboxPureZip'].help)
+        self.dosboxPureZipGamesCheckButton.grid(column=4, row=0, sticky="W", pady=5)
+
+    def __drawBasicConfigurationFrame__(self):
+        # 'Dosbox Basic Settings' separator Frame
+        self.dosboxBasicSeparatorFrame = Tk.Frame(self.conversionFrame)
+        self.dosboxBasicSeparatorFrame.grid(column=0, row=1, sticky="EW")
+        self.dosboxBasicSeparatorFrame.columnconfigure(0, weight=2)
+        self.dosboxBasicSeparatorFrame.columnconfigure(1, weight=1)
+        self.dosboxBasicSeparatorFrame.columnconfigure(2, weight=100)
+        ttk.Separator(self.dosboxBasicSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
+        converterSeparatorLabel = Tk.Label(self.dosboxBasicSeparatorFrame,
+                                           text=self.guiStrings['dosboxBasicSettings'].label)
+        wckToolTips.register(converterSeparatorLabel, self.guiStrings['dosboxBasicSettings'].help)
+        converterSeparatorLabel.grid(column=1, row=0)
+        ttk.Separator(self.dosboxBasicSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0, sticky="EW")
+
+        # Dosbox Basic Settings parameters
+        self.basicConversionFrame = Tk.Frame(self.conversionFrame)
+        self.basicConversionFrame.grid(column=0, row=2, sticky="EW")
+        self.basicConversionFrame.columnconfigure(2, weight=1)
 
         self.guiVars['debugMode'] = Tk.IntVar()
         self.guiVars['debugMode'].set(self.configuration['debugMode'])
-        self.debugModeCheckButton = Tk.Checkbutton(self.genericConversionFrame,
+        self.debugModeCheckButton = Tk.Checkbutton(self.basicConversionFrame,
                                                    text=self.guiStrings['debugMode'].label,
                                                    variable=self.guiVars['debugMode'], onvalue=1,
                                                    offvalue=0)
         wckToolTips.register(self.debugModeCheckButton, self.guiStrings['debugMode'].help)
         self.debugModeCheckButton.grid(column=0, row=0, sticky="W", pady=5)
 
-        self.guiVars['genreSubFolders'] = Tk.IntVar()
-        self.guiVars['genreSubFolders'].set(self.configuration['genreSubFolders'])
-        self.useGenreSubFolderCheckButton = Tk.Checkbutton(self.genericConversionFrame,
-                                                           text=self.guiStrings['genreSubFolders'].label,
-                                                           variable=self.guiVars['genreSubFolders'], onvalue=1,
-                                                           offvalue=0)
-        wckToolTips.register(self.useGenreSubFolderCheckButton, self.guiStrings['genreSubFolders'].help)
-        self.useGenreSubFolderCheckButton.grid(column=1, row=0, sticky="W", pady=5, padx=5)
-
         self.guiVars['vsyncCfg'] = Tk.IntVar()
         self.guiVars['vsyncCfg'].set(self.configuration['vsyncCfg'])
-        self.vsyncCfgCheckButton = Tk.Checkbutton(self.genericConversionFrame,
+        self.vsyncCfgCheckButton = Tk.Checkbutton(self.basicConversionFrame,
                                                   text=self.guiStrings['vsyncCfg'].label,
                                                   variable=self.guiVars['vsyncCfg'], onvalue=1,
                                                   offvalue=0)
         wckToolTips.register(self.vsyncCfgCheckButton, self.guiStrings['vsyncCfg'].help)
-        self.vsyncCfgCheckButton.grid(column=4, row=0, sticky="W")
+        self.vsyncCfgCheckButton.grid(column=1, row=0, sticky="W")
+
+        # empty frame
+        Tk.Frame(self.conversionFrame).grid(column=2, row=1, sticky="EW")
+
+        self.mapperLabel = Tk.Label(self.basicConversionFrame, text=self.guiStrings['mapper'].label)
+        wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
+        self.mapperLabel.grid(column=3, row=0, sticky="E", pady=5)
+        self.guiVars['mapper'] = Tk.StringVar()
+        self.guiVars['mapper'].set(self.configuration['mapper'])
+        self.mapperComboBox = ttk.Combobox(self.basicConversionFrame, state="readonly",
+                                           textvariable=self.guiVars['mapper'])
+        self.mapperComboBox.grid(column=4, row=0, sticky="E", pady=5, padx=5)
+        self.mapperValues = util.mappers.copy()
+        self.mapperComboBox['values'] = self.mapperValues
+
+        self.guiVars['mapSticks'] = Tk.IntVar()
+        self.guiVars['mapSticks'].set(self.configuration['mapSticks'])
+        self.mapSticksCheckButton = Tk.Checkbutton(self.basicConversionFrame, text=self.guiStrings['mapSticks'].label,
+                                                   variable=self.guiVars['mapSticks'], onvalue=1, offvalue=0)
+        wckToolTips.register(self.mapSticksCheckButton, self.guiStrings['mapSticks'].help)
+        self.mapSticksCheckButton.grid(column=5, row=0, sticky="W")
+
+        self.guiVars['useKeyb2Joypad'] = Tk.IntVar()
+        self.guiVars['useKeyb2Joypad'].set(self.configuration['useKeyb2Joypad'])
+        self.useKeyb2JoypadCheckButton = Tk.Checkbutton(self.basicConversionFrame,
+                                                        text=self.guiStrings['useKeyb2Joypad'].label,
+                                                        variable=self.guiVars['useKeyb2Joypad'], onvalue=1, offvalue=0)
+        wckToolTips.register(self.useKeyb2JoypadCheckButton, self.guiStrings['useKeyb2Joypad'].help)
+        self.useKeyb2JoypadCheckButton.grid(column=6, row=0, sticky="W", padx=5)
 
     def __drawExpertConfigurationFrame__(self):
-        self.expertConversionFrame = Tk.Frame(self.conversionFrame)
-        self.expertConversionFrame.grid(column=0, row=1, sticky="EW")
+        # 'DosboxExpertSettings' separator frame
+        self.dosboxExpertSeparatorFrame = Tk.Frame(self.conversionFrame)
+        self.dosboxExpertSeparatorFrame.grid(column=0, row=3, sticky="EW")
+        self.dosboxExpertSeparatorFrame.columnconfigure(0, weight=2)
+        self.dosboxExpertSeparatorFrame.columnconfigure(1, weight=1)
+        self.dosboxExpertSeparatorFrame.columnconfigure(2, weight=100)
+        ttk.Separator(self.dosboxExpertSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
+        converterSeparatorLabel = Tk.Label(self.dosboxExpertSeparatorFrame,
+                                           text=self.guiStrings['dosboxExpertSettings'].label)
+        wckToolTips.register(converterSeparatorLabel, self.guiStrings['dosboxExpertSettings'].help)
+        converterSeparatorLabel.grid(column=1, row=0)
+        ttk.Separator(self.dosboxExpertSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0, sticky="EW")
+
+        self.expertConversionFirstLineFrame = Tk.Frame(self.conversionFrame)
+        self.expertConversionFirstLineFrame.grid(column=0, row=4, sticky="EW")
 
         self.guiVars['expertMode'] = Tk.IntVar()
         self.guiVars['expertMode'].set(self.configuration['expertMode'])
-        self.expertModeCheckButton = Tk.Checkbutton(self.expertConversionFrame,
+        self.expertModeCheckButton = Tk.Checkbutton(self.expertConversionFirstLineFrame,
                                                     text=self.guiStrings['expertMode'].label,
                                                     variable=self.guiVars['expertMode'], onvalue=1,
                                                     offvalue=0, command=self.__checkExpertMode__)
         wckToolTips.register(self.expertModeCheckButton, self.guiStrings['expertMode'].help)
         self.expertModeCheckButton.grid(column=0, row=0, sticky="W")
 
-        label = Tk.Label(self.expertConversionFrame, text=self.guiStrings['mountPrefix'].label)
+        label = Tk.Label(self.expertConversionFirstLineFrame, text=self.guiStrings['mountPrefix'].label)
         wckToolTips.register(label, self.guiStrings['mountPrefix'].help)
         label.grid(column=1, row=0, padx=5, sticky="W")
         self.guiVars['mountPrefix'] = Tk.StringVar()
         self.guiVars['mountPrefix'].set(self.configuration['mountPrefix'])
-        self.mountPrefixEntry = Tk.Entry(self.expertConversionFrame, textvariable=self.guiVars['mountPrefix'], width=51)
+        self.mountPrefixEntry = Tk.Entry(self.expertConversionFirstLineFrame, textvariable=self.guiVars['mountPrefix'], width=51)
         self.mountPrefixEntry.grid(column=2, row=0, padx=5, sticky="W")
-        self.genericConversionFrame.columnconfigure(4, weight=1)
+        self.converterSettingsFrame.columnconfigure(4, weight=1)
 
-        label = Tk.Label(self.expertConversionFrame, text=self.guiStrings['fullresolutionCfg'].label)
+        self.expertConversionSecondLineFrame = Tk.Frame(self.conversionFrame)
+        self.expertConversionSecondLineFrame.grid(column=0, row=5, sticky="EW")
+
+        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['fullresolutionCfg'].label)
         wckToolTips.register(label, self.guiStrings['fullresolutionCfg'].help)
-        label.grid(column=3, row=0, sticky="W")
+        label.grid(column=0, row=0, sticky="W")
         self.guiVars['fullresolutionCfg'] = Tk.StringVar()
         self.guiVars['fullresolutionCfg'].set(self.configuration['fullresolutionCfg'])
-        self.fullResolutionCfgEntry = Tk.Entry(self.expertConversionFrame,
+        self.fullResolutionCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame,
                                                textvariable=self.guiVars['fullresolutionCfg'], width=11)
-        self.fullResolutionCfgEntry.grid(column=4, row=0, padx=5, sticky="W")
+        self.fullResolutionCfgEntry.grid(column=1, row=0, padx=5, sticky="W")
 
-        label = Tk.Label(self.expertConversionFrame, text=self.guiStrings['rendererCfg'].label)
+        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['rendererCfg'].label)
         wckToolTips.register(label, self.guiStrings['rendererCfg'].help)
-        label.grid(column=5, row=0, sticky="W")
+        label.grid(column=2, row=0, sticky="W")
         self.guiVars['rendererCfg'] = Tk.StringVar()
         self.guiVars['rendererCfg'].set(self.configuration['rendererCfg'])
-        self.rendererCfgEntry = Tk.Entry(self.expertConversionFrame, textvariable=self.guiVars['rendererCfg'], width=11)
-        self.rendererCfgEntry.grid(column=6, row=0, padx=5, sticky="WE")
+        self.rendererCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['rendererCfg'], width=11)
+        self.rendererCfgEntry.grid(column=3, row=0, padx=5, sticky="W")
 
-        # frame = Tk.Frame(self.conversionSecondLineFrame, width=20)
-        # frame.grid(column=9, row=0, sticky="EW")
-
-        label = Tk.Label(self.expertConversionFrame, text=self.guiStrings['outputCfg'].label)
+        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['outputCfg'].label)
         wckToolTips.register(label, self.guiStrings['outputCfg'].help)
-        label.grid(column=7, row=0, padx=5, sticky="W")
+        label.grid(column=4, row=0, padx=5, sticky="W")
         self.guiVars['outputCfg'] = Tk.StringVar()
         self.guiVars['outputCfg'].set(self.configuration['outputCfg'])
-        self.outputCfgEntry = Tk.Entry(self.expertConversionFrame, textvariable=self.guiVars['outputCfg'], width=11)
-        self.outputCfgEntry.grid(column=8, row=0, sticky="W")
+        self.outputCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['outputCfg'], width=11)
+        self.outputCfgEntry.grid(column=5, row=0, sticky="W")
 
-    def __drawMapperConfigurationFrame__(self):
-        ttk.Separator(self.conversionFrame, orient=Tk.HORIZONTAL).grid(column=0, row=2, pady=5,
-                                                                          sticky="EW")
-        self.mapperConversionFrame = Tk.Frame(self.conversionFrame)
-        self.mapperConversionFrame.grid(column=0, row=3, sticky="EW")
-        # TODO add better mapper handling, based on chosen conversion, with warning messages and all
-        self.mapperLabel = Tk.Label(self.mapperConversionFrame, text=self.guiStrings['mapper'].label)
-        wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
-        self.mapperLabel.grid(column=1, row=1, sticky="E", pady=5)
-        self.guiVars['mapper'] = Tk.StringVar()
-        self.guiVars['mapper'].set(self.configuration['mapper'])
-        self.mapperComboBox = ttk.Combobox(self.mapperConversionFrame, state="readonly",
-                                           textvariable=self.guiVars['mapper'])
-        self.mapperComboBox.grid(column=2, row=1, sticky="E", pady=5, padx=5)
-        self.mapperValues = util.mappers.copy()
-        self.mapperComboBox['values'] = self.mapperValues
-
-        self.guiVars['mapSticks'] = Tk.IntVar()
-        self.guiVars['mapSticks'].set(self.configuration['mapSticks'])
-        self.mapSticksCheckButton = Tk.Checkbutton(self.mapperConversionFrame, text=self.guiStrings['mapSticks'].label,
-                                                   variable=self.guiVars['mapSticks'], onvalue=1, offvalue=0)
-        wckToolTips.register(self.mapSticksCheckButton, self.guiStrings['mapSticks'].help)
-        self.mapSticksCheckButton.grid(column=3, row=1, sticky="W")
-
-        self.guiVars['useKeyb2Joypad'] = Tk.IntVar()
-        self.guiVars['useKeyb2Joypad'].set(self.configuration['useKeyb2Joypad'])
-        self.useKeyb2JoypadCheckButton = Tk.Checkbutton(self.mapperConversionFrame,
-                                                        text=self.guiStrings['useKeyb2Joypad'].label,
-                                                        variable=self.guiVars['useKeyb2Joypad'], onvalue=1, offvalue=0)
-        wckToolTips.register(self.useKeyb2JoypadCheckButton, self.guiStrings['useKeyb2Joypad'].help)
-        self.useKeyb2JoypadCheckButton.grid(column=4, row=1, sticky="W")
+        # empty frame
+        Tk.Frame(self.conversionFrame).grid(column=7, row=0, sticky="EW")
 
     # Listener for Expert Mode Check
     def __checkExpertMode__(self):
@@ -795,32 +845,37 @@ class ExoGUI:
         mainButtons = [self.verifyButton, self.saveButton, self.proceedButton]
         entryComponents = [self.collectionEntry, self.outputEntry, self.selectCollectionDirButton,
                            self.selectOutputDirButton]
-        expertComponents = [self.mountPrefixEntry, self.fullResolutionCfgEntry, self.rendererCfgEntry,
-                            self.outputCfgEntry]
+        exoConversionComponents = [self.preExtractGamesCheckButton, self.dosboxPureZipGamesCheckButton,
+                                   self.downloadOnDemandCheckButton, self.longGameFolderCheckButton]
+        dosboxBasicComponents = [self.vsyncCfgCheckButton, self.debugModeCheckButton,
+                                 self.mapperComboBox, self.mapSticksCheckButton, self.useKeyb2JoypadCheckButton]
+        dosboxExpertComponents = [self.mountPrefixEntry, self.fullResolutionCfgEntry, self.rendererCfgEntry, self.outputCfgEntry]
         otherComponents = [self.exoGamesListbox, self.selectedGamesListbox, self.selectGameButton,
                            self.deselectGameButton, self.selectAllGamesButton, self.unselectAllGamesButton,
-                           self.filterEntry,
-                           self.conversionTypeComboBox,
-                           self.useGenreSubFolderCheckButton,
-                           self.mapperComboBox, self.vsyncCfgCheckButton, self.debugModeCheckButton,
-                           self.expertModeCheckButton,
                            self.loadCustomButton, self.saveCustomButton, self.selectionPathEntry,
                            self.selectSelectionPathButton,
-                           self.preExtractGamesCheckButton, self.dosboxPureZipGamesCheckButton, self.downloadOnDemandCheckButton, self.longGameFolderCheckButton]
+                           self.filterEntry,
+                           self.expertModeCheckButton,
+                           self.conversionTypeComboBox, self.useGenreSubFolderCheckButton]
 
         if clickedProcess or collectionVersion == 'None':
             [self.__setComponentState__(c, 'disabled' if clickedProcess else 'normal') for c in entryComponents]
-            [self.__setComponentState__(c, 'disabled') for c in mainButtons + otherComponents + expertComponents]
+            [self.__setComponentState__(c, 'disabled') for c in mainButtons + exoConversionComponents
+             + dosboxBasicComponents + dosboxExpertComponents + otherComponents]
         else:
-            [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
-             expertComponents]
-            [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
-            self.__setComponentState__(self.preExtractGamesCheckButton,
-                                       'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
-            self.__setComponentState__(self.dosboxPureZipGamesCheckButton,
-                                       'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
-            self.__setComponentState__(self.longGameFolderCheckButton,
-                                       'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
+            if collectionVersion != util.C64DREAMS:
+                [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
+                 dosboxExpertComponents]
+                [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
+                self.__setComponentState__(self.preExtractGamesCheckButton,
+                                           'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+                self.__setComponentState__(self.dosboxPureZipGamesCheckButton,
+                                           'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
+                self.__setComponentState__(self.longGameFolderCheckButton,
+                                           'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
+            else:
+                [self.__setComponentState__(c, 'disabled') for c in exoConversionComponents + dosboxBasicComponents
+                 + dosboxExpertComponents + [self.expertModeCheckButton]]
 
     def postProcess(self):
         self.__unselectAll__()

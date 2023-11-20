@@ -35,10 +35,11 @@ class GameGenerator:
 
     # Checks if collection is win3x or dos
     def isWin3x(self):
+        return True  # Due to too many bugs, always generate at root
         # Handle this DOS games like win3x games: files must be at C: root for them to work
-        cRootForcedGames = ['Screamer', 'SWTieCD', 'CyberMag', 'ActionSo', 'scomet', 'dw1', 'RAVAGER', 'EWJ2', 'MDK',
-                            'lordorm2', 'kknd', 'BURGER', 'pice', 'RedBaron', 'rzork', 'samnmax', 'WormsRe', 'Tyrian']
-        return self.game in cRootForcedGames or util.isWin3x(self.collectionVersion)
+        # cRootForcedGames = ['Screamer', 'SWTieCD', 'CyberMag', 'ActionSo', 'scomet', 'dw1', 'RAVAGER', 'EWJ2', 'MDK',
+        #                     'lordorm2', 'kknd', 'BURGER', 'pice', 'RedBaron', 'rzork', 'samnmax', 'WormsRe', 'Tyrian', '7thguest']
+        # return self.game in cRootForcedGames or util.isWin3x(self.collectionVersion)
 
     # Returns local parent output dir of the generated game
     def getLocalParentOutputDir(self):
