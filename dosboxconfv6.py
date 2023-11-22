@@ -21,8 +21,10 @@ def loadDosboxConf(dosboxFile, dosboxConf):
             cleanLine = line.rstrip(' \n\r')
             if cleanLine != '':
                 keyValue = cleanLine.split('=')
-                dosboxConfCopy[currentCategory][keyValue[0].rstrip(' \n\r').strip(' \n\r')] \
-                    = keyValue[1].rstrip(' \n\r').strip(' \n\r')
+                value = keyValue[1].rstrip(' \n\r').strip(' \n\r')
+                if value != '':
+                    dosboxConfCopy[currentCategory][keyValue[0].rstrip(' \n\r').strip(' \n\r')] \
+                        = keyValue[1].rstrip(' \n\r').strip(' \n\r')
 
     dosboxConfFile.close()
     return dosboxConfCopy

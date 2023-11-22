@@ -63,7 +63,8 @@ class ConfConverter:
             dosboxConf['[sdl]']['output'] = self.__getExpertParam__("outputCfg", "texture")
         dosboxConf['[sdl]']['renderer'] = self.__getExpertParam__("rendererCfg", "auto")
         dosboxConf['[sdl]']['vsync'] = 'true' if gGator.conversionConf['vsyncCfg'] else 'false'
-        dosboxConf['[sdl]']['mapperfile'] = 'mapper.map'
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'mapper.map':
+            dosboxConf['[sdl]']['mapperfile'] = 'mapper.map'
         dosboxConf['[render]']['aspect'] = 'true'
         dosboxConf['[joystick]']['buttonwrap'] = 'false'
         dosboxConf['[gus]']['ultradir'] = 'C:\\ULTRASND'
@@ -101,7 +102,7 @@ class ConfConverter:
                 retroDosboxCfg.write("aspect=true\n")
             elif cmdline.startswith("buttonwrap"):
                 retroDosboxCfg.write("buttonwrap=false\n")
-            elif cmdline.startswith("mapperfile"):
+            elif cmdline.startswith("mapperfile") and 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'mapper.map':
                 retroDosboxCfg.write("mapperfile=mapper.map\n")
             elif cmdline.startswith("ultradir"):
                 retroDosboxCfg.write(r"ultradir=C:\ULTRASND")
