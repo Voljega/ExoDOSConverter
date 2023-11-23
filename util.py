@@ -43,7 +43,7 @@ mappersBatocera = ['None', 'mapper.map', 'padto.keys']  # retrobat too
 mappersDefault = ['None', 'mapper.map']  # default choice except MiSTeR
 mappersRecalbox = ['None', 'mapper.map', 'p2k']
 
-theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
+theEyeUrl = 'https://the-eye.eu/public/Games/eXo/eXoDOS_v6r2/eXo/eXoDOS/'
 
 misterCleanNameToGameDir = dict()
 
