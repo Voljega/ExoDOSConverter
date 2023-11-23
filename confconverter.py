@@ -150,7 +150,7 @@ class ConfConverter:
                     whereWeAt.append('game')
             # remove cd to gamedir as it is already done, but keep others cd
             elif cmdline.lower().startswith("cd "):
-                path = self.commandHandler.reducePath(cmdline.rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '))
+                path = self.commandHandler.reducePathExoPart(cmdline.lstrip(' ').rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '))
                 if path.lower() == gGator.game.lower() and not os.path.exists(
                         os.path.join(gGator.getLocalGameDataOutputDir(), path)):
                     self.logger.log("    cd command: '%s' -> path is game name and no existing subpath, removed"
@@ -181,22 +181,29 @@ class ConfConverter:
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
                 if gGator.game in lists.gamesWithRunBatHandling:
                     self.__handleRunBat__(gGator)
-                self.__handlePotentialSubFile__(cmdline, gGator)
+                self.__handlePotentialSubFile__(cmdline, gGator, [])
                 retroDosboxBat.write(cmdline)
             else:
-                self.__handlePotentialSubFile__(cmdline, gGator)
+                self.__handlePotentialSubFile__(cmdline, gGator, [])
                 retroDosboxBat.write(cmdline)
 
     # Handle potential sub files and problems in it
-    def __handlePotentialSubFile__(self, subPath, gGator, handledSubFiles=[]):
+    def __handlePotentialSubFile__(self, subPath, gGator, handledSubFiles):
+        # Ignore charset unwritable by python
+        if gGator.game in ['747400', 'Frightma', 'FreakOut', 'ghenkhan', 'Spheroid', 'TORNADO']:
+            return
+
         subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
         subBat = os.path.join(gGator.getLocalGameDataOutputDir(), subPath.rstrip(' \n\r') + '.bat')
+
         if os.path.exists(subBat) and not os.path.isdir(subBat) and subBat.lower() not in handledSubFiles:
-            # Handle old DOS file with cp437 encoding (falsely detected as TIS-620, EUC-KR
+            # Handle old DOS file with cp437 encoding (falsely detected as TIS-620, EUC-KR)
             subBatRaw = open(subBat, 'rb')
             rawdata = subBatRaw.read()
             result = chardet.detect(rawdata)
-            encoding = 'utf-8' if result['encoding'] not in ['TIS-620', 'EUC-KR'] else 'cp437'
+            encodingDic = {'TIS-620': 'cp437', 'EUC-KR': 'cp437', 'CP949': 'cp949'}
+            # TODO Survey this fix is ok ...
+            encoding = result['encoding'] if result['encoding'] not in encodingDic else encodingDic[result['encoding']]
             subBatRaw.close()
             self.logger.log('    Handle Bat File (enc:%s->%s) %s' % (result['encoding'],encoding, subBat), self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
@@ -233,23 +240,25 @@ class ConfConverter:
             # Clone run.bat and only modify imgmount lines
             # Add some hardcoded lines which are impossible to handle
             handled = {
-                'imgmount d ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" -t cdrom \n':
-                    'imgmount d ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" ".\\cd\\cover3.cue" -t cdrom',
-                'imgmount d ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" -t cdrom \n':
-                    'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.iso" ".\\cd\\comma1.iso" -t cdrom',
-                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal2.iso" ".\\cd\\redal1.iso" ".\\cd\\redal3.cue" ".\\cd\\redal4.cue" -t cdrom',
-                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal4.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal3.cue" -t cdrom',
-                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert CD1.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert CD2.iso" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n':
-                    'imgmount d ".\\cd\\redal3.cue" ".\\cd\\redal1.iso" ".\\cd\\redal2.iso" ".\\cd\\redal4.cue" -t cdrom',
-                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom \n': 'imgmount d .\\cd\\redal4.cue -t cdrom',
-                'imgmount -u d\n': '\n'
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Soviet Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Allied Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom':
+                'imgmount d ".\\cd\\comma2.cue" ".\\cd\\comma1.cue" ".\\cd\\redal3.cue" ".\\eXoDOS\\comconra\\cd\\redal4.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Allied Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Soviet Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" -t cdrom':
+                'imgmount d ".\\cd\\redal4.cue" ".\\cd\\comma1.cue" ".\\cd\\comma2.cue" ".\\cd\\redal3.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Counterstrike CD3.cue" ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Allied Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Command & Conquer - Red Alert (USA) (Soviet Disc) (Rerelease) (19991021).cue" ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom':
+                'imgmount d ".\\cd\\redal3.cue" ".\\cd\\comma1.cue" ".\\cd\\comma2.cue" ".\\cd\\redal4.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comconra\\cd\\Red Alert Aftermath CD4.cue" -t cdrom': 'imgmount d ".\\cd\\redal4.cue" -t cdrom',
+                'imgmount -u d\n': '\n',
+                'imgmount d ".\\eXoDOS\\Blood\\cd\\bloodcd1.cue" -t cdrom': 'imgmount d ".\\cd\\BLOODCD1.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" -t cdrom':
+                'imgmount d ".\\cd\\comma2.cue" ".\\cd\\comma1.cue" ".\\cd\\cover3.cue" -t cdrom',
+                'imgmount d ".\\eXoDOS\\comcon\\cd\\Covert Operations.cue" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-2.iso" ".\\eXoDOS\\comcon\\cd\\Command & Conquer CD-1.iso" -t cdrom':
+                    'imgmount d ".\\cd\\cover3.cue" ".\\cd\\comma2.cue" ".\\cd\\comma1.cue" -t cdrom',
             }
             for cmdline in runFile.readlines():
                 # always remove @
                 cmdline = cmdline.lstrip('@ ')
                 if cmdline.lower().startswith("imgmount "):
+                    cmdline = cmdline.rstrip(' \n\r')
                     if cmdline not in handled:
                         fixedCommand, letter = self.commandHandler.handleImgmount(cmdline, True)
                         runFileClone.write('imgmount -u ' + letter + '\n')  # prevents dosbox-pure automount

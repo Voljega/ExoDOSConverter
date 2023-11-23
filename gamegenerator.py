@@ -77,7 +77,6 @@ class GameGenerator:
             os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game,
                          "dosbox.conf"),
             os.path.join(self.getLocalGameDataOutputDir(), "dosbox.conf"))
-        # TODO warn about exception conf (do something later)
         if os.path.exists(os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game, "exception.bat")):
             self.logger.log('  <WARNING> This game has specific exception launch configuration', self.logger.WARNING)
         # Create blank file with full game name        
