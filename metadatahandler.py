@@ -148,7 +148,7 @@ class MetadataHandler:
 
         year = metadata.year + "0101T000000" if metadata.year is not None else ''
 
-        extension = '.zip' if (conversionType == util.batocera or conversionType == util.retrobat) and rezipped else '.pc'
+        extension = '.zip' if (conversionType == util.batocera or conversionType == util.retrobat or conversionType == util.recalbox) and rezipped else '.pc'
 
         if conversionType == util.retropie:
             gameFilePath = nameOverride if nameOverride is not None else util.getCleanGameID(metadata, '.conf')

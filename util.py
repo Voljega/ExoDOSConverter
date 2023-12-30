@@ -36,11 +36,27 @@ exoCollectionsDirs = {
     C64DREAMS: {'rootDir': 'C64 Dreams', 'gamesDir': 'Games', 'gamesConfDir': None, 'metadataId': 'Games', 'picId': 'C64 Dreams'}
 }
 
-mappers = ['Yes', 'No']
+# TODO change
+# need to check call to self.conversionConf['mapper'] et util.mappers everywhere in code
+mappersMiSTeR = ['None']
+mappersBatocera = ['None', 'mapper.map', 'padto.keys']  # retrobat too
+mappersDefault = ['None', 'mapper.map']  # default choice except MiSTeR
+mappersRecalbox = ['None', 'mapper.map', 'p2k']
 
-theEyeUrl = 'http://the-eye.eu/public/Games/eXo/eXoDOS_v5/eXo/eXoDOS/'
+theEyeUrl = 'https://the-eye.eu/public/Games/eXo/eXoDOS_v6r2/eXo/eXoDOS/'
 
 misterCleanNameToGameDir = dict()
+
+
+def getMapperValues(conversionType):
+    if conversionType == mister:
+        return mappersMiSTeR
+    elif conversionType == recalbox:
+        return mappersRecalbox
+    elif conversionType in [batocera, retrobat]:
+        return mappersBatocera
+    else:
+        return mappersDefault
 
 
 def isWin3x(collectionVersion):

@@ -34,7 +34,7 @@ class ExoGUI:
 
         self.window = Tk.Tk()
         self.window.resizable(False, False)
-        self.window.geometry('+0+0')
+        self.window.geometry('+5+5')
         self.startFontSize = self.DEFAULT_FONT_SIZE
 
         if platform.system() == 'Windows':
@@ -286,15 +286,6 @@ class ExoGUI:
         wckToolTips.register(self.longGameFolderCheckButton, self.guiStrings['longGameFolder'].help)
         self.longGameFolderCheckButton.grid(column=2, row=0, sticky="", pady=5)
 
-        self.guiVars['preExtractGames'] = Tk.IntVar()
-        self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
-        self.preExtractGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
-                                                         text=self.guiStrings['preExtractGames'].label,
-                                                         variable=self.guiVars['preExtractGames'], onvalue=1,
-                                                         offvalue=0)
-        wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
-        self.preExtractGamesCheckButton.grid(column=3, row=0, sticky="W", pady=5)
-
         self.guiVars['dosboxPureZip'] = Tk.IntVar()
         self.guiVars['dosboxPureZip'].set(self.configuration['dosboxPureZip'])
         self.dosboxPureZipGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
@@ -302,7 +293,16 @@ class ExoGUI:
                                                             variable=self.guiVars['dosboxPureZip'], onvalue=1,
                                                             offvalue=0)
         wckToolTips.register(self.dosboxPureZipGamesCheckButton, self.guiStrings['dosboxPureZip'].help)
-        self.dosboxPureZipGamesCheckButton.grid(column=4, row=0, sticky="W", pady=5)
+        self.dosboxPureZipGamesCheckButton.grid(column=3, row=0, sticky="W", pady=5)
+
+        self.guiVars['preExtractGames'] = Tk.IntVar()
+        self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
+        self.preExtractGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+                                                         text=self.guiStrings['preExtractGames'].label,
+                                                         variable=self.guiVars['preExtractGames'], onvalue=1,
+                                                         offvalue=0)
+        wckToolTips.register(self.preExtractGamesCheckButton, self.guiStrings['preExtractGames'].help)
+        self.preExtractGamesCheckButton.grid(column=4, row=0, sticky="W", pady=5)
 
     def __drawBasicConfigurationFrame__(self):
         # 'Dosbox Basic Settings' separator Frame
@@ -347,12 +347,13 @@ class ExoGUI:
         self.mapperLabel = Tk.Label(self.basicConversionFrame, text=self.guiStrings['mapper'].label)
         wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
         self.mapperLabel.grid(column=3, row=0, sticky="E", pady=5)
+        self.mapperValues = util.getMapperValues(self.guiVars['conversionType'].get()).copy()
         self.guiVars['mapper'] = Tk.StringVar()
-        self.guiVars['mapper'].set(self.configuration['mapper'])
+        selectedMapperValue = self.configuration['mapper'] if self.configuration['mapper'] in self.mapperValues else 'None'
+        self.guiVars['mapper'].set(selectedMapperValue)
         self.mapperComboBox = ttk.Combobox(self.basicConversionFrame, state="readonly",
                                            textvariable=self.guiVars['mapper'])
         self.mapperComboBox.grid(column=4, row=0, sticky="E", pady=5, padx=5)
-        self.mapperValues = util.mappers.copy()
         self.mapperComboBox['values'] = self.mapperValues
 
         self.guiVars['mapSticks'] = Tk.IntVar()
@@ -790,7 +791,6 @@ class ExoGUI:
         self.logger.log('\n<--------- Starting ' + self.setKey + ' Process --------->')
         collectionDir = self.guiVars['collectionDir'].get()
         conversionType = self.guiVars['conversionType'].get()
-        useLongFolderNames = True if self.guiVars['longGameFolder'].get() == 1 else False
         useGenreSubFolders = True if self.guiVars['genreSubFolders'].get() == 1 else False
         outputDir = self.guiVars['outputDir'].get()
         # Configuration parameters
@@ -805,7 +805,13 @@ class ExoGUI:
         conversionConf['outputCfg'] = self.guiVars['outputCfg'].get()
         conversionConf['vsyncCfg'] = True if self.guiVars['vsyncCfg'].get() == 1 else False
         conversionConf['preExtractGames'] = True if self.guiVars['preExtractGames'].get() == 1 else False
-        conversionConf['dosboxPureZip'] = True if self.guiVars['dosboxPureZip'].get() == 1 else False
+        if conversionType in [util.retrobat, util.batocera, util.recalbox]:
+            useLongFolderNames = True if self.guiVars['longGameFolder'].get() == 1 else False
+            conversionConf['dosboxPureZip'] = True if self.guiVars['dosboxPureZip'].get() == 1 else False
+        else:
+            useLongFolderNames = False
+            conversionConf['dosboxPureZip'] = False
+
         conversionConf['downloadOnDemand'] = True if self.guiVars['downloadOnDemand'].get() == 1 else False
         conversionConf['mapper'] = self.guiVars['mapper'].get()
 
@@ -864,18 +870,32 @@ class ExoGUI:
              + dosboxBasicComponents + dosboxExpertComponents + otherComponents]
         else:
             if collectionVersion != util.C64DREAMS:
-                [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 else 'normal') for c in
-                 dosboxExpertComponents]
+                [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 or self.guiVars['conversionType'].get() == util.mister else 'normal')
+                 for c in dosboxExpertComponents]
                 [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
                 self.__setComponentState__(self.preExtractGamesCheckButton,
                                            'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
+                [self.__setComponentState__(c, 'disabled' if self.guiVars['conversionType'].get() == util.mister else 'normal') for c in
+                 dosboxBasicComponents + [self.expertModeCheckButton]]
                 self.__setComponentState__(self.dosboxPureZipGamesCheckButton,
-                                           'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
+                                           'normal' if self.guiVars['conversionType'].get() == util.batocera
+                                                       or self.guiVars['conversionType'].get() == util.retrobat
+                                                       or self.guiVars['conversionType'].get() == util.recalbox
+                                           else 'disabled')
                 self.__setComponentState__(self.longGameFolderCheckButton,
-                                           'normal' if self.guiVars['conversionType'].get() == util.batocera or self.guiVars['conversionType'].get() == util.retrobat else 'disabled')
+                                           'normal' if self.guiVars['conversionType'].get() == util.batocera
+                                                       or self.guiVars['conversionType'].get() == util.retrobat
+                                                       or self.guiVars['conversionType'].get() == util.recalbox
+                                           else 'disabled')
             else:
                 [self.__setComponentState__(c, 'disabled') for c in exoConversionComponents + dosboxBasicComponents
                  + dosboxExpertComponents + [self.expertModeCheckButton]]
+
+            # Handle Mapper values
+            self.mapperValues = util.getMapperValues(self.guiVars['conversionType'].get()).copy()
+            selectedMapperValue = self.guiVars['mapper'].get() if self.guiVars['mapper'].get() in self.mapperValues else 'None'
+            self.guiVars['mapper'].set(selectedMapperValue)
+            self.mapperComboBox['values'] = self.mapperValues
 
     def postProcess(self):
         self.__unselectAll__()

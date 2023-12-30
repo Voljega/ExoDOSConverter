@@ -77,7 +77,6 @@ class GameGenerator:
             os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game,
                          "dosbox.conf"),
             os.path.join(self.getLocalGameDataOutputDir(), "dosbox.conf"))
-        # TODO warn about exception conf (do something later)
         if os.path.exists(os.path.join(util.getCollectionGamesConfDir(self.exoCollectionDir, self.collectionVersion), self.game, "exception.bat")):
             self.logger.log('  <WARNING> This game has specific exception launch configuration', self.logger.WARNING)
         # Create blank file with full game name        
@@ -142,7 +141,7 @@ class GameGenerator:
             self.__postConversionForMister__()
         elif self.conversionType == util.recalbox:
             self.__postConversionForRecalbox__()
-        elif self.conversionType == util.batocera:
+        elif self.conversionType == util.batocera or self.conversionType == util.retrobat:
             self.__postConversionForBatocera__()
         elif self.conversionType == util.emuelec:
             self.__postConversionForEmuelec__()
@@ -174,7 +173,7 @@ class GameGenerator:
         shutil.copy2(
             os.path.join(emuElecDataDir, self.game, util.getCleanGameID(self.metadata, '.txt')),
             emuelecConfOutputDir)
-        if os.path.exists(os.path.join(emuElecDataDir, self.game, 'mapper.map')):
+        if os.path.exists(os.path.join(emuElecDataDir, self.game, 'mapper.map')) and 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'mapper.map':
             shutil.move(os.path.join(emuElecDataDir, self.game, 'mapper.map'), emuelecConfOutputDir)
         # modify dosbox-SDL2.conf to add mount c /storage/roms/pcdata/game at the beginning of autoexec.bat
         dosboxCfg = open(os.path.join(emuelecConfOutputDir, 'dosbox-SDL2.conf'), 'a')
@@ -197,7 +196,7 @@ class GameGenerator:
     # Post-conversion for Recalbox for a given game
     def __postConversionForRecalbox__(self):
         self.logger.log("  Recalbox post-conversion")
-        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'p2k':
             p2kTemplate = open(os.path.join(self.scriptDir, 'data', 'P2K.template.txt'), 'r')
             p2kFile = open(os.path.join(self.getLocalParentOutputDir(), self.game + '.pc.p2k.cfg'), 'w',
                            encoding='utf-8')
@@ -205,10 +204,12 @@ class GameGenerator:
                 p2kFile.write(line.replace('{GameID}', self.metadata.name))
             p2kFile.close()
             p2kTemplate.close()
+        if 'dosboxPureZip' in self.conversionConf and self.conversionConf['dosboxPureZip'] is True:
+            self.__postConversionDosboxPureZip()
 
     def __postConversionForBatocera__(self):
-        self.logger.log("  Batocera post-conversion")
-        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+        self.logger.log("  Batocera/Retrobat post-conversion")
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'padto.keys':
             Mapping(self.keyb2joypad.gamesConf, self.game, util.getCleanGameID(self.metadata, ''), self.getLocalGameOutputDir(),
                     self.conversionConf, self.collectionVersion, self.scriptDir, self.logger).mapForBatocera()
         if 'dosboxPureZip' in self.conversionConf and self.conversionConf['dosboxPureZip'] is True:
@@ -217,7 +218,6 @@ class GameGenerator:
     def __postConversionDosboxPureZip(self):
         self.logger.log("    ReZip game for dosbox-pure")
         # dosbox-pure full treatment
-        # TODO see if it's compatible with full name
         # combine dosbox.cfg and dosbox.bat into dosbox.conf
         dosboxcfgpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg')
         dosboxbatpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.bat')
@@ -236,14 +236,14 @@ class GameGenerator:
         os.remove(dosboxbatpath)
         # move padto.keys up
         gamename = '.'.join(os.path.splitext(self.gameDir)[:-1])
-        padtokeys = os.path.join(self.getLocalGameOutputDir(), 'padto.keys')
-        if os.path.exists(padtokeys):
-            shutil.move(padtokeys, os.path.join(self.getLocalParentOutputDir(), gamename + '.keys'))
+        if self.conversionType == util.batocera or self.conversionType == util.retrobat:
+            padtokeys = os.path.join(self.getLocalGameOutputDir(), 'padto.keys')
+            if os.path.exists(padtokeys):
+                shutil.move(padtokeys, os.path.join(self.getLocalParentOutputDir(), gamename + '.keys'))
         # TODO might have issues with empty directories
         shutil.make_archive(os.path.join(self.getLocalParentOutputDir(), gamename), 'zip',
                             self.getLocalGameOutputDir())
         shutil.rmtree(os.path.join(self.getLocalParentOutputDir(), self.gameDir))
-        # TODO modify gamelist.xml (do it before during generation)
         # handle issues with dosbox.conf handling option ...
         # handle padtokeys not taken into account / dosbox pure mapping not disabled through scroll lock
 
@@ -339,7 +339,7 @@ class GameGenerator:
             os.mkdir(dosboxBatPicPath)
         shutil.copy2(os.path.join(distPicPath, self.game + '.pc.png'),
                      os.path.join(dosboxBatPicPath, 'dosbox.png'))
-        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'Yes':
+        if 'mapper' in self.conversionConf and self.conversionConf['mapper'] == 'mapper.map':
             # Generate RG350 mapper
             mapper = open(os.path.join(self.getLocalGameOutputDir(), "mapper.map"), 'w')
             mapper.write('key_space "key 308"\n')
