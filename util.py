@@ -28,11 +28,15 @@ conversionTypes = [batocera, recalbox, retropie, retrobat, emuelec, simplemenu, 
 EXODOS = 'eXoDOS v6'
 EXOWIN3X = 'eXoWin3x v2'
 C64DREAMS = 'C64 Dreams'
-exoVersions = [EXODOS, EXOWIN3X, C64DREAMS]
+EXOAPPLEIIGS = 'eXoAppleIIGS'
+EXOSCUMMVM = 'eXoScummVM'
+exoVersions = [EXODOS, EXOWIN3X, EXOAPPLEIIGS, EXOSCUMMVM, C64DREAMS]
 
 exoCollectionsDirs = {
     EXODOS: {'rootDir': 'eXo', 'gamesDir': 'eXoDOS', 'gamesConfDir': '!dos', 'metadataId': 'MS-DOS', 'picId': 'MS-DOS'},
     EXOWIN3X: {'rootDir': 'eXo', 'gamesDir': 'eXoWin3x', 'gamesConfDir': '!win3x', 'metadataId': 'Windows 3x', 'picId': 'Windows 3x'},
+    EXOAPPLEIIGS: {'rootDir': 'eXo', 'gamesDir': 'eXoAppleIIGS', 'gamesConfDir': '!appleiigs', 'metadataId': 'Apple IIGS', 'picId': 'Apple IIGS'},
+    EXOSCUMMVM: {'rootDir': 'eXo', 'gamesDir': 'eXoScummVM', 'gamesConfDir': '!ScummVM', 'metadataId': 'ScummVM', 'picId': 'ScummVM'},
     C64DREAMS: {'rootDir': 'C64 Dreams', 'gamesDir': 'Games', 'gamesConfDir': None, 'metadataId': 'Games', 'picId': 'C64 Dreams'}
 }
 
@@ -299,10 +303,12 @@ def resize(imgPath):
 
 # Return full clean game name
 def getCleanGameID(metadata, ext):
-    cleanGameName = metadata.name.replace(':', ' -').replace('?', '').replace('!', '').replace('/', '-').replace('\\',
-                                                                                                                 '-').replace(
-        '*', '_').replace('í', 'i')
-    return cleanGameName + ' (' + str(metadata.year) + ')' + ext
+    exceptions = ['ostealth']
+    if metadata.dosname in exceptions:
+        return metadata.metadataname.replace(':', ' -').replace('?', '').replace('!', '').replace('/', '-').replace('\\','-').replace('*', '_').replace('í', 'i') + ext
+    else:
+        cleanGameName = metadata.name.replace(':', ' -').replace('?', '').replace('!', '').replace('/', '-').replace('\\','-').replace('*', '_').replace('í', 'i')
+        return cleanGameName + ' (' + str(metadata.year) + ')' + ext
 
 
 # Returns distrib roms directory prefix for mount command
@@ -337,6 +343,10 @@ def validCollectionPath(collectionPath):
         return EXODOS
     elif isCollectionPath(collectionPath, EXOWIN3X):
         return EXOWIN3X
+    elif isCollectionPath(collectionPath, EXOAPPLEIIGS):
+        return EXOAPPLEIIGS
+    elif isCollectionPath(collectionPath, EXOSCUMMVM):
+        return EXOSCUMMVM
     elif isCollectionPath(collectionPath, C64DREAMS):
         return C64DREAMS
     else:

@@ -24,10 +24,6 @@ The conversion should cover the following :
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 It should be used on a separate computer, not on the system you are targetting.
 
-The conversion now works fine with dosbox-pure, although it doesn't generate zipped games and it might be wise to disable auto mapping.
-In the libretro version this can be done by simply changing the focus mode by clicking Scroll Lock on you keyboard
-
-
 ## ExoDOS & ExoWin3x
 
 [Retro-Exo](https://www.retro-exo.com)
@@ -35,12 +31,15 @@ In the libretro version this can be done by simply changing the focus mode by cl
 eXoDOS and eXoWin3x collections are collections of DOS and Windows 3.1 games and in my opinion the best ones as it includes full, correct configuration for all games.  
 It is based on Launchbox and Windows only though
 
-eXoDOS: full support for v6 version (lite version not supported yet), v5 support has been dropped  
+eXoDOS: full support for v6 version, both full and lite, v5 support has been dropped  
 eXoWin3x: full support for v2
 
 If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye or download through torrent (much slower)
 
-Before using this tool, don't forget to install the collections (eXoDOS full and lite V5 versions, or eXoWin3x) with their respective `setup.bat`
+The conversion now works fine with dosbox-pure, although it doesn't generate zipped games and it might be wise to disable auto mapping.
+In the libretro version this can be done by simply changing the focus mode by clicking Scroll Lock on you keyboard (or inside retroarch menu)
+
+Before using this tool, don't forget to install the collections (eXoDOS full and lite V6 versions, or eXoWin3x v2) with their respective `setup.bat`
 
 They should be installed separately and not combined/merged, or the tool will not work.
 
@@ -54,7 +53,7 @@ C64 Dreams: support for v0.60 (custom mapping files not supported yet)
 
 Support is prelimilary, but it's fully functional
 
-Mostly missing is the conversion of keyboard to joystick mapping files (whi I hope to implement later)
+Mostly missing is the conversion of keyboard to joystick mapping files (which I hope to implement later)
 
 UI is not fully adapted yet, most extra parameters will do nothing foe this collection generation 
 
@@ -97,7 +96,7 @@ chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned
 
 Either use the latest [release](https://github.com/Voljega/ExoDOSConverter/releases) or you can build your own version using one of these two options :
 - @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
-- read the `build.txt` to build your own version
+- read the `build.txt` to build your own version or even simplier, execute `build.bat`
 
 Before using the tool, install the collection by executing `setup.bat`
 
@@ -116,7 +115,7 @@ see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/RG350-support)
 ## Known issues
 
 A few games in both collections have some conversion issues with this tool.  
-For eXoDOS v5 issues (not updated for v6), see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)  
+For eXoDOS v6 issues (not updated for v6), see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoDOS-v5)  
 For eXoWin3x v2 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-issues:-eXoWin3x-v2)  
 For C64 Dreams v0.60 issues, see [wiki page](https://github.com/Voljega/ExoDOSConverter/wiki/Known-Issues:-C64-Dreams)  
   

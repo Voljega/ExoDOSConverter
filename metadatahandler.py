@@ -103,7 +103,7 @@ class MetadataHandler:
             return None
 
     # Process and export metadata to in-memory gamelist xml for a given game    
-    def processGame(self, game, gamelist, genre, outputDir, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride):
+    def processGame(self, game, gamelist, genre, outputDir, useLongFolderNames, useGenreSubFolders, conversionType, collectionVersion, rezipped, nameOverride, manualOverride):
         gameMetadata = self.__handleMetadata__(game)
         self.logger.log("  computed genre %s" % genre)
         self.logger.log("  copy pics and manual")
@@ -113,7 +113,7 @@ class MetadataHandler:
             self.logger.log('  <WARNING> No pic found for %s, please file a report on Github with the game name' % game, self.logger.WARNING)
         if gameMetadata.manual is not None and os.path.exists(gameMetadata.manual):
             shutil.copy2(gameMetadata.manual, os.path.join(outputDir, 'manuals'))
-        self.__writeGamelistEntry__(gamelist, gameMetadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride)
+        self.__writeGamelistEntry__(gamelist, gameMetadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, collectionVersion, rezipped, nameOverride, manualOverride)
         return gameMetadata
 
     # Replaces “ ” ’ …
@@ -133,7 +133,7 @@ class MetadataHandler:
             etree.SubElement(gameElt, 'hidden').text = 'true'
 
     # Write metada for a given game to in-memory gamelist xml
-    def __writeGamelistEntry__(self, gamelist, metadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, rezipped, nameOverride, manualOverride):
+    def __writeGamelistEntry__(self, gamelist, metadata, game, genre, useLongFolderNames, useGenreSubFolders, conversionType, collectionVersion, rezipped, nameOverride, manualOverride):
         root = gamelist.getroot()
 
         if platform.system() == 'Windows':
@@ -160,12 +160,15 @@ class MetadataHandler:
             gameFilePath = nameOverride if nameOverride is not None else self.__cleanXmlString__(game) + extension
             path = "./" + genre + "/" + gameFilePath if useGenreSubFolders else "./" + gameFilePath
 
+        gamelistname = nameOverride if (nameOverride is not None and collectionVersion == util.EXOSCUMMVM) else metadata.name
+
         existsInGamelist = [child for child in root.iter('game') if
-                            self.__getNode__(child, "name") == metadata.name and self.__getNode__(child, "releasedate") == year]
+                            self.__getNode__(child, "name") == gamelistname and self.__getNode__(child, "releasedate") == year]
+
         if len(existsInGamelist) == 0:
             gameElt = etree.SubElement(root, 'game')
             etree.SubElement(gameElt, 'path').text = path
-            etree.SubElement(gameElt, 'name').text = metadata.name
+            etree.SubElement(gameElt, 'name').text = gamelistname
             etree.SubElement(gameElt, 'desc').text = metadata.desc if metadata.desc is not None else ''
             etree.SubElement(gameElt, 'releasedate').text = year
             etree.SubElement(gameElt, 'developer').text = metadata.developer if metadata.developer is not None else ''

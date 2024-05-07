@@ -11,6 +11,8 @@ import platform
 from datetime import datetime
 from exoconverter import ExoConverter
 from c64converter import C64Converter
+from appleiigsconverter import AppleIIGSConverter
+from scummvmconverter import ScummVMConverter
 from functools import partial
 import _thread
 
@@ -833,6 +835,14 @@ class ExoGUI:
                 converter = C64Converter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
                                          conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
                                          self.fullnameToGameDir, partial(self.postProcess), self.logger)
+            elif collectionVersion is util.EXOAPPLEIIGS:
+                converter = AppleIIGSConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
+                                         conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
+                                         self.fullnameToGameDir, partial(self.postProcess), self.logger)
+            elif collectionVersion is util.EXOSCUMMVM:
+                converter = ScummVMConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
+                                         conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
+                                         self.fullnameToGameDir, partial(self.postProcess), self.logger)
             else:
                 converter = ExoConverter(games, self.cache, self.scriptDir, collectionVersion, collectionDir, outputDir,
                                          conversionType, useLongFolderNames, useGenreSubFolders, conversionConf,
@@ -869,7 +879,7 @@ class ExoGUI:
             [self.__setComponentState__(c, 'disabled') for c in mainButtons + exoConversionComponents
              + dosboxBasicComponents + dosboxExpertComponents + otherComponents]
         else:
-            if collectionVersion != util.C64DREAMS:
+            if collectionVersion in [util.EXODOS, util.EXOWIN3X]:
                 [self.__setComponentState__(c, 'disabled' if self.guiVars['expertMode'].get() != 1 or self.guiVars['conversionType'].get() == util.mister else 'normal')
                  for c in dosboxExpertComponents]
                 [self.__setComponentState__(c, 'normal') for c in mainButtons + otherComponents + entryComponents]
@@ -877,6 +887,7 @@ class ExoGUI:
                                            'normal' if self.guiVars['conversionType'].get() == util.mister else 'disabled')
                 [self.__setComponentState__(c, 'disabled' if self.guiVars['conversionType'].get() == util.mister else 'normal') for c in
                  dosboxBasicComponents + [self.expertModeCheckButton]]
+                self.__setComponentState__(self.downloadOnDemandCheckButton, 'normal')
                 self.__setComponentState__(self.dosboxPureZipGamesCheckButton,
                                            'normal' if self.guiVars['conversionType'].get() == util.batocera
                                                        or self.guiVars['conversionType'].get() == util.retrobat
