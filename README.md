@@ -21,6 +21,8 @@ The conversion should cover the following :
  - scrapping of the game metadata, including front boxart, metada and manual
  - when possible, custom or generic controller configuration
 
+Your collections will remain untouched by the conversion, as all relevant files are copied in the output folder during the process.
+
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 It should be used on a separate computer, not on the system you are targetting.
 
@@ -42,6 +44,13 @@ In the libretro version this can be done by simply changing the focus mode by cl
 Before using this tool, don't forget to install the collections (eXoDOS full and lite V6 versions, or eXoWin3x v2) with their respective `setup.bat`
 
 They should be installed separately and not combined/merged, or the tool will not work.
+
+### dosbox-pure zip compatibility
+
+To use dosbox-pure-zip you might need to activate this parameter in retroarch: `Core Options / Emulation / Loading of dosbox.conf` to enable the reading of dosbox.conf configuration from inside game zips.
+
+At the moment, game using the mount dosbox command are not compatible with dosbox-pure, they will in a next release of dosbox-pure, [see this issue](https://github.com/schellingb/dosbox-pure/issues/528)
+
 
 ## C64 Dreams
 

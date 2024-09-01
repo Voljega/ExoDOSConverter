@@ -651,6 +651,8 @@ class ExoGUI:
                 game = line.rstrip(' \n\r')
                 if game in self.exoGamesValues.get():
                     selectedGames.append(game)
+                else:
+                    self.logger.log('Game "%s" not found in collection' % game, self.logger.ERROR)
             file.close()
             self.logger.log('Loaded selection File "%s" with %i games' % (customSelectionFile, len(selectedGames)))
             self.selectedGamesValues.set(sorted(selectedGames))

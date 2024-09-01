@@ -106,7 +106,7 @@ class GameGenerator:
                 with ZipFile(os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion),
                                           previousGameZip), 'r') as zipFile:
                     # Extract all the contents of zip file in current directory
-                    self.logger.log("  unzipping previous game" + previousGameZip)
+                    self.logger.log("  unzipping previous game " + previousGameZip)
                     zipFile.extractall(
                         path=util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion))
                 # copy its directory or directory part to the inside of the second game dir
@@ -222,12 +222,12 @@ class GameGenerator:
         dosboxcfgpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg')
         dosboxbatpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.bat')
         dosboxcfg = open(dosboxcfgpath, 'r', encoding='utf-8')
-        dosboxbat = open(dosboxbatpath, 'r', encoding='utf-8')
+        dosboxbat = open(dosboxbatpath, 'r', encoding="mbcs")  # ANSI encoding
         dosboxconf = open(os.path.join(self.getLocalGameOutputDir(), 'dosbox.conf'), 'w', encoding='utf-8')
         dosboxcfglines = list(map(lambda l: l.rstrip(' \r\n'), dosboxcfg.readlines()))
         dosboxcfglines = dosboxcfglines[:dosboxcfglines.index('[autoexec]')]
         dosboxconf.write('\n'.join(dosboxcfglines) + '\n[autoexec]\n')
-        dosboxconf.write(''.join(dosboxbat.readlines()))
+        dosboxconf.write(''.join(dosboxbat.readlines())) # TODO needs to convert dosbox.bat lines using mount or boot command
         dosboxcfg.close()
         dosboxbat.close()
         dosboxconf.close()
