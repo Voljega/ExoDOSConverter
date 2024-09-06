@@ -242,7 +242,9 @@ class GameGenerator:
                 self.logger.log("      " + line.rstrip('\n\r '))
                 self.logger.log(
                     "      converted to " + substLine.rstrip('\n\r '))
-            dosboxconf.write(line)
+                dosboxconf.write(substLine)
+            else:
+                dosboxconf.write(line)
         dosboxcfg.close()
         dosboxbat.close()
         dosboxconf.close()
