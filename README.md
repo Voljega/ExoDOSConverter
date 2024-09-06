@@ -2,7 +2,15 @@
 
 # ExoConverter
 
-A custom converter of the eXoDOS v6, eXoWin3x and C64 Dreams collections to several EmulationStation and/or Linux based distributions format : 
+A custom converter of launchbox-based retrogaming collections  : 
+ - C64 Dreams 
+ - eXoDOS v6
+ - eXoDOS v6 lite
+ - eXoWin3x v2   
+ - eXo Apple IIGS    
+ - eXo ScummVM (atrociously broken conversion at the moment, I need some testers knowing ScummVM well)
+
+to several EmulationStation and/or Linux based distributions format:
  - Recalbox
  - Batocera
  - Retrobat
@@ -13,7 +21,7 @@ A custom converter of the eXoDOS v6, eXoWin3x and C64 Dreams collections to seve
 
 ## The Tool
 
-The original aim of this tool was to convert any selection of games of the eXoDOS collection to emulationstation / basic dosbox for linux format, so that in can be used on Retropie on any other like minded distribution.
+The aim of this tool is to convert any selection of games of the supported collection to emulationstation / basic dosbox (or lr-dosbox-pure) for linux format, so that in can be used on Retropie on any other like minded distribution.
 As the project evolved it now covers different collections, distributions and/or formats. 
 
 The conversion should cover the following :
@@ -25,6 +33,13 @@ Your collections will remain untouched by the conversion, as all relevant files 
 
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
 It should be used on a separate computer, not on the system you are targetting.
+
+## State of development
+
+Fully supported (but not always tested) distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
+
+MiSTer compatibility is still beeing worked on at the moment but is already at a pretty advanced stage, espeically for DOS games.
+
 
 ## ExoDOS & ExoWin3x
 
@@ -70,15 +85,6 @@ UI is not fully adapted yet, most extra parameters will do nothing foe this coll
 
 Some antiviruses (like Windows Defender) might detect the released exe version as false postive.  
 This is due to the exe python packager `pyInstaller` and it's safe to exclude the tool from virus detection 
-
-## State of development
-
-For now the tool is in beta stage, it seems to work fine, but some games throw errors when beeing converted.  
-This will be corrected when possible
-
-Fully supported (but not always tested) distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
-
-MiSTer compatibility is still beeing worked on at the moment but is already at a pretty advanced stage, espeically for DOS games.
 
 ### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)

@@ -54,6 +54,12 @@ class GameGenerator:
         return self.getLocalGameOutputDir() if self.isWin3x() else os.path.join(
             self.getLocalGameOutputDir(), self.game)
 
+    # returns emulation distribution game ouput dir of the generated game
+    def getEmulationGameOutputDir(self):
+        romsFolder = util.getRomsFolderPrefix(self.conversionType, self.conversionConf)
+        fileSeparator = "\\" if self.conversionType == util.retrobat else '/'
+        return romsFolder + fileSeparator + self.genre + fileSeparator + self.gameDir if self.useGenreSubFolders else romsFolder + fileSeparator + self.gameDir
+
     ################################
 
     ##### Generation functions #####
@@ -227,7 +233,16 @@ class GameGenerator:
         dosboxcfglines = list(map(lambda l: l.rstrip(' \r\n'), dosboxcfg.readlines()))
         dosboxcfglines = dosboxcfglines[:dosboxcfglines.index('[autoexec]')]
         dosboxconf.write('\n'.join(dosboxcfglines) + '\n[autoexec]\n')
-        dosboxconf.write(''.join(dosboxbat.readlines())) # TODO needs to convert dosbox.bat lines using mount or boot command
+        for line in dosboxbat.readlines():
+            if line.lower().startswith('mount'):
+                substLine = line.replace('mount ', 'subst ').replace('MOUNT ', 'SUBST').replace(self.getEmulationGameOutputDir(), 'c:').replace('"', '')
+                substLine = substLine.replace(' -t floppy', '').replace(' -t cdrom', '')
+                if not self.conversionType == util.retrobat:
+                    substLine = substLine.replace('/', "\\")
+                self.logger.log("      " + line.rstrip('\n\r '))
+                self.logger.log(
+                    "      converted to " + substLine.rstrip('\n\r '))
+            dosboxconf.write(line)
         dosboxcfg.close()
         dosboxbat.close()
         dosboxconf.close()

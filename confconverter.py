@@ -207,6 +207,7 @@ class ConfConverter:
             # TODO Survey this fix is ok ...
             encoding = result['encoding'] if result['encoding'] not in encodingDic else encodingDic[result['encoding']]
             subBatRaw.close()
+            # TODO is encoding is None use 'cp1252' ?
             self.logger.log('    Handle Bat File (enc:%s->%s) %s' % (result['encoding'],encoding, subBat), self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
             subBatFile = open(subBat, 'r', encoding=encoding)
