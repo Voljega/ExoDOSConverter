@@ -102,7 +102,7 @@ class C64Converter:
         manualFile = self.__copyManual(game)
 
         self.metadataHandler.processGame(game, gamelist, genre, self.outputDir, self.useLongFolderNames,
-                                         self.useGenreSubFolders, self.conversionType, False, outputGameFile, manualFile)
+                                         self.useGenreSubFolders, self.conversionType, self.collectionVersion, False, outputGameFile, manualFile)
 
         for hiddenOutputGameFiles in hiddenOutputGameFiles:
             self.metadataHandler.writeHiddenGamelistEntry(gamelist, hiddenOutputGameFiles, genre, self.useGenreSubFolders)

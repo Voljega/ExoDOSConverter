@@ -54,6 +54,12 @@ class GameGenerator:
         return self.getLocalGameOutputDir() if self.isWin3x() else os.path.join(
             self.getLocalGameOutputDir(), self.game)
 
+    # returns emulation distribution game ouput dir of the generated game
+    def getEmulationGameOutputDir(self):
+        romsFolder = util.getRomsFolderPrefix(self.conversionType, self.conversionConf)
+        fileSeparator = "\\" if self.conversionType == util.retrobat else '/'
+        return romsFolder + fileSeparator + self.genre + fileSeparator + self.gameDir if self.useGenreSubFolders else romsFolder + fileSeparator + self.gameDir
+
     ################################
 
     ##### Generation functions #####
@@ -106,7 +112,7 @@ class GameGenerator:
                 with ZipFile(os.path.join(util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion),
                                           previousGameZip), 'r') as zipFile:
                     # Extract all the contents of zip file in current directory
-                    self.logger.log("  unzipping previous game" + previousGameZip)
+                    self.logger.log("  unzipping previous game " + previousGameZip)
                     zipFile.extractall(
                         path=util.getCollectionGamesDir(self.exoCollectionDir, self.collectionVersion))
                 # copy its directory or directory part to the inside of the second game dir
@@ -222,12 +228,21 @@ class GameGenerator:
         dosboxcfgpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg')
         dosboxbatpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.bat')
         dosboxcfg = open(dosboxcfgpath, 'r', encoding='utf-8')
-        dosboxbat = open(dosboxbatpath, 'r', encoding='utf-8')
+        dosboxbat = open(dosboxbatpath, 'r', encoding="mbcs")  # ANSI encoding
         dosboxconf = open(os.path.join(self.getLocalGameOutputDir(), 'dosbox.conf'), 'w', encoding='utf-8')
         dosboxcfglines = list(map(lambda l: l.rstrip(' \r\n'), dosboxcfg.readlines()))
         dosboxcfglines = dosboxcfglines[:dosboxcfglines.index('[autoexec]')]
         dosboxconf.write('\n'.join(dosboxcfglines) + '\n[autoexec]\n')
-        dosboxconf.write(''.join(dosboxbat.readlines()))
+        for line in dosboxbat.readlines():
+            if line.lower().startswith('mount'):
+                substLine = line.replace('mount ', 'subst ').replace('MOUNT ', 'SUBST').replace(self.getEmulationGameOutputDir(), 'c:').replace('"', '')
+                substLine = substLine.replace(' -t floppy', '').replace(' -t cdrom', '')
+                if not self.conversionType == util.retrobat:
+                    substLine = substLine.replace('/', "\\")
+                self.logger.log("      " + line.rstrip('\n\r '))
+                self.logger.log(
+                    "      converted to " + substLine.rstrip('\n\r '))
+            dosboxconf.write(line)
         dosboxcfg.close()
         dosboxbat.close()
         dosboxconf.close()

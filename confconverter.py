@@ -4,6 +4,7 @@ import util
 import dosboxconfv6
 import chardet
 import lists
+import shutil
 
 
 # Converts dosbox.conf to dosbox.cfg and dosbox.bat, at the moment Batocera/ Recalbox linux flavor
@@ -13,6 +14,7 @@ class ConfConverter:
         self.logger = gGator.logger
         self.conversionConf = gGator.conversionConf
         self.commandHandler = CommandHandler(gGator)
+        self.scriptDir = gGator.scriptDir
         # self.outputDir = gGator.outputDir
         # self.useGenreSubFolders = gGator.useGenreSubFolders
         # self.conversionType = gGator.conversionType
@@ -128,26 +130,25 @@ class ConfConverter:
             self.logger.log("    add ULTRADIR for ULTRASND driver")
             retroDosboxBat.write("set ULTRADIR=C:\\%s\\ULTRASND\n" % gGator.game)
 
+        whereWeAt = [gGator.getLocalGameOutputDir()]  # Identify where we at in generated set
         for cmdline in cmdlines:
             # keep conf in dosbox.cfg but comment it
             if self.conversionConf['useDebugMode']:
                 retroDosboxCfg.write("# " + cmdline)
-            self.__convertLine__(cmdline, retroDosboxBat, gGator)
+            self.__convertLine__(cmdline, retroDosboxBat, gGator, whereWeAt)
 
     # Convert command line to dosbox.bat
-    def __convertLine__(self, cmdline, retroDosboxBat, gGator):
+    def __convertLine__(self, cmdline, retroDosboxBat, gGator, whereWeAt):
         cutLines = ["cd ..", "cls", "mount c", "#", "exit", "echo off", "echo on"]
         # always remove @
         cmdline = cmdline.lstrip('@ ')
-        # TODO whereWeAt identifies where we are in the game tree based on instructions, use in the future ?
-        whereWeAt = ['c:','.']
         if self.commandHandler.useLine(cmdline, cutLines):
             if cmdline.lower().startswith("c:"):
                 retroDosboxBat.write(cmdline)
                 if not gGator.isWin3x():
                     # First add move into game subdir
                     retroDosboxBat.write("cd %s\n" % gGator.game)
-                    whereWeAt.append('game')
+                    whereWeAt.append(gGator.game)
             # remove cd to gamedir as it is already done, but keep others cd
             elif cmdline.lower().startswith("cd "):
                 path = self.commandHandler.reducePathExoPart(cmdline.lstrip(' ').rstrip('\n\r ').split(" ")[-1].rstrip('\n\r '))
@@ -181,22 +182,23 @@ class ConfConverter:
                 self.logger.log("    <WARNING> game uses call run.bat", self.logger.WARNING)
                 if gGator.game in lists.gamesWithRunBatHandling:
                     self.__handleRunBat__(gGator)
-                self.__handlePotentialSubFile__(cmdline, gGator, [])
+                self.__handlePotentialSubFile__(cmdline, gGator, [], whereWeAt)
                 retroDosboxBat.write(cmdline)
             else:
-                self.__handlePotentialSubFile__(cmdline, gGator, [])
+                self.__handlePotentialSubFile__(cmdline, gGator, [], whereWeAt)
                 retroDosboxBat.write(cmdline)
 
     # Handle potential sub files and problems in it
-    def __handlePotentialSubFile__(self, subPath, gGator, handledSubFiles):
+    def __handlePotentialSubFile__(self, subPath, gGator, handledSubFiles,whereWeAt):
         # Ignore charset unwritable by python
         if gGator.game in ['747400', 'Frightma', 'FreakOut', 'ghenkhan', 'Spheroid', 'TORNADO']:
             return
 
         subPath = subPath.lstrip('@ ').lower().replace('call ','') if subPath.lstrip('@ ').lower().startswith("call ") else subPath
-        subBat = os.path.join(gGator.getLocalGameDataOutputDir(), subPath.rstrip(' \n\r') + '.bat')
+        subBat = os.path.join(os.path.join(*whereWeAt), subPath.rstrip(' \n\r') + '.bat')
 
         if os.path.exists(subBat) and not os.path.isdir(subBat) and subBat.lower() not in handledSubFiles:
+            shutil.copy2(os.path.join(self.scriptDir, 'data', 'JCHOICE.EXE'), os.path.dirname(subBat))
             # Handle old DOS file with cp437 encoding (falsely detected as TIS-620, EUC-KR)
             subBatRaw = open(subBat, 'rb')
             rawdata = subBatRaw.read()
@@ -205,6 +207,7 @@ class ConfConverter:
             # TODO Survey this fix is ok ...
             encoding = result['encoding'] if result['encoding'] not in encodingDic else encodingDic[result['encoding']]
             subBatRaw.close()
+            # TODO is encoding is None use 'cp1252' ?
             self.logger.log('    Handle Bat File (enc:%s->%s) %s' % (result['encoding'],encoding, subBat), self.logger.WARNING)
             handledSubFiles.append(subBat.lower())
             subBatFile = open(subBat, 'r', encoding=encoding)
@@ -222,8 +225,10 @@ class ConfConverter:
                         else:
                             if not gGator.isWin3x():
                                 cmdline = cmdline.replace('c:','c:\\'+gGator.game).replace('C:','C:\\'+gGator.game)
+                    elif cmdline.lower().startswith('choice '):
+                        cmdline = cmdline.replace('choice ', 'jchoice ').replace('CHOICE ', 'JCHOICE ')
                     else:
-                        self.__handlePotentialSubFile__(cmdline, gGator, handledSubFiles)
+                        self.__handlePotentialSubFile__(cmdline, gGator, handledSubFiles, whereWeAt)
                     subBatFileClone.write(cmdline)
             subBatFileClone.close()
             subBatFile.close()
