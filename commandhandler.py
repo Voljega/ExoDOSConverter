@@ -1,3 +1,4 @@
+import errno
 import os
 import shutil
 import stat
@@ -16,6 +17,7 @@ class CommandHandler:
     # Rename a filename to a dos compatible 8 char name
     @staticmethod
     def __dosRename__(path, originalFile, fileName, fileExt, cdCount):
+        path_fixed = util.localOSPath(path)
         fileName = fileName.replace(" ", "").replace("[", "").replace("]", "")
         if len(fileName) > 8:
             if cdCount is None:
@@ -23,15 +25,15 @@ class CommandHandler:
             else:
                 fileName = fileName[0:5] + str(cdCount)
         # TESTCASE : Ripper (1996) / ripper shouldn't enter here
-        if os.path.exists(os.path.join(path, fileName + fileExt)) and (
+        if os.path.exists(os.path.join(path_fixed, fileName + fileExt)) and (
                 fileName + fileExt) != originalFile.lower() and cdCount is None:
             fileName = fileName[0:6] + "1"
         # Double rename file to avoid trouble with case on Windows
         source = os.path.join(path, originalFile)
         targetTemp = os.path.join(path, fileName + "1" + fileExt)
         target = os.path.join(path, fileName + fileExt)
-        os.rename(util.localOSPath(source), util.localOSPath(targetTemp))
-        os.rename(util.localOSPath(targetTemp), util.localOSPath(target))
+        os.rename(source, targetTemp)
+        os.rename(targetTemp, target)
         return fileName
 
     # Checks if a command line should be kept or not
@@ -123,7 +125,7 @@ class CommandHandler:
             else:
                 # several paths (multi cds)
                 self.logger.logList("    multi imgmount", paths)
-                # analyze paths to see if there are spaces in it  
+                # analyze paths to see if there are spaces in it
                 # TESTCASE: Star Trek Borg / STBorg
                 spaceInPaths = False
                 for path in paths:
@@ -258,21 +260,23 @@ class CommandHandler:
 
     # Cleans cd names to a dos compatible 8 char name
     def __cleanCDname__(self, path, cdCount=None, gameInternalBatFile=False):
-        cdFileFullPath = os.path.join(self.gGator.getLocalGameOutputDir(), path) \
-            if not gameInternalBatFile else os.path.join(self.gGator.getLocalGameDataOutputDir(), path)
-        if os.path.exists(util.localOSPath(cdFileFullPath)):
-            if os.path.isdir(util.localOSPath(cdFileFullPath)):
+        path_fixed = util.localOSPath(path)
+        if gameInternalBatFile:
+            cdFileFullPath = util.getActualFilesystemPath(path_fixed, start=self.gGator.getLocalGameDataOutputDir(), prepend_start=True)
+        else:
+            cdFileFullPath = util.getActualFilesystemPath(path_fixed, start=self.gGator.getLocalGameOutputDir(), prepend_start=True)
+        if os.path.exists(cdFileFullPath):
+            if os.path.isdir(cdFileFullPath):
                 return path
             else:
-                pathList = path.split('\\')
-                cdFile = pathList[-1]
-                oldCdFilename = os.path.splitext(cdFile)[0].lower()
-                cdFileExt = os.path.splitext(cdFile)[-1].lower()
+                head, tail = os.path.split(cdFileFullPath)
+                cdsPath = head # Root path of CDs
+                cdFile = tail
+                name, ext = os.path.splitext(cdFile)
+                oldCdFilename = name.lower()
+                cdFileExt = ext.lower()
 
-                # Root path of CDs
-                cdsPath = "\\".join(cdFileFullPath.split('\\')[:-1])
-
-                # Rename file to dos compatible name                
+                # Rename file to dos compatible name
                 cdFilename = self.__dosRename__(cdsPath, cdFile, oldCdFilename, cdFileExt, cdCount)
                 self.logger.log("      renamed %s to %s" % (cdFile, cdFilename + cdFileExt))
 
@@ -280,21 +284,22 @@ class CommandHandler:
                     self.__cleanCue__(cdsPath, cdFilename, cdCount)
 
                 # Clean remaining ccd and sub file which might have the same name as the cue file
-                otherCdFiles = [file for file in os.listdir(util.localOSPath(cdsPath)) if
-                                os.path.splitext(file)[0].lower() == oldCdFilename and os.path.splitext(file)[
-                                    -1].lower() in ['.ccd', '.sub']]
+                otherCdFiles = (file for file in os.listdir(cdsPath)
+                                if os.path.splitext(file)[0].lower() == oldCdFilename and os.path.splitext(file)[
+                                    -1].lower() in {'.ccd', '.sub'})
                 for otherCdFile in otherCdFiles:
                     otherCdFileExt = os.path.splitext(otherCdFile)[-1].lower()
                     otherCdFilename = self.__dosRename__(cdsPath, otherCdFile, cdFilename, otherCdFileExt, cdCount)
                     self.logger.log("      renamed %s to %s" % (otherCdFile, otherCdFilename + otherCdFileExt))
 
+                pathList = path.split('\\')
                 cleanedPath = "\\".join(pathList[:-1]) + "\\" + cdFilename + cdFileExt
                 #                self.logger.log("    modify dosbox.bat : %s -> %s" %(path,cleanedPath))
                 return cleanedPath
         else:
-            if not os.path.exists(os.path.join(self.gGator.getLocalGameDataOutputDir(), util.localOSPath(path))):
-                self.logger.log("      <ERROR> path %s doesn't exist" % util.localOSPath(cdFileFullPath),
-                                self.logger.ERROR)
+            path_actual = util.getActualFilesystemPath(path_fixed, start=self.gGator.getLocalGameDataOutputDir())
+            if not os.path.exists(os.path.join(self.gGator.getLocalGameDataOutputDir(), path_actual)):
+                self.logger.log("      <ERROR> path %s doesn't exist" % cdFileFullPath, self.logger.ERROR)
             return path
 
     # Cleans cue files content to dos compatible 8 char name
@@ -306,19 +311,29 @@ class CommandHandler:
             if line.startswith("FILE"):
                 if not modifiedFirstLine:  # Handle first line: img, iso, bin, etc
                     params = line.split('"')
-                    isobin = os.path.splitext(params[1].lower())
-                    fixedIsoBinName = self.__dosRename__(path, params[1], isobin[0], isobin[1], cdCount)
-                    self.logger.log("      renamed %s to %s" % (params[1], fixedIsoBinName + isobin[1]))
+                    FILE_path = params[1]
+                    FILE_path_actual = util.getActualFilesystemPath(FILE_path, start=util.localOSPath(path))
+                    if os.path.isdir(os.path.join(util.localOSPath(path), FILE_path_actual)):
+                        raise IsADirectoryError(errno.EISDIR, os.strerror(errno.EISDIR),
+                                                os.path.join(util.localOSPath(path), FILE_path_actual))
+                    isoBinName_ext = os.path.basename(FILE_path_actual).lower()
+                    isoBinName, ext = os.path.splitext(isoBinName_ext)
+                    isoBinNameFixed = self.__dosRename__(path, FILE_path_actual, isoBinName, ext, cdCount)
+                    self.logger.log("      renamed %s to %s" % (FILE_path_actual, isoBinNameFixed + ext))
                     # TESTCASE: Pinball Arcade (1994) / PBArc94:
-                    params[1] = fixedIsoBinName + isobin[-1]
+                    params[1] = isoBinNameFixed + ext
                     line = '"'.join(params)
                     self.logger.log("      convert cue content -> " + line.rstrip('\n\r '))
                     # Only do it for the first Line
                     modifiedFirstLine = True
                 else:  # Move music files in subfolders to cd folder
                     params = line.split('"')
-                    if '\\' in params[1]:
-                        musicParams = params[1].split('\\')  # Assume there are only two music file path components
+                    FILE_path = params[1]
+                    if '\\' in FILE_path:
+                        musicParams = FILE_path.split('\\')  # Assume there are only two music file path components
+                        musicParams[0] = util.getActualFilesystemFilename(musicParams[0], directory=util.localOSPath(path))
+                        musicParams[1] = util.getActualFilesystemFilename(musicParams[1],
+                                                                          directory=os.path.join(util.localOSPath(path), musicParams[0]))
                         shutil.move(os.path.join(util.localOSPath(path), musicParams[0], musicParams[1]),
                                     os.path.join(util.localOSPath(path), musicParams[1]))
                         self.logger.log("      move music %s from %s to . -> " % (musicParams[1], musicParams[0]))

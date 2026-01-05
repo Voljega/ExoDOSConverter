@@ -228,7 +228,7 @@ class GameGenerator:
         dosboxcfgpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.cfg')
         dosboxbatpath = os.path.join(self.getLocalGameOutputDir(), 'dosbox.bat')
         dosboxcfg = open(dosboxcfgpath, 'r', encoding='utf-8')
-        dosboxbat = open(dosboxbatpath, 'r', encoding="mbcs")  # ANSI encoding
+        dosboxbat = open(dosboxbatpath, 'r', encoding="cp1252")  # ANSI encoding
         dosboxconf = open(os.path.join(self.getLocalGameOutputDir(), 'dosbox.conf'), 'w', encoding='utf-8')
         dosboxcfglines = list(map(lambda l: l.rstrip(' \r\n'), dosboxcfg.readlines()))
         dosboxcfglines = dosboxcfglines[:dosboxcfglines.index('[autoexec]')]

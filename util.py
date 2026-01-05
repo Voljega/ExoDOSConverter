@@ -8,6 +8,8 @@ from PIL import Image
 import requests
 import urllib.request
 import urllib.parse
+from pathlib import PurePath
+from pathlib import PureWindowsPath
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
 
@@ -214,7 +216,7 @@ def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
-                
+
             exitCode = callProcess(subProcessArgs,logger)
             retryCount -= 1
 
@@ -267,7 +269,7 @@ def downloadZip(gameZip, gameZipPath, logger):
                 response.status_code, gameZipPath, response.reason),
             logger.ERROR)
         return False
-    
+
 
 # Loads UI Strings
 def loadUIStrings(scriptDir, guiStringsFile):
@@ -283,12 +285,71 @@ def loadUIStrings(scriptDir, guiStringsFile):
     return guiStrings
 
 
-# Handle os escaping of path in local output dir
-def localOSPath(path):
-    if platform.system() == 'Windows':
-        return path
+def getActualFilesystemFilename(filename_case_insensitive, directory=os.curdir, cached_listdir=None):
+    """
+    In 'directory', get the actual filename that exists in the filesystem
+    from a case-insensitive filename ('filename_case_insensitive').
+    Works for resolving directories as well.
+
+    Search through a given list of filenames if 'cached_listdir' is given.
+    This is useful if you need to use getActualFilesystemFilename()
+    multiple times in a single directory, using 'cached_listdir' then
+    avoids excessive filesystem access operations.
+    """
+    if cached_listdir:
+        for filename_case_sensitive in cached_listdir:
+            if filename_case_sensitive.lower() == filename_case_insensitive.lower():
+                actual_filename = filename_case_sensitive
+                return actual_filename
     else:
-        return path.replace('\\', '/')
+        with os.scandir(directory) as files_case_sensitive:
+            for entry in files_case_sensitive:
+                filename_case_sensitive = entry.name
+                if filename_case_sensitive.lower() == filename_case_insensitive.lower():
+                    actual_filename = filename_case_sensitive
+                    return actual_filename
+    raise FileNotFoundError(errno.ENOENT,
+                            os.strerror(errno.ENOENT) + " (last part is case-insensitive)",
+                            str(PurePath(directory) / filename_case_insensitive))
+
+
+def getActualFilesystemPath(path_case_insensitive, start=os.curdir, prepend_start=False):
+    """
+    Recursive version of getActualFilesystemFilename().
+    Starting at (relative to) the 'start' path, get the actual file path that exists
+    in the filesystem from a case-insensitive file path ('path_case_insensitive').
+    This is important for correctly resolving filenames and paths in .cue files
+    and batch files in an OS-agnostic way.
+    If 'path_case_insensitive' is absolute and/or specifies a drive, 'start' does nothing.
+
+    If 'path_case_insensitive' is relative:
+    append the 'start' path to the returned path if 'prepend_start' is true.
+    Useful if you only want to resolve the end of a path
+    relative to a 'start' directory.
+    """
+    start = os.curdir if start is None else start
+    drive_and_root = PurePath(path_case_insensitive).anchor
+    path_components = PurePath(path_case_insensitive).parts
+    if drive_and_root: # If true, this means 'path_components' includes 'drive_and_root', remove it
+        path_components = path_components[1:] # Remove the drive and root component
+    head = PurePath(start) / drive_and_root # The start of the path, before any path components
+    resolved_path_components = PurePath()
+    for path_component in path_components:
+        if path_component in {os.curdir, os.pardir}:
+            actual_path_component = path_component
+        else:
+            resolved_dir = head / resolved_path_components
+            actual_path_component = getActualFilesystemFilename(path_component, directory=resolved_dir)
+        resolved_path_components = resolved_path_components / actual_path_component
+    fully_resolved_path = PurePath(drive_and_root) / resolved_path_components
+    if prepend_start and not drive_and_root: # If 'prepand_path' and 'path_case_insensitive' is relative
+        fully_resolved_path = PurePath(start) / fully_resolved_path
+    return type(path_case_insensitive)(fully_resolved_path)
+
+
+# Handle os escaping of path in local output dir
+def localOSPath(windows_path):
+    return type(windows_path)(PurePath(PureWindowsPath(windows_path)))
 
 
 # Resize image for opendingux
@@ -355,6 +416,13 @@ def validCollectionPath(collectionPath):
 
 # Parse the collection static cache file to generate list of games
 def fullnameToGameDir(collectionDir, scriptDir, collectionVersion, logger):
+    if not os.path.exists(collectionDir):
+        logger.log(
+            "The collection folder %s does not exist.\n"
+            "Please select an existing folder." % collectionDir,
+            level=logger.ERROR,
+        )
+        return {}
     collectionCSVCachePath = os.path.join(scriptDir, 'data', collectionVersion.replace(' ', '') + '.csv')
     if not os.path.exists(collectionCSVCachePath):
         # Use when needing to rebuild collection (usually new releases)
@@ -362,9 +430,21 @@ def fullnameToGameDir(collectionDir, scriptDir, collectionVersion, logger):
 
     gameDict = dict()
     collectFile = open(collectionCSVCachePath, 'r', encoding='utf-8')
+    collectionGamesConfDir = getCollectionGamesConfDir(collectionDir, collectionVersion)
+    gamedirs_actual = os.listdir(collectionGamesConfDir)
     for line in collectFile.readlines():
-        strings = line.split(';')
-        gameDict[strings[0]] = strings[1].rstrip('\n\r')
+        fullname, gamedir = line.split(';')
+        gamedir = gamedir.rstrip('\n\r')
+        try:
+            # Resolve the actual (correctly-cased) game directory name from the 'gamedir' stored in 'collectFile'.
+            # New versions of a collection may change the case of a game directory, this solves that issue.
+            gamedir_actual = getActualFilesystemFilename(gamedir, cached_listdir=gamedirs_actual)
+            gamedirs_actual.remove(gamedir_actual) # Searching gets progressively faster, this speeds up the startup time greatly
+            gameDict[fullname] = gamedir_actual
+        except FileNotFoundError: # Could not find the game directory in the collection, ignore it and do not list it in the GUI
+            pass # The game directory does not exist (may be due to a new version of the collection, etc)
+            #logger.log("  <INFO> Game %s (%s) not found in the collection config directory %s"
+            #           % (fullname, gamedir, collectionGamesConfDir), logger.INFO)
     return gameDict
 
 
@@ -547,7 +627,7 @@ def moveFolderifExist(useGenreSubFolders, metadata, genre, game, gameDir, output
     elif totalExistingPaths == 0:
         # game folder is non existent in any path, so create it.
         return False
-    
+
     # only one existing path found rename it to wanted path
     if wantedPath != existingPath[0]:
         logger.log("  Moving Existing -> " + wantedPath)
