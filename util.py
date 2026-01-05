@@ -416,6 +416,13 @@ def validCollectionPath(collectionPath):
 
 # Parse the collection static cache file to generate list of games
 def fullnameToGameDir(collectionDir, scriptDir, collectionVersion, logger):
+    if not os.path.exists(collectionDir):
+        logger.log(
+            "The collection folder %s does not exist.\n"
+            "Please select an existing folder." % collectionDir,
+            level=logger.ERROR,
+        )
+        return {}
     collectionCSVCachePath = os.path.join(scriptDir, 'data', collectionVersion.replace(' ', '') + '.csv')
     if not os.path.exists(collectionCSVCachePath):
         # Use when needing to rebuild collection (usually new releases)
