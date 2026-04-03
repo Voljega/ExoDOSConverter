@@ -235,8 +235,15 @@ def downloadTorrent(gameZip, gameZipPath, exoCollectionDir, logger):
 
 
 def downloadZip(gameZip, gameZipPath, logger):
-    response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
-                            headers={'User-agent': 'Mozilla/5.0'})
+    try:
+        response = requests.get(theEyeUrl + '/' + urllib.parse.quote(gameZip), stream=True,
+                                headers={'User-agent': 'Mozilla/5.0'})
+    except Exception as e:
+        logger.log(
+            '  <ERROR> Exception while downloading from web %s: %s' % (
+                gameZipPath, str(e)),
+            logger.ERROR)
+        return False
     if response.status_code == 200:
         totalSize = int(response.headers.get('content-length'))
         rightSize = totalSize
