@@ -21,24 +21,26 @@ to several EmulationStation and/or Linux based distributions format:
 
 ## The Tool
 
-The aim of this tool is to convert any selection of games of the supported collection to emulationstation / basic dosbox (or lr-dosbox-pure) for linux format, so that in can be used on Retropie on any other like minded distribution.
+The aim of this tool is to convert any selection of games of the supported collection to emulationstation / basic dosbox (or lr-dosbox-pure) for linux format, so that it can be used on Retropie or any other like-minded distribution.
 As the project evolved it now covers different collections, distributions and/or formats. 
 
 The conversion should cover the following :
  - conversion of the game to a correct format, including dosbox.cfg and dosbox.bat
- - scrapping of the game metadata, including front boxart, metada and manual
+ - scraping of the game metadata, including front boxart, metadata and manual
  - when possible, custom or generic controller configuration
 
 Your collections will remain untouched by the conversion, as all relevant files are copied in the output folder during the process.
 
 The tool is now fully compatible with Windows and Linux, Mac OS should work although some graphic issues may be present
-It should be used on a separate computer, not on the system you are targetting.
+It should be used on a separate computer, not on the system you are targeting.
+
+The gear button at the right of the tabs opens the settings, where you can choose between the light and dark themes.
 
 ## State of development
 
 Fully supported (but not always tested) distributions are Batocera, Recalbox, Retropie, Emuelec, Retrobat, MiSTeR and OpenDingux.
 
-MiSTer compatibility is still beeing worked on at the moment but is already at a pretty advanced stage, espeically for DOS games.
+MiSTer compatibility is still being worked on at the moment but is already at a pretty advanced stage, especially for DOS games.
 
 
 ## ExoDOS & ExoWin3x
@@ -54,7 +56,7 @@ eXoWin3x: full support for v2
 If you use eXoDOS Lite version, games you wish to convert will be downloaded on the fly if needed, using direct download from The Eye or download through torrent (much slower)
 
 The conversion now works fine with dosbox-pure, although it doesn't generate zipped games and it might be wise to disable auto mapping.
-In the libretro version this can be done by simply changing the focus mode by clicking Scroll Lock on you keyboard (or inside retroarch menu)
+In the libretro version this can be done by simply changing the focus mode by clicking Scroll Lock on your keyboard (or inside retroarch menu)
 
 Before using this tool, don't forget to install the collections (eXoDOS full and lite V6 versions, or eXoWin3x v2) with their respective `setup.bat`
 
@@ -75,43 +77,47 @@ C64 Dreams is a carefully crafted collection of C64 Games, based on Launchbox an
 
 C64 Dreams: support for v0.60 (custom mapping files not supported yet)
 
-Support is prelimilary, but it's fully functional
+Support is preliminary, but it's fully functional
 
 Mostly missing is the conversion of keyboard to joystick mapping files (which I hope to implement later)
 
-UI is not fully adapted yet, most extra parameters will do nothing foe this collection generation 
+UI is not fully adapted yet, most extra parameters will do nothing for this collection generation 
 
 ## Anti-virus false positives
 
-Some antiviruses (like Windows Defender) might detect the released exe version as false postive.  
+Some antiviruses (like Windows Defender) might detect the released exe version as false positive.  
 This is due to the exe python packager `pyInstaller` and it's safe to exclude the tool from virus detection 
 
 ### Linux/MacOS installation and execution :
 - eXoDOSConverter requires that python3 is installed (it's developed on 3.8)
-- first install Tkinter for python3 if needed : `sudo apt-get install python3-tk`
-- you might need to install pillow : `pip install pillow`
+- first install Tkinter, pip and venv for python3 if needed : `sudo apt-get install python3-tk python3-pip python3-venv`
 - directly download sources or clone the repo with :
  ```
  sudo apt install git # optional, only if git is not installed
  git clone https://github.com/Voljega/ExoDOSConverter
  ```
-- give execution rights to `ExoDOSConverter.sh` :
+- then create a virtual environment and install the python libraries in it (pillow, requests, chardet and ttkbootstrap). Recent distributions refuse a system-wide `pip install` with an `externally-managed-environment` error :
 ```
-cd ExoDOSConverter            # change to ExoDOSConverter directory
-chmod u+x ExoDOSConverter.sh  # give execution perms (already done in git-cloned version)
+cd ExoDOSConverter                        # change to ExoDOSConverter directory
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+- give execution rights to `eXoConverter.sh` :
+```
+chmod u+x eXoConverter.sh  # give execution perms (already done in git-cloned version)
 ```
 - If you didn't install the collection beforehand on Windows or with wine by executing `setup.bat`, you'll need to do that or  alternatively:
 >Unzip `./Content/XODOSMetadata.zip` to the home dir of the collection, this should create `./Images` and `./xml` folder
 
 >Unzip `./Content/!DOSmetadata.zip` to the home dir of the collection, this should create a `./eXo/eXoDOS/!dos folder`
 
-- launch with `./ExoDOSConverter.sh` or `./ExoDOSConverter`
+- launch with `./eXoConverter.sh` or `./eXoConverter`, it uses the `.venv` virtual environment when it exists
 
 ### Windows installation and execution :
 
 Either use the latest [release](https://github.com/Voljega/ExoDOSConverter/releases) or you can build your own version using one of these two options :
 - @flynnsbit [tutorial video](https://www.youtube.com/watch?v=wW2yhrw9Jp0&lc=UgzkMKahMRjhABX4FhN4AaABAg)
-- read the `build.txt` to build your own version or even simplier, execute `build.bat`
+- read the `build.txt` to build your own version or even simpler, execute `build.bat`
 
 Before using the tool, install the collection by executing `setup.bat`
 

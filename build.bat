@@ -1,5 +1,7 @@
 @echo off
-set /p "version=Version number: "
+rem version is defined in version.py
+for /f %%v in ('python -c "import version; print(version.VERSION)"') do set "version=%%v"
+echo Building version %version%
 echo .
 echo Clean build directory content
 rd /s /q .\build
@@ -13,7 +15,7 @@ echo .
 echo .
 echo Build with pyinstaller
 echo .
-pyinstaller --icon=exodosicon.ico --clean -F main.py
+pyinstaller --icon=exodosicon.ico --clean --collect-all ttkbootstrap -F main.py
 echo .
 echo Pyinstaller has ended its work
 echo .
@@ -30,8 +32,9 @@ if not exist .\dist\data\mister mkdir .\dist\data\mister
 copy ..\data\mister\*.* .\dist\data\mister
 if not exist .\dist\data\padtokeys mkdir .\dist\data\padtokeys
 copy ..\data\padtokeys\*.* .\dist\data\padtokeys
+if not exist .\dist\data\images mkdir .\dist\data\images
+copy ..\data\images\*.gif .\dist\data\images
 if not exist .\dist\conf mkdir .\dist\conf
-copy ..\conf\*.conf .\dist\conf
 if not exist .\dist\GUI mkdir .\dist\GUI
 copy ..\GUI\*.* .\dist\GUI
 copy ..\*.md .\dist

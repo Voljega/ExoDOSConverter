@@ -1,5 +1,8 @@
 import tkinter as Tk
 from tkinter import ttk, messagebox, filedialog
+import ttkbootstrap
+import tabstyle
+from settingsgui import SettingsGUI
 from operator import attrgetter
 import tkinter.font as Font
 import wckToolTips
@@ -8,6 +11,7 @@ import util
 import os
 import shutil
 import platform
+import subprocess
 from datetime import datetime
 from exoconverter import ExoConverter
 from c64converter import C64Converter
@@ -21,26 +25,42 @@ import _thread
 # noinspection PyUnresolvedReferences
 class ExoGUI:
     DEFAULT_FONT_SIZE = 9
+    THEMES = {'Light': 'flatly', 'Dark': 'darkly'}
+    SETTINGS_FILE = 'conf-settings.conf'
 
     def __init__(self, scriptDir, logger, title):
         self.scriptDir = scriptDir
         self.setKey = 'exo'
         self.cache = None
         self.loading = True
-        # TODO create conf file from guiStrings if it doesn't exist and do not ship it with tool anymore 
-        self.configuration = conf.loadConf(
-            os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)))
-        self.guiVars = dict()
         self.guiStrings = util.loadUIStrings(self.scriptDir, util.getGuiStringsFilename(self.setKey))
+        self.configuration = conf.loadConf(
+            os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)), self.guiStrings)
+        # a conf saved without a valid collection holds no collection version, its games list is the default one
+        if self.configuration['collectionVersion'] not in util.exoCollectionsDirs:
+            self.configuration['collectionVersion'] = conf.DEFAULT_VALUES['collectionVersion']
+        self.guiVars = dict()
         self.fullnameToGameDir = None
 
         self.window = Tk.Tk()
+        self.settingsButton = None
+        self.settingsOpen = None
+        self.settingsFrame = None
+        self.logTest = None
+        self.theme = self.__loadTheme__()
+        self.style = ttkbootstrap.Style(theme=self.theme)
+        # section titles in bold
+        self.sectionFont = Font.Font(font=Font.nametofont('TkDefaultFont'))
+        self.sectionFont.configure(weight='bold')
+        self.__customizeStyle__()
+        # a closed readonly combobox keeps the chosen text highlighted otherwise
+        self.window.bind_class('TCombobox', '<<ComboboxSelected>>', lambda event: event.widget.selection_clear(), add='+')
         self.window.resizable(False, False)
         self.window.geometry('+5+5')
         self.startFontSize = self.DEFAULT_FONT_SIZE
 
         if platform.system() == 'Windows':
-            self.window.iconbitmap('exodosicon.ico')
+            self.window.iconbitmap(os.path.join(self.scriptDir, 'exodosicon.ico'))
 
         self.__setFontSize__(self.startFontSize)
         self.window.title(title)
@@ -109,11 +129,133 @@ class ExoGUI:
         self.logTest = None
         self.scrollbar = None
 
+    def __settingsPath__(self):
+        return os.path.join(self.scriptDir, util.confDir, self.SETTINGS_FILE)
+
+    @staticmethod
+    def __osTheme__():
+        """The theme matching the dark or light mode of the OS, light when it can't be told"""
+        dark = False
+        try:
+            if platform.system() == 'Windows':
+                import winreg
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                                     r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize')
+                dark = winreg.QueryValueEx(key, 'AppsUseLightTheme')[0] == 0
+            elif platform.system() == 'Darwin':
+                dark = 'dark' in subprocess.run(['defaults', 'read', '-g', 'AppleInterfaceStyle'],
+                                                capture_output=True, text=True).stdout.lower()
+            else:
+                dark = 'dark' in subprocess.run(['gsettings', 'get', 'org.gnome.desktop.interface', 'color-scheme'],
+                                                capture_output=True, text=True).stdout.lower()
+        except Exception:
+            pass
+        return ExoGUI.THEMES['Dark'] if dark else ExoGUI.THEMES['Light']
+
+    def __loadTheme__(self):
+        """The saved theme, the one of the OS as long as none was chosen"""
+        theme = conf.loadSettings(self.__settingsPath__()).get('theme')
+        return theme if theme in self.THEMES.values() else self.__osTheme__()
+
+    def __customizeStyle__(self):
+        """What is added to the theme, to be done again each time the theme is changed"""
+        style = self.style
+        style.configure('TLabelframe.Label', font=self.sectionFont)
+        # the theme doesn't render disabled checkbuttons differently from enabled ones
+        disabledColor = tabstyle.mix(style.colors.fg, style.colors.bg, 0.6)
+        disabledBackground = tabstyle.mix(style.colors.bg, style.colors.border, 0.4)
+        # some room between the box and its label
+        # (set through Tk directly, ttkbootstrap would restyle the checkbuttons entirely)
+        style.master.tk.call('ttk::style', 'configure', 'TCheckbutton', '-indicatormargin', [0, 0, 5, 0])
+        style.map('TCheckbutton', foreground=[('disabled', disabledColor)],
+                  indicatorforeground=[('disabled', disabledColor)],
+                  indicatorbackground=[('disabled', disabledBackground)])
+        self.gearImage = tabstyle.gearIcon(style.colors.fg)
+        self.closeImage = tabstyle.closeIcon(style.colors.fg)
+        if self.settingsButton:
+            self.__showSettingsIcon__()
+        if self.logTest:
+            self.__colorConsole__()
+        self.__colorListboxes__()
+        self.__colorComboboxLists__()
+        tabstyle.gearButtonColors(style)
+
+    # The theme gives its own colors and padding to text widgets each time it is changed, the console is always black
+    # and keeps the same size in both themes
+    def __colorConsole__(self):
+        self.logTest.configure(background='black', foreground='yellow', borderwidth=1, relief='sunken',
+                               highlightthickness=0, padx=5, pady=1)
+
+    def __colorListboxes__(self):
+        colors = self.style.colors
+        for listbox in [getattr(self, name, None) for name in ('exoGamesListbox', 'selectedGamesListbox')]:
+            if listbox:
+                listbox.configure(background=colors.inputbg, foreground=colors.inputfg,
+                                  selectbackground=colors.selectbg, selectforeground=colors.selectfg,
+                                  highlightbackground=colors.border, highlightcolor=colors.border,
+                                  disabledforeground=tabstyle.mix(colors.fg, colors.bg, 0.6))
+
+    def __colorComboboxLists__(self):
+        """The lists of the comboboxes are plain Tk listboxes the theme doesn't color"""
+        colors = self.style.colors
+        options = {'background': colors.inputbg, 'foreground': colors.inputfg,
+                   'selectbackground': colors.selectbg, 'selectforeground': colors.selectfg}
+        # for the lists not yet created, which take their colors from the option database
+        for option, color in options.items():
+            self.window.option_add('*TCombobox*Listbox.' + option, color)
+
+        def recolor(widget):
+            if isinstance(widget, ttk.Combobox):
+                popdownList = str(self.window.tk.call('ttk::combobox::PopdownWindow', str(widget))) + '.f.l'
+                for option, color in options.items():
+                    self.window.tk.call(popdownList, 'configure', '-' + option, color)
+            for child in widget.winfo_children():
+                recolor(child)
+
+        recolor(self.window)
+
+    def changeTheme(self, theme):
+        self.style.theme_use(theme)
+        # the theme finishes its own styling when events are processed, it would replace what is added to it
+        self.window.update()
+        self.__customizeStyle__()
+        self.theme = theme
+        conf.saveSettings(self.__settingsPath__(), {'theme': theme})
+
     def draw(self):
-        self.root = Tk.Frame(self.window, padx=10, pady=5)
+        self.root = ttk.Frame(self.window, padding=(10, 5))
         self.root.grid(column=0, row=0)
+        self.__drawSettings__()
         self.__drawMainframe__()
         self.window.mainloop()
+
+    # gear button at the top right corner, the settings page is laid over the main frame
+    def __drawSettings__(self):
+        topBar = ttk.Frame(self.root)
+        topBar.grid(column=0, row=0, sticky="EW")
+        topBar.grid_columnconfigure(0, weight=1)
+        self.settingsOpen = Tk.BooleanVar(value=False)
+        self.settingsButton = ttk.Checkbutton(topBar, image=self.gearImage, style='Toolbutton',
+                                              variable=self.settingsOpen, command=self.__toggleSettings__)
+        self.settingsButton.grid(column=1, row=0, sticky="E")
+        wckToolTips.register(self.settingsButton,
+                             lambda widget, xy: 'Back' if self.settingsOpen.get() else 'Settings')
+
+    # the gear becomes a cross while the settings are open, to show that it leads back to the main page
+    def __showSettingsIcon__(self):
+        self.settingsButton.configure(image=self.closeImage if self.settingsOpen.get() else self.gearImage)
+
+    def __toggleSettings__(self):
+        self.__showSettingsIcon__()
+        if self.settingsOpen.get():
+            if self.settingsFrame is None:
+                self.settingsFrame = ttk.Frame(self.root, padding=(10, 5))
+                self.settingsFrame.grid_columnconfigure(0, weight=1)
+                SettingsGUI(self.settingsFrame, self).draw()
+            self.settingsFrame.place(in_=self.mainFrame, x=0, y=0, relwidth=1, relheight=1)
+            self.settingsFrame.lift()
+        else:
+            self.settingsFrame.place_forget()
 
     def __setFontSize__(self, value):
         fontSize = value if value is not None else self.startFontSize
@@ -123,10 +265,11 @@ class ExoGUI:
         text_font.configure(size=fontSize)
         fixed_font = Font.nametofont("TkFixedFont")
         fixed_font.configure(size=fontSize)
+        self.sectionFont.configure(size=fontSize)
 
     # Main mama Frame    
     def __drawMainframe__(self):
-        self.mainFrame = Tk.Frame(self.root, pady=0)
+        self.mainFrame = ttk.Frame(self.root)
         self.mainFrame.grid(column=0, row=1, sticky="EW")
         self.mainFrame.grid_columnconfigure(0, weight=1)
         self.__drawPathsFrame__()
@@ -156,34 +299,34 @@ class ExoGUI:
 
     # Paths frame    
     def __drawPathsFrame__(self):
-        self.pathsFrame = Tk.LabelFrame(self.mainFrame, text="Your Paths", pady=5)
+        self.pathsFrame = ttk.LabelFrame(self.mainFrame, text="Your Paths", padding=(0, 5))
         self.pathsFrame.grid(column=0, row=0, sticky="EW")
         self.pathsFrame.grid_columnconfigure(1, weight=1)
         setRow = 0
 
-        label = Tk.Label(self.pathsFrame, text=self.guiStrings['collectionDir'].label)
+        label = ttk.Label(self.pathsFrame, text=self.guiStrings['collectionDir'].label)
         wckToolTips.register(label, self.guiStrings['collectionDir'].help)
         label.grid(column=0, row=setRow, padx=5, sticky="W")
         self.guiVars['collectionDir'] = Tk.StringVar()
         self.guiVars['collectionDir'].set(self.configuration['collectionDir'])
         self.fullnameToGameDir = util.fullnameToGameDir(self.guiVars['collectionDir'].get(), self.scriptDir, self.configuration['collectionVersion'], self.logger)
         self.guiVars['collectionDir'].trace_add("write", self.__handleCollectionFolder__)
-        self.collectionEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
+        self.collectionEntry = ttk.Entry(self.pathsFrame, textvariable=self.guiVars['collectionDir'])
         self.collectionEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
-        self.selectCollectionDirButton = Tk.Button(self.pathsFrame, text=self.guiStrings['selectCollectionDir'].label,
+        self.selectCollectionDirButton = ttk.Button(self.pathsFrame, text=self.guiStrings['selectCollectionDir'].label,
                                                    command=lambda: self.__openFileExplorer__(True, 'collectionDir', None))
         self.selectCollectionDirButton.grid(column=2, row=setRow, padx=5, sticky="WE")
         wckToolTips.register(self.selectCollectionDirButton, self.guiStrings['selectCollectionDir'].help)
         setRow = setRow + 1
 
-        outputDirLabel = Tk.Label(self.pathsFrame, text=self.guiStrings['outputDir'].label)
+        outputDirLabel = ttk.Label(self.pathsFrame, text=self.guiStrings['outputDir'].label)
         wckToolTips.register(outputDirLabel, self.guiStrings['outputDir'].help)
         outputDirLabel.grid(column=0, row=setRow, padx=5, sticky=Tk.W)
         self.guiVars['outputDir'] = Tk.StringVar()
         self.guiVars['outputDir'].set(self.configuration['outputDir'])
-        self.outputEntry = Tk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
+        self.outputEntry = ttk.Entry(self.pathsFrame, textvariable=self.guiVars['outputDir'])
         self.outputEntry.grid(column=1, row=setRow, padx=5, sticky="WE")
-        self.selectOutputDirButton = Tk.Button(self.pathsFrame, text=self.guiStrings['selectOutputDir'].label,
+        self.selectOutputDirButton = ttk.Button(self.pathsFrame, text=self.guiStrings['selectOutputDir'].label,
                                                command=lambda: self.__openFileExplorer__(True, 'outputDir', None))
         self.selectOutputDirButton.grid(column=2, row=setRow, padx=5, sticky="WE")
         wckToolTips.register(self.selectOutputDirButton, self.guiStrings['selectOutputDir'].help)
@@ -201,13 +344,13 @@ class ExoGUI:
         self.loading = False
 
     def __drawGenericConfigurationFrame__(self):
-        self.configurationFrame = Tk.LabelFrame(self.mainFrame, text="Configuration", pady=5)
+        self.configurationFrame = ttk.LabelFrame(self.mainFrame, text="Configuration", padding=(0, 5))
         self.configurationFrame.grid(column=0, row=1, sticky="EW", pady=5)
         self.configurationFrame.columnconfigure(0, weight=1)
         self.configurationFrame.rowconfigure(0, weight=1)
 
         # Collection Version Frame
-        self.versionFrame = Tk.Frame(self.configurationFrame)
+        self.versionFrame = ttk.Frame(self.configurationFrame)
         self.versionFrame.grid(column=0, row=0, padx=5, sticky="EW")
         self.versionFrame.columnconfigure(1, weight=1)
 
@@ -216,19 +359,19 @@ class ExoGUI:
         self.guiVars['collectionVersionLabel'] = Tk.StringVar()
         self.guiVars['collectionVersionLabel'].set(
             self.guiStrings['collectionVersion'].label + ' : ' + self.guiVars['collectionVersion'].get())
-        self.collectionVersionLabel = Tk.Label(self.versionFrame,
+        self.collectionVersionLabel = ttk.Label(self.versionFrame,
                                                textvariable=self.guiVars['collectionVersionLabel'])
         wckToolTips.register(self.collectionVersionLabel, self.guiStrings['collectionVersion'].help)
         self.collectionVersionLabel.grid(column=0, row=0, sticky="W")
 
         # empty frame
-        Tk.Frame(self.conversionFrame).grid(column=1, row=0, sticky="EW")
+        ttk.Frame(self.versionFrame).grid(column=1, row=0, sticky="EW")
 
         # Conversion Type frame
-        # self.collectionFrame = Tk.Frame(self.configurationFrame)
+        # self.collectionFrame = ttk.Frame(self.configurationFrame)
         # self.collectionFrame.grid(column=0, row=1, padx=5, sticky="EW")
 
-        self.conversionTypeLabel = Tk.Label(self.versionFrame, text=self.guiStrings['conversionType'].label)
+        self.conversionTypeLabel = ttk.Label(self.versionFrame, text=self.guiStrings['conversionType'].label)
         wckToolTips.register(self.conversionTypeLabel, self.guiStrings['conversionType'].help)
         self.conversionTypeLabel.grid(column=2, row=0, sticky="W")
         self.guiVars['conversionType'] = Tk.StringVar()
@@ -242,7 +385,7 @@ class ExoGUI:
 
         self.guiVars['genreSubFolders'] = Tk.IntVar()
         self.guiVars['genreSubFolders'].set(self.configuration['genreSubFolders'])
-        self.useGenreSubFolderCheckButton = Tk.Checkbutton(self.versionFrame,
+        self.useGenreSubFolderCheckButton = ttk.Checkbutton(self.versionFrame,
                                                            text=self.guiStrings['genreSubFolders'].label,
                                                            variable=self.guiVars['genreSubFolders'], onvalue=1,
                                                            offvalue=0)
@@ -250,56 +393,56 @@ class ExoGUI:
         self.useGenreSubFolderCheckButton.grid(column=4, row=0, sticky="W", padx=5)
 
         # 'ConverterSettings' separator frame
-        self.converterSeparatorFrame = Tk.Frame(self.configurationFrame)
+        self.converterSeparatorFrame = ttk.Frame(self.configurationFrame)
         self.converterSeparatorFrame.grid(column=0, row=2, padx=5, sticky="EW")
         self.converterSeparatorFrame.columnconfigure(0, weight=2)
         self.converterSeparatorFrame.columnconfigure(1, weight=1)
         self.converterSeparatorFrame.columnconfigure(2, weight=100)
         ttk.Separator(self.converterSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
-        converterSeparatorLabel = Tk.Label(self.converterSeparatorFrame, text=self.guiStrings['converterSettings'].label)
+        converterSeparatorLabel = ttk.Label(self.converterSeparatorFrame, text=self.guiStrings['converterSettings'].label)
         wckToolTips.register(converterSeparatorLabel, self.guiStrings['converterSettings'].help)
         converterSeparatorLabel.grid(column=1, row=0)
         ttk.Separator(self.converterSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0,
                                                                                sticky="EW")
 
         # Conversion parameters
-        self.conversionFrame = Tk.Frame(self.configurationFrame)
+        self.conversionFrame = ttk.Frame(self.configurationFrame)
         self.conversionFrame.grid(column=0, row=3, padx=5, sticky="EW")
         self.conversionFrame.columnconfigure(0, weight=1)
 
-        self.converterSettingsFrame = Tk.Frame(self.conversionFrame)
+        self.converterSettingsFrame = ttk.Frame(self.conversionFrame)
         self.converterSettingsFrame.grid(column=0, row=0, sticky="EW")
 
         self.guiVars['downloadOnDemand'] = Tk.IntVar()
         self.guiVars['downloadOnDemand'].set(self.configuration['downloadOnDemand'])
-        self.downloadOnDemandCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+        self.downloadOnDemandCheckButton = ttk.Checkbutton(self.converterSettingsFrame,
                                                           text=self.guiStrings['downloadOnDemand'].label,
                                                           variable=self.guiVars['downloadOnDemand'], onvalue=1,
                                                           offvalue=0)
         wckToolTips.register(self.downloadOnDemandCheckButton, self.guiStrings['downloadOnDemand'].help)
-        self.downloadOnDemandCheckButton.grid(column=1, row=0, sticky="E", pady=5)
+        self.downloadOnDemandCheckButton.grid(column=1, row=0, sticky="E", padx=(0, 10), pady=5)
 
         self.guiVars['longGameFolder'] = Tk.IntVar()
         self.guiVars['longGameFolder'].set(self.configuration['longGameFolder'])
-        self.longGameFolderCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+        self.longGameFolderCheckButton = ttk.Checkbutton(self.converterSettingsFrame,
                                                         text=self.guiStrings['longGameFolder'].label,
                                                         variable=self.guiVars['longGameFolder'], onvalue=1,
                                                         offvalue=0)
         wckToolTips.register(self.longGameFolderCheckButton, self.guiStrings['longGameFolder'].help)
-        self.longGameFolderCheckButton.grid(column=2, row=0, sticky="", pady=5)
+        self.longGameFolderCheckButton.grid(column=2, row=0, sticky="", padx=(0, 10), pady=5)
 
         self.guiVars['dosboxPureZip'] = Tk.IntVar()
         self.guiVars['dosboxPureZip'].set(self.configuration['dosboxPureZip'])
-        self.dosboxPureZipGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+        self.dosboxPureZipGamesCheckButton = ttk.Checkbutton(self.converterSettingsFrame,
                                                             text=self.guiStrings['dosboxPureZip'].label,
                                                             variable=self.guiVars['dosboxPureZip'], onvalue=1,
                                                             offvalue=0)
         wckToolTips.register(self.dosboxPureZipGamesCheckButton, self.guiStrings['dosboxPureZip'].help)
-        self.dosboxPureZipGamesCheckButton.grid(column=3, row=0, sticky="W", pady=5)
+        self.dosboxPureZipGamesCheckButton.grid(column=3, row=0, sticky="W", padx=(0, 10), pady=5)
 
         self.guiVars['preExtractGames'] = Tk.IntVar()
         self.guiVars['preExtractGames'].set(self.configuration['preExtractGames'])
-        self.preExtractGamesCheckButton = Tk.Checkbutton(self.converterSettingsFrame,
+        self.preExtractGamesCheckButton = ttk.Checkbutton(self.converterSettingsFrame,
                                                          text=self.guiStrings['preExtractGames'].label,
                                                          variable=self.guiVars['preExtractGames'], onvalue=1,
                                                          offvalue=0)
@@ -308,45 +451,45 @@ class ExoGUI:
 
     def __drawBasicConfigurationFrame__(self):
         # 'Dosbox Basic Settings' separator Frame
-        self.dosboxBasicSeparatorFrame = Tk.Frame(self.conversionFrame)
+        self.dosboxBasicSeparatorFrame = ttk.Frame(self.conversionFrame)
         self.dosboxBasicSeparatorFrame.grid(column=0, row=1, sticky="EW")
         self.dosboxBasicSeparatorFrame.columnconfigure(0, weight=2)
         self.dosboxBasicSeparatorFrame.columnconfigure(1, weight=1)
         self.dosboxBasicSeparatorFrame.columnconfigure(2, weight=100)
         ttk.Separator(self.dosboxBasicSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
-        converterSeparatorLabel = Tk.Label(self.dosboxBasicSeparatorFrame,
+        converterSeparatorLabel = ttk.Label(self.dosboxBasicSeparatorFrame,
                                            text=self.guiStrings['dosboxBasicSettings'].label)
         wckToolTips.register(converterSeparatorLabel, self.guiStrings['dosboxBasicSettings'].help)
         converterSeparatorLabel.grid(column=1, row=0)
         ttk.Separator(self.dosboxBasicSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0, sticky="EW")
 
         # Dosbox Basic Settings parameters
-        self.basicConversionFrame = Tk.Frame(self.conversionFrame)
+        self.basicConversionFrame = ttk.Frame(self.conversionFrame)
         self.basicConversionFrame.grid(column=0, row=2, sticky="EW")
         self.basicConversionFrame.columnconfigure(2, weight=1)
 
         self.guiVars['debugMode'] = Tk.IntVar()
         self.guiVars['debugMode'].set(self.configuration['debugMode'])
-        self.debugModeCheckButton = Tk.Checkbutton(self.basicConversionFrame,
+        self.debugModeCheckButton = ttk.Checkbutton(self.basicConversionFrame,
                                                    text=self.guiStrings['debugMode'].label,
                                                    variable=self.guiVars['debugMode'], onvalue=1,
                                                    offvalue=0)
         wckToolTips.register(self.debugModeCheckButton, self.guiStrings['debugMode'].help)
-        self.debugModeCheckButton.grid(column=0, row=0, sticky="W", pady=5)
+        self.debugModeCheckButton.grid(column=0, row=0, sticky="W", padx=(0, 10), pady=5)
 
         self.guiVars['vsyncCfg'] = Tk.IntVar()
         self.guiVars['vsyncCfg'].set(self.configuration['vsyncCfg'])
-        self.vsyncCfgCheckButton = Tk.Checkbutton(self.basicConversionFrame,
+        self.vsyncCfgCheckButton = ttk.Checkbutton(self.basicConversionFrame,
                                                   text=self.guiStrings['vsyncCfg'].label,
                                                   variable=self.guiVars['vsyncCfg'], onvalue=1,
                                                   offvalue=0)
         wckToolTips.register(self.vsyncCfgCheckButton, self.guiStrings['vsyncCfg'].help)
-        self.vsyncCfgCheckButton.grid(column=1, row=0, sticky="W")
+        self.vsyncCfgCheckButton.grid(column=1, row=0, sticky="W", padx=(0, 10))
 
         # empty frame
-        Tk.Frame(self.conversionFrame).grid(column=2, row=1, sticky="EW")
+        ttk.Frame(self.conversionFrame).grid(column=2, row=1, sticky="EW")
 
-        self.mapperLabel = Tk.Label(self.basicConversionFrame, text=self.guiStrings['mapper'].label)
+        self.mapperLabel = ttk.Label(self.basicConversionFrame, text=self.guiStrings['mapper'].label)
         wckToolTips.register(self.mapperLabel, self.guiStrings['mapper'].help)
         self.mapperLabel.grid(column=3, row=0, sticky="E", pady=5)
         self.mapperValues = util.getMapperValues(self.guiVars['conversionType'].get()).copy()
@@ -360,14 +503,14 @@ class ExoGUI:
 
         self.guiVars['mapSticks'] = Tk.IntVar()
         self.guiVars['mapSticks'].set(self.configuration['mapSticks'])
-        self.mapSticksCheckButton = Tk.Checkbutton(self.basicConversionFrame, text=self.guiStrings['mapSticks'].label,
+        self.mapSticksCheckButton = ttk.Checkbutton(self.basicConversionFrame, text=self.guiStrings['mapSticks'].label,
                                                    variable=self.guiVars['mapSticks'], onvalue=1, offvalue=0)
         wckToolTips.register(self.mapSticksCheckButton, self.guiStrings['mapSticks'].help)
-        self.mapSticksCheckButton.grid(column=5, row=0, sticky="W")
+        self.mapSticksCheckButton.grid(column=5, row=0, sticky="W", padx=(0, 10))
 
         self.guiVars['useKeyb2Joypad'] = Tk.IntVar()
         self.guiVars['useKeyb2Joypad'].set(self.configuration['useKeyb2Joypad'])
-        self.useKeyb2JoypadCheckButton = Tk.Checkbutton(self.basicConversionFrame,
+        self.useKeyb2JoypadCheckButton = ttk.Checkbutton(self.basicConversionFrame,
                                                         text=self.guiStrings['useKeyb2Joypad'].label,
                                                         variable=self.guiVars['useKeyb2Joypad'], onvalue=1, offvalue=0)
         wckToolTips.register(self.useKeyb2JoypadCheckButton, self.guiStrings['useKeyb2Joypad'].help)
@@ -375,69 +518,69 @@ class ExoGUI:
 
     def __drawExpertConfigurationFrame__(self):
         # 'DosboxExpertSettings' separator frame
-        self.dosboxExpertSeparatorFrame = Tk.Frame(self.conversionFrame)
+        self.dosboxExpertSeparatorFrame = ttk.Frame(self.conversionFrame)
         self.dosboxExpertSeparatorFrame.grid(column=0, row=3, sticky="EW")
         self.dosboxExpertSeparatorFrame.columnconfigure(0, weight=2)
         self.dosboxExpertSeparatorFrame.columnconfigure(1, weight=1)
         self.dosboxExpertSeparatorFrame.columnconfigure(2, weight=100)
         ttk.Separator(self.dosboxExpertSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=0, row=0, pady=0, sticky="EW")
-        converterSeparatorLabel = Tk.Label(self.dosboxExpertSeparatorFrame,
+        converterSeparatorLabel = ttk.Label(self.dosboxExpertSeparatorFrame,
                                            text=self.guiStrings['dosboxExpertSettings'].label)
         wckToolTips.register(converterSeparatorLabel, self.guiStrings['dosboxExpertSettings'].help)
         converterSeparatorLabel.grid(column=1, row=0)
         ttk.Separator(self.dosboxExpertSeparatorFrame, orient=Tk.HORIZONTAL).grid(column=2, row=0, pady=0, sticky="EW")
 
-        self.expertConversionFirstLineFrame = Tk.Frame(self.conversionFrame)
+        self.expertConversionFirstLineFrame = ttk.Frame(self.conversionFrame)
         self.expertConversionFirstLineFrame.grid(column=0, row=4, sticky="EW")
 
         self.guiVars['expertMode'] = Tk.IntVar()
         self.guiVars['expertMode'].set(self.configuration['expertMode'])
-        self.expertModeCheckButton = Tk.Checkbutton(self.expertConversionFirstLineFrame,
+        self.expertModeCheckButton = ttk.Checkbutton(self.expertConversionFirstLineFrame,
                                                     text=self.guiStrings['expertMode'].label,
                                                     variable=self.guiVars['expertMode'], onvalue=1,
                                                     offvalue=0, command=self.__checkExpertMode__)
         wckToolTips.register(self.expertModeCheckButton, self.guiStrings['expertMode'].help)
-        self.expertModeCheckButton.grid(column=0, row=0, sticky="W")
+        self.expertModeCheckButton.grid(column=0, row=0, sticky="W", padx=(0, 5))
 
-        label = Tk.Label(self.expertConversionFirstLineFrame, text=self.guiStrings['mountPrefix'].label)
+        label = ttk.Label(self.expertConversionFirstLineFrame, text=self.guiStrings['mountPrefix'].label)
         wckToolTips.register(label, self.guiStrings['mountPrefix'].help)
         label.grid(column=1, row=0, padx=5, sticky="W")
         self.guiVars['mountPrefix'] = Tk.StringVar()
         self.guiVars['mountPrefix'].set(self.configuration['mountPrefix'])
-        self.mountPrefixEntry = Tk.Entry(self.expertConversionFirstLineFrame, textvariable=self.guiVars['mountPrefix'], width=51)
+        self.mountPrefixEntry = ttk.Entry(self.expertConversionFirstLineFrame, textvariable=self.guiVars['mountPrefix'], width=51)
         self.mountPrefixEntry.grid(column=2, row=0, padx=5, sticky="W")
         self.converterSettingsFrame.columnconfigure(4, weight=1)
 
-        self.expertConversionSecondLineFrame = Tk.Frame(self.conversionFrame)
+        self.expertConversionSecondLineFrame = ttk.Frame(self.conversionFrame)
         self.expertConversionSecondLineFrame.grid(column=0, row=5, sticky="EW")
 
-        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['fullresolutionCfg'].label)
+        label = ttk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['fullresolutionCfg'].label)
         wckToolTips.register(label, self.guiStrings['fullresolutionCfg'].help)
         label.grid(column=0, row=0, sticky="W")
         self.guiVars['fullresolutionCfg'] = Tk.StringVar()
         self.guiVars['fullresolutionCfg'].set(self.configuration['fullresolutionCfg'])
-        self.fullResolutionCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame,
+        self.fullResolutionCfgEntry = ttk.Entry(self.expertConversionSecondLineFrame,
                                                textvariable=self.guiVars['fullresolutionCfg'], width=11)
         self.fullResolutionCfgEntry.grid(column=1, row=0, padx=5, sticky="W")
 
-        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['rendererCfg'].label)
+        label = ttk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['rendererCfg'].label)
         wckToolTips.register(label, self.guiStrings['rendererCfg'].help)
         label.grid(column=2, row=0, sticky="W")
         self.guiVars['rendererCfg'] = Tk.StringVar()
         self.guiVars['rendererCfg'].set(self.configuration['rendererCfg'])
-        self.rendererCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['rendererCfg'], width=11)
+        self.rendererCfgEntry = ttk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['rendererCfg'], width=11)
         self.rendererCfgEntry.grid(column=3, row=0, padx=5, sticky="W")
 
-        label = Tk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['outputCfg'].label)
+        label = ttk.Label(self.expertConversionSecondLineFrame, text=self.guiStrings['outputCfg'].label)
         wckToolTips.register(label, self.guiStrings['outputCfg'].help)
         label.grid(column=4, row=0, padx=5, sticky="W")
         self.guiVars['outputCfg'] = Tk.StringVar()
         self.guiVars['outputCfg'].set(self.configuration['outputCfg'])
-        self.outputCfgEntry = Tk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['outputCfg'], width=11)
+        self.outputCfgEntry = ttk.Entry(self.expertConversionSecondLineFrame, textvariable=self.guiVars['outputCfg'], width=11)
         self.outputCfgEntry.grid(column=5, row=0, sticky="W")
 
         # empty frame
-        Tk.Frame(self.conversionFrame).grid(column=7, row=0, sticky="EW")
+        ttk.Frame(self.conversionFrame).grid(column=7, row=0, sticky="EW")
 
     # Listener for Expert Mode Check
     def __checkExpertMode__(self):
@@ -460,7 +603,10 @@ class ExoGUI:
         if collectionVersion is None:
             self.logger.log(
                 "\n%s is not a directory, doesn't exist, or is not a valid eXo collection directory" % collectionDir, self.logger.ERROR)
-            self.logger.log("Did you install the collection with setup.bat beforehand ?", self.logger.ERROR)
+            self.logger.log("Hint: You must select the parent folder of the setup.bat of the collection", self.logger.ERROR)
+            self.logger.log("Example: if you have c:\\ExoDOS\\setup.bat, select C:\\ExoDOS", self.logger.ERROR)
+            self.logger.log("You need to install the collection with setup.bat beforehand.", self.logger.ERROR)
+
         else:
             self.fullnameToGameDir = util.fullnameToGameDir(self.guiVars['collectionDir'].get(), self.scriptDir, self.guiVars['collectionVersion'].get(), self.logger)
             # Empty filter
@@ -490,56 +636,56 @@ class ExoGUI:
 
     # Selection Frame
     def __drawSelectionFrame__(self):
-        self.selectionFrame = Tk.LabelFrame(self.mainFrame, padx=10, pady=5)
+        self.selectionFrame = ttk.LabelFrame(self.mainFrame, padding=(10, 5))
         self.selectionFrame.grid(column=0, row=2, sticky="EW", pady=5)
         self.selectionFrame.grid_columnconfigure(0, weight=1)
 
         self.guiVars['filter'] = Tk.StringVar()
         self.guiVars['filter'].set('')
         self.guiVars['filter'].trace_add("write", self.__filterGamesList__)
-        self.filterEntry = Tk.Entry(self.selectionFrame, textvariable=self.guiVars['filter'])
+        self.filterEntry = ttk.Entry(self.selectionFrame, textvariable=self.guiVars['filter'])
         self.filterEntry.grid(column=0, row=0, sticky='W')
         wckToolTips.register(self.filterEntry, self.guiStrings['filter'].help)
 
         # Custom Selection
-        self.customSelectionFrame = Tk.Frame(self.selectionFrame, borderwidth=1)
+        self.customSelectionFrame = ttk.Frame(self.selectionFrame, borderwidth=1)
         self.customSelectionFrame.grid(column=2, row=0, sticky='W')
 
-        label = Tk.Label(self.customSelectionFrame, text=self.guiStrings['selectionPath'].label)
+        label = ttk.Label(self.customSelectionFrame, text=self.guiStrings['selectionPath'].label)
         wckToolTips.register(label, self.guiStrings['selectionPath'].help)
         label.grid(column=0, row=0, sticky="W")
 
         self.guiVars['selectionPath'] = Tk.StringVar()
         self.guiVars['selectionPath'].set(self.configuration['selectionPath'])
         # self.guiVars['selectionPath'].trace_add("write", self.filterGamesList)
-        self.selectionPathEntry = Tk.Entry(self.customSelectionFrame, textvariable=self.guiVars['selectionPath'],
+        self.selectionPathEntry = ttk.Entry(self.customSelectionFrame, textvariable=self.guiVars['selectionPath'],
                                            width=44)
         self.selectionPathEntry.grid(column=1, row=0, padx=5, sticky='W')
         wckToolTips.register(self.selectionPathEntry, self.guiStrings['selectionPath'].help)
-        self.selectSelectionPathButton = Tk.Button(self.customSelectionFrame,
+        self.selectSelectionPathButton = ttk.Button(self.customSelectionFrame,
                                                    text=self.guiStrings['selectSelectionPath'].label,
                                                    command=lambda: self.__openFileExplorer__(False, 'selectionPath', '*'))
         self.selectSelectionPathButton.grid(column=2, row=0, padx=5, sticky="WE")
         wckToolTips.register(self.selectSelectionPathButton, self.guiStrings['selectSelectionPath'].help)
 
         # Left List
-        self.leftFrame = Tk.Frame(self.selectionFrame)
+        self.leftFrame = ttk.Frame(self.selectionFrame)
         self.leftFrame.grid(column=0, row=1, sticky="W", pady=5)
         self.leftFrame.grid_columnconfigure(0, weight=3)
         self.leftListLabel = Tk.StringVar(value=self.guiStrings['leftList'].label)
 
-        hatLeftFrame = Tk.Frame(self.leftFrame)
+        hatLeftFrame = ttk.Frame(self.leftFrame)
         hatLeftFrame.grid(column=0, row=0, sticky='WE')
         hatLeftFrame.grid_columnconfigure(0, weight=3)
 
-        label = Tk.Label(hatLeftFrame, textvariable=self.leftListLabel, anchor='w')
+        label = ttk.Label(hatLeftFrame, textvariable=self.leftListLabel, anchor='w')
         wckToolTips.register(label, self.guiStrings['leftList'].help)
         label.grid(column=0, row=0, sticky="W")
 
-        emptyFrame = Tk.Frame(hatLeftFrame, width=10)
+        emptyFrame = ttk.Frame(hatLeftFrame, width=10)
         emptyFrame.grid(column=1, row=0, sticky='W')
 
-        self.selectAllGamesButton = Tk.Button(hatLeftFrame, text=self.guiStrings['selectall'].label,
+        self.selectAllGamesButton = ttk.Button(hatLeftFrame, text=self.guiStrings['selectall'].label,
                                               command=self.__selectAll__)
         wckToolTips.register(self.selectAllGamesButton, self.guiStrings['selectall'].help)
         self.selectAllGamesButton.grid(column=2, row=0, sticky='E')
@@ -554,56 +700,56 @@ class ExoGUI:
         self.leftListLabel.set(
             self.guiStrings['leftList'].label + ' (' + str(len(self.fullnameToGameDir.keys())) + ')')
 
-        scrollbarLeft = Tk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exoGamesListbox.yview)
+        scrollbarLeft = ttk.Scrollbar(self.leftFrame, orient=Tk.VERTICAL, command=self.exoGamesListbox.yview)
         scrollbarLeft.grid(column=1, row=1, sticky=(Tk.N, Tk.S), )
         self.exoGamesListbox['yscrollcommand'] = scrollbarLeft.set
 
         # Selection Buttons Frame
-        self.buttonsColumnFrame = Tk.Frame(self.selectionFrame, padx=10)
+        self.buttonsColumnFrame = ttk.Frame(self.selectionFrame, padding=(10, 0))
         self.buttonsColumnFrame.grid(column=1, row=1, pady=5)
         self.buttonsColumnFrame.grid_columnconfigure(1, weight=1)
-        emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
+        emptyFrame = ttk.Frame(self.buttonsColumnFrame, padding=(10, 0))
         emptyFrame.grid(column=0, row=0, pady=5)
-        self.selectGameButton = Tk.Button(self.buttonsColumnFrame, text='->', command=self.__clickRight__)
+        self.selectGameButton = ttk.Button(self.buttonsColumnFrame, text='->', command=self.__clickRight__)
         wckToolTips.register(self.selectGameButton, self.guiStrings['right'].help)
         self.selectGameButton.grid(column=0, row=3, padx=3)
-        emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
+        emptyFrame = ttk.Frame(self.buttonsColumnFrame, padding=(10, 0))
         emptyFrame.grid(column=0, row=4, pady=5)
-        self.deselectGameButton = Tk.Button(self.buttonsColumnFrame, text='<-', command=self.__clickLeft__)
+        self.deselectGameButton = ttk.Button(self.buttonsColumnFrame, text='<-', command=self.__clickLeft__)
         wckToolTips.register(self.deselectGameButton, self.guiStrings['left'].help)
         self.deselectGameButton.grid(column=0, row=7, padx=3)
-        emptyFrame = Tk.Frame(self.buttonsColumnFrame, padx=10)
+        emptyFrame = ttk.Frame(self.buttonsColumnFrame, padding=(10, 0))
         emptyFrame.grid(column=0, row=8, pady=5)
 
         # Right List
-        self.rightFrame = Tk.Frame(self.selectionFrame)
+        self.rightFrame = ttk.Frame(self.selectionFrame)
         self.rightFrame.grid(column=2, row=1, sticky="E", pady=5)
         self.rightFrame.grid_columnconfigure(2, weight=3)
         self.rightListLabel = Tk.StringVar(value=self.guiStrings['rightList'].label + ' (0)')
 
-        hatRightFrame = Tk.Frame(self.rightFrame)
+        hatRightFrame = ttk.Frame(self.rightFrame)
         hatRightFrame.grid(column=0, row=0, sticky='WE')
         hatRightFrame.grid_columnconfigure(0, weight=3)
 
-        label = Tk.Label(hatRightFrame, textvariable=self.rightListLabel, anchor='w')
+        label = ttk.Label(hatRightFrame, textvariable=self.rightListLabel, anchor='w')
         wckToolTips.register(label, self.guiStrings['rightList'].help)
         label.grid(column=0, row=0, sticky="W")
 
-        emptyFrame = Tk.Frame(hatRightFrame, width=20)
+        emptyFrame = ttk.Frame(hatRightFrame, width=20)
         emptyFrame.grid(column=1, row=0, sticky='W')
 
-        self.unselectAllGamesButton = Tk.Button(hatRightFrame, text=self.guiStrings['unselectall'].label,
+        self.unselectAllGamesButton = ttk.Button(hatRightFrame, text=self.guiStrings['unselectall'].label,
                                                 command=self.__unselectAll__)
         wckToolTips.register(self.unselectAllGamesButton, self.guiStrings['unselectall'].help)
         self.unselectAllGamesButton.grid(column=2, row=0, sticky='E')
 
-        loadSaveFrame = Tk.Frame(hatRightFrame)
+        loadSaveFrame = ttk.Frame(hatRightFrame)
         loadSaveFrame.grid(column=0, row=0, sticky='E')
-        self.loadCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['loadCustom'].label,
+        self.loadCustomButton = ttk.Button(loadSaveFrame, text=self.guiStrings['loadCustom'].label,
                                           command=self.__loadCustom__)
         wckToolTips.register(self.loadCustomButton, self.guiStrings['loadCustom'].help)
         self.loadCustomButton.grid(column=0, row=0, padx=5, sticky='E')
-        self.saveCustomButton = Tk.Button(loadSaveFrame, text=self.guiStrings['saveCustom'].label,
+        self.saveCustomButton = ttk.Button(loadSaveFrame, text=self.guiStrings['saveCustom'].label,
                                           command=self.__saveCustom__)
         wckToolTips.register(self.saveCustomButton, self.guiStrings['saveCustom'].help)
         self.saveCustomButton.grid(column=1, row=0, padx=5, sticky='E')
@@ -614,10 +760,11 @@ class ExoGUI:
         self.selectedGamesListbox.grid(column=0, row=1, sticky="E", pady=5)
         self.selectedGamesListbox.grid_columnconfigure(0, weight=3)
 
-        scrollbarRight = Tk.Scrollbar(self.rightFrame, orient=Tk.VERTICAL, command=self.selectedGamesListbox.yview)
+        scrollbarRight = ttk.Scrollbar(self.rightFrame, orient=Tk.VERTICAL, command=self.selectedGamesListbox.yview)
         scrollbarRight.grid(column=1, row=1, sticky=(Tk.N, Tk.S))
         self.selectedGamesListbox['yscrollcommand'] = scrollbarRight.set
 
+        self.__colorListboxes__()
         self.__handleCollectionFolder__()
 
     # Listener to save custom selection
@@ -703,24 +850,19 @@ class ExoGUI:
 
     # Action buttons frame    
     def __drawButtonsFrame__(self):
-        self.buttonsFrame = Tk.Frame(self.mainFrame, padx=10)
+        self.buttonsFrame = ttk.Frame(self.mainFrame, padding=(10, 0))
         self.buttonsFrame.grid(column=0, row=3, sticky="EW", pady=5)
-        emptyFrame = Tk.Frame(self.buttonsFrame, padx=10, width=400)
-        emptyFrame.grid(column=0, row=0, sticky="NEWS", pady=5)
-        emptyFrame.grid_columnconfigure(0, weight=3)
-        self.verifyButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['verify'].label, command=self.__clickVerify__)
+        self.buttonsFrame.grid_columnconfigure(0, weight=1)
+        self.verifyButton = ttk.Button(self.buttonsFrame, text=self.guiStrings['verify'].label, command=self.__clickVerify__)
         wckToolTips.register(self.verifyButton, self.guiStrings['verify'].help)
         self.verifyButton.grid(column=1, row=0, sticky="EW", padx=3)
-        self.saveButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['save'].label, command=self.__clickSave__)
+        self.saveButton = ttk.Button(self.buttonsFrame, text=self.guiStrings['save'].label, command=self.__clickSave__)
         wckToolTips.register(self.saveButton, self.guiStrings['save'].help)
         self.saveButton.grid(column=2, row=0, sticky="EW", padx=3)
-        self.proceedButton = Tk.Button(self.buttonsFrame, text=self.guiStrings['proceed'].label,
+        self.proceedButton = ttk.Button(self.buttonsFrame, text=self.guiStrings['proceed'].label,
                                        command=self.__clickProceed__)
         wckToolTips.register(self.proceedButton, self.guiStrings['proceed'].help)
         self.proceedButton.grid(column=3, row=0, sticky="EW", padx=3)
-        emptyFrame = Tk.Frame(self.buttonsFrame, padx=10, width=350)
-        emptyFrame.grid(column=4, row=0, sticky="NEWS", pady=5)
-        emptyFrame.grid_columnconfigure(4, weight=3)
 
     # Listener for Save button    
     def __clickSave__(self):
@@ -734,8 +876,10 @@ class ExoGUI:
         confBackupFilePath = os.path.join(self.scriptDir, util.confDir, util.getConfBakFilename(self.setKey))
         if os.path.exists(confBackupFilePath):
             os.remove(confBackupFilePath)
-        shutil.copy2(os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)),
-                     os.path.join(self.scriptDir, util.confDir, util.getConfBakFilename(self.setKey)))
+        confFilePath = os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey))
+        os.makedirs(os.path.join(self.scriptDir, util.confDir), exist_ok=True)
+        if os.path.exists(confFilePath):
+            shutil.copy2(confFilePath, confBackupFilePath)
         confFile = open(os.path.join(self.scriptDir, util.confDir, util.getConfFilename(self.setKey)), "w",
                         encoding="utf-8")
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
@@ -855,7 +999,8 @@ class ExoGUI:
     @staticmethod
     def __setComponentState__(component, state):
         if component is not None:
-            component['state'] = state
+            # a normal combobox could be typed in
+            component['state'] = 'readonly' if state == 'normal' and isinstance(component, ttk.Combobox) else state
 
     # Handles state of all the components based on UI status
     def __handleComponentsState__(self, clickedProcess):
@@ -916,16 +1061,16 @@ class ExoGUI:
 
     # Console Frame    
     def __drawConsole__(self):
-        self.consoleFrame = Tk.Frame(self.root, padx=10)
+        self.consoleFrame = ttk.Frame(self.root, padding=(10, 0))
         self.consoleFrame.grid(column=0, row=5, sticky="EW", pady=5)
         self.consoleFrame.grid_columnconfigure(0, weight=1)
-        self.logTest = Tk.Text(self.consoleFrame, height=22, state='disabled', wrap='word', background='black',
-                               foreground='yellow')
+        self.logTest = Tk.Text(self.consoleFrame, height=16, state='disabled', wrap='word')
+        self.__colorConsole__()
         self.logTest.grid(column=0, row=0, sticky="EW")
         self.logTest.tag_config('ERROR', background='black', foreground='red')
         self.logTest.tag_config('WARNING', background='black', foreground='orange')
         self.logTest.tag_config('INFO', background='black', foreground='yellow')
-        self.scrollbar = Tk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL, command=self.logTest.yview)
+        self.scrollbar = ttk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL, command=self.logTest.yview)
         self.scrollbar.grid(column=1, row=0, sticky=(Tk.N, Tk.S))
         self.logTest['yscrollcommand'] = self.scrollbar.set
         self.logTest.after(10, self.__updateConsoleFromQueue__)
